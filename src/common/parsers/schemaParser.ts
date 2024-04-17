@@ -1,5 +1,5 @@
 import Ajv from "ajv";
-import { DatabaseSchemaSchema } from "../schemas";
+import { DatabaseSchemaSchema } from "../ajvSchemas";
 
 // To handle recursive schema, you would typically set it up in your AJV instance like this:
 export const parse = (data: any) => {

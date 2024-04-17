@@ -3,7 +3,9 @@ import {
   DatabaseSchema,
   TableSchema,
   DatabaseSchemaSchema,
-} from "./zodSchemas";
+  Schema,
+  Table,
+} from "./schemas";
 import {
   createDatabaseFolderInObjects,
   ensureRootDirectoryStructure,
@@ -12,13 +14,10 @@ import {
   writeFile,
 } from "../util/fs.util";
 import { createYamlDocument } from "../util/yaml.util";
-import { Database } from "../common/typings";
-import { Credentials } from "../credentials";
-import { Options } from "../object-import";
-import axios from "axios";
-
-type Schema = z.infer<typeof DatabaseSchemaSchema>;
-type Table = z.infer<typeof TableSchema>;
+import { Database } from "./typings";
+import { Credentials } from "./typings";
+import { Options } from "../commands/object-import";
+import { getDatabase } from "../util/ninox.client";
 
 export const run = async (opts: Options) => {
   const { domain, apiKey, workspaceId } = opts;
@@ -29,15 +28,7 @@ export const run = async (opts: Options) => {
   };
 
   // make a request to the Ninox API to get the database
-  const response = await axios.get(
-    `https://${creds.domain}/v1/teams/${creds.workspaceId}/databases/${opts.id}`,
-    {
-      headers: {
-        Authorization: `Bearer ${creds.apiKey}`,
-      },
-    }
-  );
-  const dbData = response.data;
+  const dbData = await getDatabase(creds, { id: opts.id });
 
   const { schema: schemaData, ...dbRemainingData } = dbData;
 

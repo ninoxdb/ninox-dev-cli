@@ -2,12 +2,12 @@
   "name": "ninox-cli",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/commands/index.js",
   "scripts": {
     "build": "tsc",
-    "start:dev": "ts-node src/index.ts",
-    "start": "npm run build && node dist/index.js",
-    "start:quick": "node dist/index.js",
+    "start:dev": "ts-node src/commands/index.ts",
+    "start": "npm run build && node dist/commands/index.js",
+    "start:quick": "node dist/commands/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -1,5 +1,20 @@
 ## First POC for the CLI for downloading a database
 
+
+### usage
+
+// Import a database
+npm start  -- object:import -t Database -id ist4yzlpvs6x -k 557d8a80-7d5f-11ee-aee7-f3c1aeaf6d5a -d saqib2.ninoxdb.de -w qnbfhl32kbi45d5ii
+
+
+
+// Deploy a database
+
+npm start  -- deploy -t Database -id ist4yzlpvs6x -k 557d8a80-7d5f-11ee-aee7-f3c1aeaf6d5a -d saqib2.ninoxdb.de -w qnbfhl32kbi45d5ii
+
+
+
+
 I have two objects
 I want to parse them into the following types
 

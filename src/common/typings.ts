@@ -1,3 +1,20 @@
+export interface Credentials {
+  workspaceId: string;
+  domain: string;
+  apiKey: string;
+}
+export interface DBConfigsRaw {
+  database: string;
+  schema: string;
+  tables: string[];
+}
+
+export interface DBConfigs {
+  database: Database;
+  schema: Schema;
+  tables: Table[];
+}
+
 export interface Database {
   id: string;
   settings: {
