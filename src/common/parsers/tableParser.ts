@@ -1,4 +1,3 @@
-
 import Ajv from "ajv";
 import { TableSchema } from "../schemas";
 
@@ -10,4 +9,4 @@ export const parse = (data: any) => {
   } else {
     console.log("Validation errors:", validateDatabase.errors);
   }
-}
+};

@@ -4,6 +4,9 @@ export interface Database {
     name: string;
     icon: string;
     color: string;
+    bgType?: string;
+    backgroundClass?: string;
+    backgroundTimestamp?: number;
   };
 }
 
@@ -38,59 +41,59 @@ export interface Schema {
 }
 
 export interface Table {
-    isSQLFilterable:boolean;
-    comparator:string;
-   queryCache: Record<string, string | undefined>;
-   nextFieldId: number;
-    id: string;
-    caption: string;
-   captions: { [key: string]: string };
-    icon: string | undefined;
-    hidden: boolean;
-    description: string | undefined;
+  isSQLFilterable: boolean;
+  comparator: string;
+  queryCache: Record<string, string | undefined>;
+  nextFieldId: number;
+  id: string;
+  caption: string;
+  captions: { [key: string]: string };
+  icon: string | undefined;
+  hidden: boolean;
+  description: string | undefined;
 
-    globalSearch: boolean;
-    fields: {
+  globalSearch: boolean;
+  fields: {
     [key: string]: unknown;
   };
-    uis: { [key: string]: unknown };
-   sorted: Array<unknown>;
-   color: any;
-   background: any;
-   uuid: any;
-   fulltextTokens: any;
-   isNew?: boolean;
+  uis: { [key: string]: unknown };
+  sorted: Array<unknown>;
+  color: any;
+  background: any;
+  uuid: any;
+  fulltextTokens: any;
+  isNew?: boolean;
 
-    readRoles: string[] | undefined;
-    writeRoles: string[] | undefined;
-    createRoles: string[] | undefined;
-    deleteRoles: string[] | undefined;
+  readRoles: string[] | undefined;
+  writeRoles: string[] | undefined;
+  createRoles: string[] | undefined;
+  deleteRoles: string[] | undefined;
 
-    afterUpdate: string | undefined;
-    afterCreate: string | undefined;
-    canRead: string | undefined;
-    canWrite: string | undefined;
-    canCreate: string | undefined;
-    canDelete: string | undefined;
+  afterUpdate: string | undefined;
+  afterCreate: string | undefined;
+  canRead: string | undefined;
+  canWrite: string | undefined;
+  canCreate: string | undefined;
+  canDelete: string | undefined;
 
-   canReadExp: string | undefined;
-   canWriteExp: string | undefined;
-   canCreateExp: string | undefined;
-   canDeleteExp: string | undefined;
+  canReadExp: string | undefined;
+  canWriteExp: string | undefined;
+  canCreateExp: string | undefined;
+  canDeleteExp: string | undefined;
 
-   afterCreateExp: string | undefined;
-   afterUpdateExp: string | undefined;
+  afterCreateExp: string | undefined;
+  afterUpdateExp: string | undefined;
 
-   hasFiles: boolean;
-   hasHistory: boolean;
-   hasComments: boolean;
-   order: number | undefined;
-   _dateFields: { [key: string]: unknown };
+  hasFiles: boolean;
+  hasHistory: boolean;
+  hasComments: boolean;
+  order: number | undefined;
+  _dateFields: { [key: string]: unknown };
 
-   master: any;
-   masterRef: any;
-   parentRefs: unknown[] | undefined;
-   children: unknown[] | undefined;
+  master: any;
+  masterRef: any;
+  parentRefs: unknown[] | undefined;
+  children: unknown[] | undefined;
 
-   kind: "table" | "page";
+  kind: "table" | "page";
 }

@@ -7,6 +7,7 @@
     "build": "tsc",
     "start:dev": "ts-node src/index.ts",
     "start": "npm run build && node dist/index.js",
+    "start:quick": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "ajv": "^8.12.0",
+    "axios": "^1.6.8",
     "commander": "^12.0.0",
     "figlet": "^1.7.0",
     "yaml": "^2.4.1",
