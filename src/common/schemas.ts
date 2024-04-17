@@ -1,162 +1,164 @@
-export const DatabaseSchema = {
-  type: "object",
-  properties: {
-    id: { type: "string" },
-    settings: {
-      type: "object",
-      properties: {
-        name: { type: "string" },
-        icon: { type: "string" },
-        color: { type: "string" },
-      },
-      required: ["name", "icon", "color"],
-      additionalProperties: false,
-    },
-  },
-  required: ["id", "settings"],
-  additionalProperties: true,
-};
+import { after } from "node:test";
+import { z } from "zod";
 
-export const DatabaseSchemaSchema = {
-  type: "object",
-  properties: {
-    database: { type: "string" },
-    isProtected: { type: "boolean" },
-    seq: { type: "number" },
-    version: { type: "number" },
-    nextTypeId: { type: "number" },
-    queryCache: {
-      type: "object",
-      additionalProperties: {
-        type: ["string", "null"],
-      },
-    },
-    afterOpen: { type: ["string", "null"] },
-    globalCode: { type: ["string", "null"] },
-    globalCodeExp: { type: ["string", "null"] },
-    globalScope: { type: "object", additionalProperties: true }, // allowing any properties as `any` type is used in TypeScript
-    afterOpenBehavior: {
-      type: "string",
-      enum: ["openHome", "restoreNavigation"],
-    },
-    fileSync: { type: "string", enum: ["full", "cached"] },
-    dateFix: { type: "string", enum: ["enabled", "disabled"] },
-    compatibility: { type: "string", enum: ["latest", "3.7.0"] },
-    dbId: { type: ["string", "null"] },
-    dbName: { type: ["string", "null"] },
-    hideCalendar: { type: "boolean" },
-    hideSearch: { type: "boolean" },
-    hideDatabase: { type: "boolean" },
-    hideNavigation: { type: "boolean" },
-    knownDatabases: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          dbId: { type: "string" },
-          name: { type: "string" },
-          teamId: { type: "string" },
-          teamName: { type: "string" },
-        },
-        required: ["dbId", "name", "teamId", "teamName"],
-      },
-    },
-    externalSchemas: {
-      type: "object",
-      additionalProperties: {
-        // This needs to reference the same schema recursively; handled programmatically in AJV setup
-      },
-    },
-  },
-  required: [],
-  additionalProperties: true,
-};
+export const DatabaseSchema = z.object({
+  id: z.string(),
+  settings: z.object({
+    name: z.string(),
+    icon: z.string(),
+    color: z.string(),
+    bgType: z.string().optional(),
+    backgroundClass: z.string().optional(),
+    backgroundTimestamp: z.number().optional(),
+  }),
+});
 
-export const TableSchema = {
-  type: "object",
-  properties: {
-    isSQLFilterable: { type: "boolean" },
-    comparator: { type: "string" },
-    queryCache: {
-      type: "object",
-      additionalProperties: { type: ["string", "null"] },
-    },
-    nextFieldId: { type: "number" },
-    id: { type: "string" },
-    caption: { type: "string" },
-    captions: {
-      type: "object",
-      additionalProperties: { type: "string" },
-    },
-    icon: { type: ["string", "null"] },
-    hidden: { type: "boolean" },
-    description: { type: ["string", "null"] },
-    globalSearch: { type: "boolean" },
-    fields: {
-      type: "object",
-      base: { type: "string" },
-      uuid: { type: "string" },
-      caption: { type: "string" },
-      additionalProperties: true, // Allowing any type of properties since fields are of type `unknown`
-    },
-    uis: {
-      type: "object",
-      base: { type: "string" },
-      uuid: { type: "string" },
-      caption: { type: "string" },
-      additionalProperties: true, // Allowing any type of properties
-    },
-    sorted: {
-      type: "array",
-      items: {}, // Allowing any type of items since `sorted` is an Array of `unknown`
-    },
-    color: {}, // Allowing any type of value since `color` is `any`
-    background: {}, // Allowing any type of value
-    uuid: {}, // Allowing any type
-    fulltextTokens: {}, // Allowing any type
-    isNew: { type: ["boolean", "null"] },
-    readRoles: {
-      type: ["array", "null"],
-      items: { type: "string" },
-    },
-    writeRoles: {
-      type: ["array", "null"],
-      items: { type: "string" },
-    },
-    createRoles: {
-      type: ["array", "null"],
-      items: { type: "string" },
-    },
-    deleteRoles: {
-      type: ["array", "null"],
-      items: { type: "string" },
-    },
-    afterUpdate: { type: ["string", "null"] },
-    afterCreate: { type: ["string", "null"] },
-    canRead: { type: ["string", "null"] },
-    canWrite: { type: ["string", "null"] },
-    canCreate: { type: ["string", "null"] },
-    canDelete: { type: ["string", "null"] },
-    hasFiles: { type: "boolean" },
-    hasHistory: { type: "boolean" },
-    hasComments: { type: "boolean" },
-    order: { type: ["number", "null"] },
-    _dateFields: {
-      type: "object",
-      additionalProperties: true, // Allowing any type of properties
-    },
-    master: {}, // Allowing any type
-    masterRef: {}, // Allowing any type
-    parentRefs: {
-      type: ["array", "null"],
-      items: {}, // Allowing any type of items
-    },
-    children: {
-      type: ["array", "null"],
-      items: {}, // Allowing any type of items
-    },
-    kind: { type: "string", enum: ["table", "page"] },
-  },
-  required: ["id", "uuid", "caption", "globalSearch", "fields", "uis"],
-  additionalProperties: true,
-};
+const ExternalSchema: z.ZodSchema<any> = z.lazy(() => DatabaseSchemaSchema);
+
+export const DatabaseSchemaForUpload = z
+  .object({
+    isProtected: z.boolean(),
+    seq: z.number(),
+    queryCache: z.record(z.union([z.string(), z.null()])),
+    afterOpen: z.union([z.string(), z.null()]),
+    globalCode: z.union([z.string(), z.null()]),
+    afterOpenBehavior: z.enum(["openHome", "restoreNavigation"]),
+    fileSync: z.enum(["full", "cached"]),
+    dateFix: z.enum(["enabled", "disabled"]),
+    compatibility: z.string(),
+    dbId: z.union([z.string(), z.null()]),
+    dbName: z.union([z.string(), z.null()]),
+    hideCalendar: z.boolean(),
+    hideSearch: z.boolean(),
+    hideDatabase: z.boolean(),
+    hideNavigation: z.boolean(),
+    knownDatabases: z.array(
+      z.object({
+        dbId: z.string(),
+        name: z.string(),
+        teamId: z.string(),
+        teamName: z.string(),
+      })
+    ),
+  })
+  .partial();
+
+export const DatabaseSchemaSchema = z
+  .object({
+    isProtected: z.boolean(),
+    seq: z.number(),
+    version: z.number(),
+    nextTypeId: z.number(),
+    queryCache: z.record(z.union([z.string(), z.null()])),
+    afterOpen: z.union([z.string(), z.null()]),
+    globalCode: z.union([z.string(), z.null()]),
+    globalScope: z.record(z.any()),
+    afterOpenBehavior: z.enum(["openHome", "restoreNavigation"]),
+    fileSync: z.enum(["full", "cached"]),
+    dateFix: z.enum(["enabled", "disabled"]),
+    compatibility: z.string(),
+    dbId: z.union([z.string(), z.null()]),
+    dbName: z.union([z.string(), z.null()]),
+    hideCalendar: z.boolean(),
+    hideSearch: z.boolean(),
+    hideDatabase: z.boolean(),
+    hideNavigation: z.boolean(),
+    knownDatabases: z.array(
+      z.object({
+        dbId: z.string(),
+        name: z.string(),
+        teamId: z.string(),
+        teamName: z.string(),
+      })
+    ),
+    externalSchemas: z.record(ExternalSchema),
+  })
+  .partial();
+
+export const DatabaseSchemaSchemaLocal = DatabaseSchemaSchema.extend({
+  database: z.string(),
+});
+
+// export const FieldSchemaForUpload = z.object({
+
+export const TableSchemaForUpload = z
+  .object({
+    id: z.string(),
+    isSQLFilterable: z.boolean(),
+    queryCache: z.record(z.union([z.string(), z.null()])),
+    caption: z.string(),
+    captions: z.record(z.string()),
+    icon: z.union([z.string(), z.null()]),
+    hidden: z.boolean(),
+    description: z.union([z.string(), z.null()]),
+    globalSearch: z.boolean(),
+    fields: z.record(z.any()),
+    uis: z.record(z.any()),
+    color: z.any(),
+    background: z.any(),
+    isNew: z.union([z.boolean(), z.null()]),
+    readRoles: z.union([z.array(z.string()), z.null()]),
+    writeRoles: z.union([z.array(z.string()), z.null()]),
+    createRoles: z.union([z.array(z.string()), z.null()]),
+    deleteRoles: z.union([z.array(z.string()), z.null()]),
+    afterUpdate: z.union([z.string(), z.null()]),
+    afterCreate: z.union([z.string(), z.null()]),
+    hasFiles: z.boolean(),
+    hasHistory: z.boolean(),
+    hasComments: z.boolean(),
+    order: z.union([z.number(), z.null()]),
+    _dateFields: z.record(z.any()),
+    master: z.any(),
+    masterRef: z.any(),
+    parentRefs: z.union([z.array(z.any()), z.null()]),
+    children: z.union([z.array(z.any()), z.null()]),
+    kind: z.enum(["table", "page"]),
+  })
+  .partial();
+
+export const TableSchema = z
+  .object({
+    isSQLFilterable: z.boolean(),
+    comparator: z.string(),
+    queryCache: z.record(z.union([z.string(), z.null()])),
+    nextFieldId: z.number(),
+    id: z.string(),
+    caption: z.string(),
+    captions: z.record(z.string()),
+    icon: z.union([z.string(), z.null()]),
+    hidden: z.boolean(),
+    description: z.union([z.string(), z.null()]),
+    globalSearch: z.boolean(),
+    fields: z.record(z.any()),
+    uis: z.record(z.any()), // Allows any properties within uis
+    sorted: z.array(z.any()),
+    color: z.any(),
+    background: z.any(),
+    uuid: z.string(),
+    fulltextTokens: z.any(),
+    isNew: z.union([z.boolean(), z.null()]),
+    readRoles: z.union([z.array(z.string()), z.null()]),
+    writeRoles: z.union([z.array(z.string()), z.null()]),
+    createRoles: z.union([z.array(z.string()), z.null()]),
+    deleteRoles: z.union([z.array(z.string()), z.null()]),
+    afterUpdate: z.union([z.string(), z.null()]),
+    afterCreate: z.union([z.string(), z.null()]),
+    hasFiles: z.boolean(),
+    hasHistory: z.boolean(),
+    hasComments: z.boolean(),
+    order: z.union([z.number(), z.null()]),
+    _dateFields: z.record(z.any()),
+    master: z.any(),
+    masterRef: z.any(),
+    parentRefs: z.union([z.array(z.any()), z.null()]),
+    children: z.union([z.array(z.any()), z.null()]),
+    kind: z.enum(["table", "page"]),
+  })
+  .partial();
+
+export const TableSchemaLocal = TableSchema.extend({
+  database: z.string(),
+});
+
+export type Schema = z.infer<typeof DatabaseSchemaSchema>;
+export type Table = z.infer<typeof TableSchema>;

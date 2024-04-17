@@ -1,5 +1,5 @@
 import Ajv from "ajv";
-import { TableSchema } from "../schemas";
+import { TableSchema } from "../ajvSchemas";
 
 export const parse = (data: any) => {
   const ajv = new Ajv();

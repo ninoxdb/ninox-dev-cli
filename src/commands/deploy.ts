@@ -1,9 +1,9 @@
 import { Command } from "commander";
-import { run } from "./common/doParsingTest";
+import { run } from "../common/doDeployTest";
 
-const objectImport = new Command("object:import");
+const deploy = new Command("object:import");
 
-objectImport
+deploy
   .description("Import an object from Ninox")
   .option("-t, --type <type>", "Object Type e.g Database, Table, View, Field")
   .option("-id, --id <id>", "Object ID")
