@@ -78,5 +78,5 @@ export const TableSchema = z.object({
     parentRefs: z.union([z.array(z.any()), z.null()]),
     children: z.union([z.array(z.any()), z.null()]),
     kind: z.enum(["table", "page"]),
-  });
+  }).partial();
   
