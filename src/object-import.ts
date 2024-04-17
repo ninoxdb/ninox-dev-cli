@@ -7,11 +7,9 @@ objectImport
   .description("Import an object from Ninox")
   .option("-t, --type <type>", "Object Type e.g Database, Table, View, Field")
   .option("-id, --id <id>", "Object ID")
-  .action((options) => {
-    console.log(
-      `Project importialized with type: ${options.type} and id: ${options.id}`
-    );
-    doSOmething(options);
+  .action(async(options) => {
+    console.log('object:import command called',options);
+    await doSOmething(options);
   })
   .parse(process.argv);
 

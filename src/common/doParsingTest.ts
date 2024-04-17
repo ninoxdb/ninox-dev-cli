@@ -1,11 +1,23 @@
-import { SafeParseSuccess } from "zod";
+import {z} from "zod";
 import {
   DatabaseSchema,
   TableSchema,
   DatabaseSchemaSchema,
 } from "./zodSchemas";
+import {
+  createDatabaseFolderInObjects,
+  ensureRootDirectoryStructure,
+  getObjectFileName,
+  getObjectPath,
+  writeFile,
+} from "../util/fs.util";
+import { createYamlDocument } from "../util/yaml.util";
+import {Database} from "../common/typings";
 
-export const doSOmething = (opts: any) => {
+type Schema = z.infer<typeof DatabaseSchemaSchema>;
+type Table = z.infer<typeof TableSchema>;
+
+export const doSOmething = async (opts: any) => {
   const db = {
     id: "ut0i1nutbi9t",
     name: "6050",
@@ -54,17 +66,61 @@ export const doSOmething = (opts: any) => {
     hideNavigation: false,
   };
 
-  const database = DatabaseSchema.safeParse(db);
+  const parsedDatabase = DatabaseSchema.safeParse(db);
 
-  const table = TableSchema.safeParse(sc.types.A);
+  const parsedTable = TableSchema.safeParse(sc.types.A);
 
-  const schema = DatabaseSchemaSchema.safeParse(sc);
+  const parsedSchema = DatabaseSchemaSchema.safeParse(sc);
 
-  if (!database.success || !table.success || !schema.success) {
+  if (
+    !parsedDatabase.success ||
+    !parsedTable.success ||
+    !parsedSchema.success
+  ) {
     console.log("Validation errors:");
     return;
   }
-  console.log(database.data);
-  console.log(table.data);
-  console.log(schema.data);
+  const database = parsedDatabase.data;
+  const table = parsedTable.data;
+  const schema = parsedSchema.data;
+  
+
+  
+
+
+
+  await writeToFiles(database, schema, table);
+
+  // Name Database as Database_${id}
+  // Name Table as Table_${id}
+  // Name Schema as Schema_${id}
+  // Write the database, table and schema to their respective files as json
 };
+
+
+async function writeToFiles(database: Database,schema: Schema, table: Table) {
+    const databaseDocument = createYamlDocument(database);
+    const tableDocument = createYamlDocument(table);
+    const schemaDocument = createYamlDocument(schema);
+
+
+    await ensureRootDirectoryStructure();
+  // Create a subfolder in the root directory/Objects with name Database_${id}
+  await createDatabaseFolderInObjects(database.id);
+  // write the database to a file as json
+  await writeFile(
+    getObjectPath(database.id, getObjectFileName("Database", database.id)),
+    JSON.stringify(database)
+  );
+  // table
+  await writeFile(
+    getObjectPath(database.id, getObjectFileName("Table", table.uuid)),
+    JSON.stringify(table)
+  );
+
+  // schema
+  await writeFile(
+    getObjectPath(database.id, getObjectFileName("Schema", database.id)),
+    JSON.stringify(schema)
+  );
+}
