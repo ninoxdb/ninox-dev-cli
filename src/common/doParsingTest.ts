@@ -1,4 +1,4 @@
-import {z} from "zod";
+import { z } from "zod";
 import {
   DatabaseSchema,
   TableSchema,
@@ -12,7 +12,7 @@ import {
   writeFile,
 } from "../util/fs.util";
 import { createYamlDocument } from "../util/yaml.util";
-import {Database} from "../common/typings";
+import { Database } from "../common/typings";
 
 type Schema = z.infer<typeof DatabaseSchemaSchema>;
 type Table = z.infer<typeof TableSchema>;
@@ -68,7 +68,7 @@ export const doSOmething = async (opts: any) => {
 
   const parsedDatabase = DatabaseSchema.safeParse(db);
 
-  const parsedTable = TableSchema.safeParse(sc.types.A);
+  const parsedTable = TableSchema.safeParse({ ...sc.types.A, id: "A" });
 
   const parsedSchema = DatabaseSchemaSchema.safeParse(sc);
 
@@ -83,11 +83,6 @@ export const doSOmething = async (opts: any) => {
   const database = parsedDatabase.data;
   const table = parsedTable.data;
   const schema = parsedSchema.data;
-  
-
-  
-
-
 
   await writeToFiles(database, schema, table);
 
@@ -97,30 +92,28 @@ export const doSOmething = async (opts: any) => {
   // Write the database, table and schema to their respective files as json
 };
 
-
-async function writeToFiles(database: Database,schema: Schema, table: Table) {
-    const databaseDocument = createYamlDocument(database);
-    const tableDocument = createYamlDocument(table);
-    const schemaDocument = createYamlDocument(schema);
-
-
-    await ensureRootDirectoryStructure();
+async function writeToFiles(database: Database, schema: Schema, table: Table) {
+  await ensureRootDirectoryStructure();
   // Create a subfolder in the root directory/Objects with name Database_${id}
   await createDatabaseFolderInObjects(database.id);
   // write the database to a file as json
   await writeFile(
     getObjectPath(database.id, getObjectFileName("Database", database.id)),
-    JSON.stringify(database)
+    createYamlDocument({ database }).toString()
   );
   // table
   await writeFile(
-    getObjectPath(database.id, getObjectFileName("Table", table.uuid)),
-    JSON.stringify(table)
+    getObjectPath(database.id, getObjectFileName("Table", table.id as string)),
+    createYamlDocument({
+      table: { database: database.id, ...table },
+    }).toString()
   );
 
   // schema
   await writeFile(
     getObjectPath(database.id, getObjectFileName("Schema", database.id)),
-    JSON.stringify(schema)
+    createYamlDocument({
+      schema: { database: database.id, ...schema },
+    }).toString()
   );
 }
