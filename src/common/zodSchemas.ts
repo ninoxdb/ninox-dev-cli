@@ -59,7 +59,7 @@ export const TableSchema = z.object({
     sorted: z.array(z.any()),
     color: z.any(),
     background: z.any(),
-    uuid: z.any(),
+    uuid: z.string(),
     fulltextTokens: z.any(),
     isNew: z.union([z.boolean(), z.null()]),
     readRoles: z.union([z.array(z.string()), z.null()]),
