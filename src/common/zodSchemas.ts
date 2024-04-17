@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const DatabaseSchema = z.object({
   id: z.string(),
@@ -6,43 +6,50 @@ export const DatabaseSchema = z.object({
     name: z.string(),
     icon: z.string(),
     color: z.string(),
-  }).strict(),
+    bgType: z.string().optional(),
+    backgroundClass: z.string().optional(),
+    backgroundTimestamp: z.number().optional(),
+  }),
 });
 
 const ExternalSchema: z.ZodSchema<any> = z.lazy(() => DatabaseSchemaSchema);
 
-export const DatabaseSchemaSchema = z.object({
-  database: z.string(),
-  isProtected: z.boolean(),
-  seq: z.number(),
-  version: z.number(),
-  nextTypeId: z.number(),
-  queryCache: z.record(z.union([z.string(), z.null()])),
-  afterOpen: z.union([z.string(), z.null()]),
-  globalCode: z.union([z.string(), z.null()]),
-  globalCodeExp: z.union([z.string(), z.null()]),
-  globalScope: z.record(z.any()),
-  afterOpenBehavior: z.enum(["openHome", "restoreNavigation"]),
-  fileSync: z.enum(["full", "cached"]),
-  dateFix: z.enum(["enabled", "disabled"]),
-  compatibility: z.enum(["latest", "3.7.0"]),
-  dbId: z.union([z.string(), z.null()]),
-  dbName: z.union([z.string(), z.null()]),
-  hideCalendar: z.boolean(),
-  hideSearch: z.boolean(),
-  hideDatabase: z.boolean(),
-  hideNavigation: z.boolean(),
-  knownDatabases: z.array(z.object({
-    dbId: z.string(),
-    name: z.string(),
-    teamId: z.string(),
-    teamName: z.string(),
-  })),
-  externalSchemas: z.record(ExternalSchema),
-}).partial();
+export const DatabaseSchemaSchema = z
+  .object({
+    database: z.string(),
+    isProtected: z.boolean(),
+    seq: z.number(),
+    version: z.number(),
+    nextTypeId: z.number(),
+    queryCache: z.record(z.union([z.string(), z.null()])),
+    afterOpen: z.union([z.string(), z.null()]),
+    globalCode: z.union([z.string(), z.null()]),
+    globalCodeExp: z.union([z.string(), z.null()]),
+    globalScope: z.record(z.any()),
+    afterOpenBehavior: z.enum(["openHome", "restoreNavigation"]),
+    fileSync: z.enum(["full", "cached"]),
+    dateFix: z.enum(["enabled", "disabled"]),
+    compatibility: z.enum(["latest", "3.7.0"]),
+    dbId: z.union([z.string(), z.null()]),
+    dbName: z.union([z.string(), z.null()]),
+    hideCalendar: z.boolean(),
+    hideSearch: z.boolean(),
+    hideDatabase: z.boolean(),
+    hideNavigation: z.boolean(),
+    knownDatabases: z.array(
+      z.object({
+        dbId: z.string(),
+        name: z.string(),
+        teamId: z.string(),
+        teamName: z.string(),
+      })
+    ),
+    externalSchemas: z.record(ExternalSchema),
+  })
+  .partial();
 
-
-export const TableSchema = z.object({
+export const TableSchema = z
+  .object({
     isSQLFilterable: z.boolean(),
     comparator: z.string(),
     queryCache: z.record(z.union([z.string(), z.null()])),
@@ -54,8 +61,8 @@ export const TableSchema = z.object({
     hidden: z.boolean(),
     description: z.union([z.string(), z.null()]),
     globalSearch: z.boolean(),
-    fields: z.record(z.any()),  // Allows any properties within fields
-    uis: z.record(z.any()),  // Allows any properties within uis
+    fields: z.record(z.any()), // Allows any properties within fields
+    uis: z.record(z.any()), // Allows any properties within uis
     sorted: z.array(z.any()),
     color: z.any(),
     background: z.any(),
@@ -78,5 +85,5 @@ export const TableSchema = z.object({
     parentRefs: z.union([z.array(z.any()), z.null()]),
     children: z.union([z.array(z.any()), z.null()]),
     kind: z.enum(["table", "page"]),
-  }).partial();
-  
+  })
+  .partial();

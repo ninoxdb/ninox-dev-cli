@@ -1,4 +1,6 @@
 src/**/**/*.yaml
+src/Objects
+src/Files
 # Logs
 logs
 *.log
