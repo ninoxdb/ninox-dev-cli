@@ -48,7 +48,7 @@ export const writeFile = async (path: string, data: string) => {
 };
 
 export const getObjectFileName = (objectType: string, objectId: string) => {
-  return `${objectType}_${objectId}`;
+  return `${objectType}_${normalizeFileName(objectId)}`;
 };
 
 export const readDefinedDatabaseConfigs = async () => {
@@ -58,7 +58,7 @@ export const readDefinedDatabaseConfigs = async () => {
 
   // return an array of database configs
   const databaseConfigs: DBConfigsRaw[] = [];
-  if(!fs.existsSync(ObjectsPath)) {
+  if (!fs.existsSync(ObjectsPath)) {
     return databaseConfigs;
   }
   const databaseFolders = await fsAsync.readdir(ObjectsPath);
