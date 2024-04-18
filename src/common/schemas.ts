@@ -1,4 +1,5 @@
 import { after } from "node:test";
+import { version } from "os";
 import { z } from "zod";
 
 export const DatabaseSchema = z.object({
@@ -19,6 +20,7 @@ export const DatabaseSchemaForUpload = z
   .object({
     isProtected: z.boolean(),
     seq: z.number(),
+    version: z.number(),
     queryCache: z.record(z.union([z.string(), z.null()])),
     afterOpen: z.union([z.string(), z.null()]),
     globalCode: z.union([z.string(), z.null()]),
@@ -84,6 +86,7 @@ export const DatabaseSchemaSchemaLocal = DatabaseSchemaSchema.extend({
 export const TableSchemaForUpload = z
   .object({
     id: z.string(),
+    nextFieldId: z.number().optional(),
     isSQLFilterable: z.boolean(),
     queryCache: z.record(z.union([z.string(), z.null()])),
     caption: z.string(),
