@@ -73,13 +73,13 @@ async function writeToFiles(
   await createDatabaseFolderInObjects(database.id);
   // write the database to a file as json
   await writeFile(
-    getObjectPath(database.id, getObjectFileName("Database", database.id)),
+    getObjectPath(database.id, getObjectFileName("Database", database.settings.name)),
     createYamlDocument({ database }).toString()
   );
   // table
   for (const t of table) {
     await writeFile(
-      getObjectPath(database.id, getObjectFileName("Table", t.id as string)),
+      getObjectPath(database.id, getObjectFileName("Table", t.caption as string)),
       createYamlDocument({
         table: { database: database.id, ...t },
       }).toString()
@@ -88,7 +88,7 @@ async function writeToFiles(
 
   // schema
   await writeFile(
-    getObjectPath(database.id, getObjectFileName("Schema", database.id)),
+    getObjectPath(database.id, getObjectFileName("Schema", database.settings.name)),
     createYamlDocument({
       schema: { database: database.id, ...schema },
     }).toString()
