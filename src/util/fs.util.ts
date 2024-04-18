@@ -64,17 +64,26 @@ export const readDefinedDatabaseConfigs = async () => {
   const databaseFolders = await fsAsync.readdir(ObjectsPath);
   for (const folder of databaseFolders) {
     const databaseId = folder.split("_")[1];
+    // read folder contents
+    const files = await fsAsync.readdir(path.join(ObjectsPath, folder));
+    const databaseFile = files.find((file) => file.startsWith("Database_"));
+    if (!databaseFile) {
+      throw new Error("Database file not found");
+    }
+    const schemaFile = files.find((file) => file.startsWith("Schema_"));
+    // TODO: assume schema is always present
+    if (!schemaFile) {
+      throw new Error("Schema file not found");
+    }
     const database = await fsAsync.readFile(
-      path.join(ObjectsPath, folder, `Database_${databaseId}.yaml`),
+      path.join(ObjectsPath, folder, databaseFile), //`Database_${databaseId}.yaml`
       "utf-8"
     );
     const schema = await fsAsync.readFile(
-      path.join(ObjectsPath, folder, `Schema_${databaseId}.yaml`),
+      path.join(ObjectsPath, folder, schemaFile), //`Schema_${databaseId}.yaml`
       "utf-8"
     );
-    const tableFiles = (
-      await fsAsync.readdir(path.join(ObjectsPath, folder))
-    ).filter((file) => file.startsWith("Table_"));
+    const tableFiles = files.filter((file) => file.startsWith("Table_"));
     const tables = await Promise.all(
       tableFiles.map(async (table) => {
         return await fsAsync.readFile(

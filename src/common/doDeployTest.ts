@@ -19,7 +19,7 @@ import {
 import { createYamlDocument, parseYamlDocument } from "../util/yaml.util";
 import { Database } from "./typings";
 import { Credentials } from "./typings";
-import { Options } from "../commands/object-import";
+import { Options } from "../commands/deploy";
 import axios from "axios";
 import {
   updateDatabaseSettings,
@@ -73,20 +73,28 @@ export const run = async (opts: Options) => {
       domain,
       workspaceId,
     };
-    await updateDatabaseSettings(creds, {
-      id: dbConfig.database.id,
-      settings: dbConfig.database.settings,
-    });
+    await updateDatabaseSettings(
+      creds,
+      {
+        id: dbConfig.database.id,
+        settings: dbConfig.database.settings,
+      },
+      opts.protocol
+    );
 
     // upload database schema
-    await uploadDatabaseSchemaToNinox(creds, {
-      id: dbConfig.database.id,
-      schema: {
-        ...dbConfig.schema,
-        types: dbConfig.tables.reduce((acc, table) => {
-          return { ...acc, [table.id as string]: table };
-        }, {}),
+    await uploadDatabaseSchemaToNinox(
+      creds,
+      {
+        id: dbConfig.database.id,
+        schema: {
+          ...dbConfig.schema,
+          types: dbConfig.tables.reduce((acc, table) => {
+            return { ...acc, [table.id as string]: table };
+          }, {}),
+        },
       },
-    });
+      opts.protocol
+    );
   }
 };

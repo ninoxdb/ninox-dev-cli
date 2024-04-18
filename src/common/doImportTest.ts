@@ -28,7 +28,7 @@ export const run = async (opts: Options) => {
   };
 
   // make a request to the Ninox API to get the database
-  const dbData = await getDatabase(creds, { id: opts.id });
+  const dbData = await getDatabase(creds, { id: opts.id }, opts.protocol);
 
   const { schema: schemaData, ...dbRemainingData } = dbData;
 
