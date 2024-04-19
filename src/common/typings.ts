@@ -21,9 +21,9 @@ export interface Database {
     name: string;
     icon: string;
     color: string;
-    bgType?: string;
-    backgroundClass?: string;
-    backgroundTimestamp?: number;
+    bgType?: string|null;
+    backgroundClass?: string|null;
+    backgroundTimestamp?: number|null;
   };
 }
 

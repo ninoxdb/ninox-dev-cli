@@ -18,7 +18,7 @@ deploy
       console.log("Success: Deploy command completed");
     } catch (e) {
       if (e instanceof Error) console.log("Failed: to deploy", e.message);
-      throw e;
+      // throw e;
     }
   })
   .parse(process.argv);

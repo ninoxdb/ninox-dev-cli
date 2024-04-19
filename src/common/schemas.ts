@@ -8,9 +8,9 @@ export const DatabaseSchema = z.object({
     name: z.string(),
     icon: z.string(),
     color: z.string(),
-    bgType: z.string().optional(),
-    backgroundClass: z.string().optional(),
-    backgroundTimestamp: z.number().optional(),
+    bgType: z.string().optional().nullable(),
+    backgroundClass: z.string().optional().nullable(),
+    backgroundTimestamp: z.number().optional().nullable(),
   }),
 });
 

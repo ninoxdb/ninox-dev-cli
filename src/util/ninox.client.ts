@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { Credentials } from "../common/typings";
 
 export const getDatabase = async (
@@ -8,7 +8,7 @@ export const getDatabase = async (
 ) => {
   try {
     const response = await axios.get(
-      `${protocol}://${creds.domain}/v1/teams/${creds.workspaceId}/databases/${opts.id}`,
+      `${protocol}://${creds.domain}/v1/teams/${creds.workspaceId}/databases/${opts.id}?human=T`,
       {
         headers: {
           Authorization: `Bearer ${creds.apiKey}`,
@@ -58,7 +58,7 @@ export const uploadDatabaseSchemaToNinox = async (
   try {
     delete opts.schema.id;
     const response = await axios.patch(
-      `${protocol}://${creds.domain}/v1/teams/${creds.workspaceId}/databases/${opts.id}/schema`,
+      `${protocol}://${creds.domain}/v1/teams/${creds.workspaceId}/databases/${opts.id}/schema?human=T`,
       opts.schema,
       {
         headers: {
@@ -69,7 +69,10 @@ export const uploadDatabaseSchemaToNinox = async (
     return response.data;
   } catch (e) {
     if (e instanceof Error) {
-      console.log("Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account. Error in request", e.message);
+      console.log("Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.", e.message);
+    }
+    if(e instanceof AxiosError){
+      console.log('Response: ',e.response?.data);
     }
     throw e;
   }

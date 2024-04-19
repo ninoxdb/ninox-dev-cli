@@ -18,7 +18,7 @@ objectImport
       console.log("Success: object import command completed");
     } catch (e) {
       if (e instanceof Error) console.log("Failed: to import", e.message);
-      throw e;
+      // throw e;
     }
   })
   .parse(process.argv);
