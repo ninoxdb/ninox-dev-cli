@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { run } from "../common/doImportTest";
+import { run } from "../handlers/ImportHandler";
 
 const objectImport = new Command("object:import");
 
@@ -18,16 +18,6 @@ objectImport
       console.log("Success: object import command completed");
     } catch (e) {
       if (e instanceof Error) console.log("Failed: to import", e.message);
-      // throw e;
     }
   })
   .parse(process.argv);
-
-export interface Options {
-  type: string;
-  id: string;
-  domain: string;
-  workspaceId: string;
-  apiKey: string;
-  protocol?: "http" | "https";
-}

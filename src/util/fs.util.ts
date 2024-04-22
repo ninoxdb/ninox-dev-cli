@@ -7,9 +7,6 @@ import { Schema, Table } from "../common/schemas";
 const ObjectsPath = path.join(process.cwd(), "src", "Objects");
 const FilesPath = path.join(process.cwd(), "src", "Files");
 
-// let finalObjectPath: string;
-// let finalFilePath: string;
-
 export const ensureRootDirectoryStructure = async () => {
   await fsAsync.mkdir(ObjectsPath, { recursive: true });
   await fsAsync.mkdir(FilesPath, { recursive: true });
@@ -64,7 +61,6 @@ export const readDefinedDatabaseConfigs = async () => {
   const databaseFolders = await fsAsync.readdir(ObjectsPath);
   for (const folder of databaseFolders) {
     const databaseId = folder.split("_")[1];
-    // read folder contents
     const files = await fsAsync.readdir(path.join(ObjectsPath, folder));
     const databaseFile = files.find((file) => file.startsWith("Database_"));
     if (!databaseFile) {

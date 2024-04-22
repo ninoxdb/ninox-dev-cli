@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { run } from "../common/doDeployTest";
+import { run } from "../handlers/DeployHandler";
 
 const deploy = new Command("deploy");
 
@@ -18,16 +18,6 @@ deploy
       console.log("Success: Deploy command completed");
     } catch (e) {
       if (e instanceof Error) console.log("Failed: to deploy", e.message);
-      // throw e;
     }
   })
   .parse(process.argv);
-
-export interface Options {
-  type: string;
-  id: string;
-  domain: string;
-  workspaceId: string;
-  apiKey: string;
-  protocol?: "http" | "https";
-}

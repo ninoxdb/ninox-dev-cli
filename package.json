@@ -14,7 +14,7 @@
     "ninox": "dist/commands/index.js"
   },
   "keywords": [],
-  "author": "Muhammad Saqib <saqib.arfeen@ninox.com>",
+  "author": "Muhammad Saqib<saqib.arfeen@ninox.com>",
   "license": "ISC",
   "dependencies": {
     "ajv": "^8.12.0",

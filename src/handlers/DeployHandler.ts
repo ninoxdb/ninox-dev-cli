@@ -1,32 +1,17 @@
-import { z } from "zod";
 import {
   DatabaseSchema,
-  TableSchema,
-  DatabaseSchemaSchema,
-  Schema,
-  Table,
   DatabaseSchemaForUpload,
   TableSchemaForUpload,
-} from "./schemas";
-import {
-  createDatabaseFolderInObjects,
-  ensureRootDirectoryStructure,
-  getObjectFileName,
-  getObjectPath,
-  readDefinedDatabaseConfigs,
-  writeFile,
-} from "../util/fs.util";
-import { createYamlDocument, parseYamlDocument } from "../util/yaml.util";
-import { Database } from "./typings";
-import { Credentials } from "./typings";
-import { Options } from "../commands/deploy";
-import axios from "axios";
+} from "../common/schemas";
+import { readDefinedDatabaseConfigs } from "../util/fs.util";
+import { parseYamlDocument } from "../util/yaml.util";
+import { NinoxCredentials, DeployCommandOptions } from "../common/typings";
 import {
   updateDatabaseSettings,
   uploadDatabaseSchemaToNinox,
 } from "../util/ninox.client";
 
-export const run = async (opts: Options) => {
+export const run = async (opts: DeployCommandOptions) => {
   const dbConfigsRaw = await readDefinedDatabaseConfigs();
   const dbConfigs = dbConfigsRaw.map((dbConfig) => {
     const {
@@ -64,11 +49,10 @@ export const run = async (opts: Options) => {
       tables: tables,
     };
   });
-  //   console.log("dbConfigs", dbConfigs);
 
   for (const dbConfig of dbConfigs) {
     const { domain, apiKey, workspaceId } = opts;
-    const creds: Credentials = {
+    const creds: NinoxCredentials = {
       apiKey,
       domain,
       workspaceId,

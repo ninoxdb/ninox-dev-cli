@@ -1,11 +1,10 @@
-import { z } from "zod";
 import {
   DatabaseSchema,
   TableSchema,
   DatabaseSchemaSchema,
   Schema,
   Table,
-} from "./schemas";
+} from "../common/schemas";
 import {
   createDatabaseFolderInObjects,
   ensureRootDirectoryStructure,
@@ -14,14 +13,13 @@ import {
   writeFile,
 } from "../util/fs.util";
 import { createYamlDocument } from "../util/yaml.util";
-import { Database } from "./typings";
-import { Credentials } from "./typings";
-import { Options } from "../commands/object-import";
+import { Database } from "../common/typings";
+import { NinoxCredentials, ImportCommandOptions } from "../common/typings";
 import { getDatabase } from "../util/ninox.client";
 
-export const run = async (opts: Options) => {
+export const run = async (opts: ImportCommandOptions) => {
   const { domain, apiKey, workspaceId } = opts;
-  const creds: Credentials = {
+  const creds: NinoxCredentials = {
     apiKey,
     domain,
     workspaceId,
@@ -59,10 +57,7 @@ function ParseData(db: any, sc: any) {
   return { database, tables, schema };
 }
 
-// Name Database as Database_${id}
-// Name Table as Table_${id}
-// Name Schema as Schema_${id}
-// Write the database, table and schema to their respective files
+// Write the database, schema and tables to their respective files
 async function writeToFiles(
   database: Database,
   schema: Schema,
@@ -71,15 +66,20 @@ async function writeToFiles(
   await ensureRootDirectoryStructure();
   // Create a subfolder in the root directory/Objects with name Database_${id}
   await createDatabaseFolderInObjects(database.id);
-  // write the database to a file as json
   await writeFile(
-    getObjectPath(database.id, getObjectFileName("Database", database.settings.name)),
+    getObjectPath(
+      database.id,
+      getObjectFileName("Database", database.settings.name)
+    ),
     createYamlDocument({ database }).toString()
   );
   // table
   for (const t of table) {
     await writeFile(
-      getObjectPath(database.id, getObjectFileName("Table", t.caption as string)),
+      getObjectPath(
+        database.id,
+        getObjectFileName("Table", t.caption as string)
+      ),
       createYamlDocument({
         table: { database: database.id, ...t },
       }).toString()
@@ -88,7 +88,10 @@ async function writeToFiles(
 
   // schema
   await writeFile(
-    getObjectPath(database.id, getObjectFileName("Schema", database.settings.name)),
+    getObjectPath(
+      database.id,
+      getObjectFileName("Schema", database.settings.name)
+    ),
     createYamlDocument({
       schema: { database: database.id, ...schema },
     }).toString()

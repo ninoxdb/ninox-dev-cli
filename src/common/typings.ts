@@ -1,4 +1,4 @@
-export interface Credentials {
+export interface NinoxCredentials {
   workspaceId: string;
   domain: string;
   apiKey: string;
@@ -21,9 +21,9 @@ export interface Database {
     name: string;
     icon: string;
     color: string;
-    bgType?: string|null;
-    backgroundClass?: string|null;
-    backgroundTimestamp?: number|null;
+    bgType?: string | null;
+    backgroundClass?: string | null;
+    backgroundTimestamp?: number | null;
   };
 }
 
@@ -113,6 +113,24 @@ export interface Table {
   children: unknown[] | undefined;
 
   kind: "table" | "page";
+}
+
+export interface DeployCommandOptions {
+  type: string;
+  id: string;
+  domain: string;
+  workspaceId: string;
+  apiKey: string;
+  protocol?: "http" | "https";
+}
+
+export interface ImportCommandOptions {
+  type: string;
+  id: string;
+  domain: string;
+  workspaceId: string;
+  apiKey: string;
+  protocol?: "http" | "https";
 }
 
 export interface InitCommandOptions {
