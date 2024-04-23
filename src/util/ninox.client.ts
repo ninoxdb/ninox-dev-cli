@@ -1,14 +1,15 @@
 import axios, { AxiosError } from "axios";
-import { Credentials } from "../common/typings";
+import { DatabaseSettings, NinoxCredentials } from "../common/typings";
+import { DatabaseSchemaType } from "../common/schemas";
 
 export const getDatabase = async (
-  creds: Credentials,
-  opts: { id: string },
+  id: string,
+  creds: NinoxCredentials,
   protocol: "http" | "https" = "https"
 ) => {
   try {
     const response = await axios.get(
-      `${protocol}://${creds.domain}/v1/teams/${creds.workspaceId}/databases/${opts.id}?human=T`,
+      `${protocol}://${creds.domain}/v1/teams/${creds.workspaceId}/databases/${id}?human=T`,
       {
         headers: {
           Authorization: `Bearer ${creds.apiKey}`,
@@ -25,14 +26,15 @@ export const getDatabase = async (
 };
 
 export const updateDatabaseSettings = async (
-  creds: Credentials,
-  opts: { id: string; settings: any },
+  id: string,
+  settings: DatabaseSettings,
+  creds: NinoxCredentials,
   protocol: "http" | "https" = "https"
 ) => {
   try {
-    const data = JSON.stringify(opts.settings);
+    const data = JSON.stringify(settings);
     const response = await axios.post(
-      `${protocol}://${creds.domain}/${creds.workspaceId}/${opts.id}/settings/update`,
+      `${protocol}://${creds.domain}/${creds.workspaceId}/${id}/settings/update`,
       data,
       {
         headers: {
@@ -51,15 +53,15 @@ export const updateDatabaseSettings = async (
 };
 
 export const uploadDatabaseSchemaToNinox = async (
-  creds: Credentials,
-  opts: { id: string; schema: any },
+  id: string,
+  schema: DatabaseSchemaType,
+  creds: NinoxCredentials,
   protocol: "http" | "https" = "https"
 ) => {
   try {
-    delete opts.schema.id;
     const response = await axios.patch(
-      `${protocol}://${creds.domain}/v1/teams/${creds.workspaceId}/databases/${opts.id}/schema?human=T`,
-      opts.schema,
+      `${protocol}://${creds.domain}/v1/teams/${creds.workspaceId}/databases/${id}/schema?human=T`,
+      schema,
       {
         headers: {
           Authorization: `Bearer ${creds.apiKey}`,
@@ -69,10 +71,13 @@ export const uploadDatabaseSchemaToNinox = async (
     return response.data;
   } catch (e) {
     if (e instanceof Error) {
-      console.log("Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.", e.message);
+      console.log(
+        "Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.",
+        e.message
+      );
     }
-    if(e instanceof AxiosError){
-      console.log('Response: ',e.response?.data);
+    if (e instanceof AxiosError) {
+      console.log("Response: ", e.response?.data);
     }
     throw e;
   }

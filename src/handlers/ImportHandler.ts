@@ -1,9 +1,12 @@
 import {
+  Database,
   DatabaseSchema,
-  TableSchema,
-  DatabaseSchemaSchema,
-  Schema,
   Table,
+  TableLocal,
+  DatabaseSchemaLocal,
+  DatabaseType,
+  DatabaseSchemaLocalType,
+  TableLocalType,
 } from "../common/schemas";
 import {
   createDatabaseFolderInObjects,
@@ -13,7 +16,6 @@ import {
   writeFile,
 } from "../util/fs.util";
 import { createYamlDocument } from "../util/yaml.util";
-import { Database } from "../common/typings";
 import { NinoxCredentials, ImportCommandOptions } from "../common/typings";
 import { getDatabase } from "../util/ninox.client";
 
@@ -26,7 +28,7 @@ export const run = async (opts: ImportCommandOptions) => {
   };
 
   // make a request to the Ninox API to get the database
-  const dbData = await getDatabase(creds, { id: opts.id }, opts.protocol);
+  const dbData = await getDatabase(opts.id, creds, opts.protocol);
 
   const { schema: schemaData, ...dbRemainingData } = dbData;
 
@@ -38,30 +40,39 @@ export const run = async (opts: ImportCommandOptions) => {
 };
 
 function ParseData(db: any, sc: any) {
-  const parsedDatabase = DatabaseSchema.safeParse(db);
-  const tables: Table[] = [];
-  let parsedTableSuccess = true;
-  for (const key in sc.types) {
-    const parsedTable = TableSchema.safeParse({ ...sc.types[key], id: key });
-    if (parsedTable.success) tables.push(parsedTable.data);
-    else parsedTableSuccess = false;
+  const parsedDatabase = Database.safeParse(db);
+  const tables: TableLocalType[] = [];
+  const parsedSchema = DatabaseSchema.safeParse(sc);
+
+  if (!parsedDatabase.success || !parsedSchema.success)
+    throw new Error("Validation errors: Database or Schema validation failed");
+
+  for (const key in parsedSchema.data.types) {
+    const parsedTable = Table.safeParse({
+      ...parsedSchema.data.types[key],
+      _id: key,
+    });
+    if (!parsedTable.success)
+      throw new Error("Validation errors: Table validation failed");
+    tables.push(
+      TableLocal.parse({
+        table: { ...parsedTable.data, _database: parsedDatabase.data.id },
+      })
+    );
   }
 
-  const parsedSchema = DatabaseSchemaSchema.safeParse(sc);
-
-  if (!parsedDatabase.success || !parsedTableSuccess || !parsedSchema.success) {
-    throw new Error("Validation errors:");
-  }
   const database = parsedDatabase.data;
-  const schema = parsedSchema.data;
+  const schema = DatabaseSchemaLocal.parse({
+    schema: { ...parsedSchema.data, _database: parsedDatabase.data.id },
+  });
   return { database, tables, schema };
 }
 
 // Write the database, schema and tables to their respective files
 async function writeToFiles(
-  database: Database,
-  schema: Schema,
-  table: Table[]
+  database: DatabaseType,
+  schema: DatabaseSchemaLocalType,
+  tables: TableLocalType[]
 ) {
   await ensureRootDirectoryStructure();
   // Create a subfolder in the root directory/Objects with name Database_${id}
@@ -71,18 +82,16 @@ async function writeToFiles(
       database.id,
       getObjectFileName("Database", database.settings.name)
     ),
-    createYamlDocument({ database }).toString()
+    createYamlDocument({ database: database }).toString()
   );
   // table
-  for (const t of table) {
+  for (const table of tables) {
     await writeFile(
       getObjectPath(
         database.id,
-        getObjectFileName("Table", t.caption as string)
+        getObjectFileName("Table", table.table.caption as string)
       ),
-      createYamlDocument({
-        table: { database: database.id, ...t },
-      }).toString()
+      createYamlDocument(table).toString()
     );
   }
 
@@ -92,8 +101,6 @@ async function writeToFiles(
       database.id,
       getObjectFileName("Schema", database.settings.name)
     ),
-    createYamlDocument({
-      schema: { database: database.id, ...schema },
-    }).toString()
+    createYamlDocument(schema).toString()
   );
 }

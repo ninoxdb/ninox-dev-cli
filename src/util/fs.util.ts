@@ -1,8 +1,7 @@
 import * as fsAsync from "fs/promises";
 import fs from "fs";
 import path from "path";
-import { InitCommandOptions, DBConfigsRaw, Database } from "../common/typings";
-import { Schema, Table } from "../common/schemas";
+import { DBConfigsYaml, Database } from "../common/typings";
 
 const ObjectsPath = path.join(process.cwd(), "src", "Objects");
 const FilesPath = path.join(process.cwd(), "src", "Files");
@@ -48,13 +47,13 @@ export const getObjectFileName = (objectType: string, objectId: string) => {
   return `${objectType}_${normalizeFileName(objectId)}`;
 };
 
-export const readDefinedDatabaseConfigs = async () => {
+export const readDefinedDatabaseConfigsFromFiles = async () => {
   // do a scan of ObjectsPath dir
   // read all the directories
   // each directory is a isolated database with its own schema, tables and views
 
   // return an array of database configs
-  const databaseConfigs: DBConfigsRaw[] = [];
+  const databaseConfigs: DBConfigsYaml[] = [];
   if (!fs.existsSync(ObjectsPath)) {
     return databaseConfigs;
   }

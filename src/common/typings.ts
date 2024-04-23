@@ -3,7 +3,7 @@ export interface NinoxCredentials {
   domain: string;
   apiKey: string;
 }
-export interface DBConfigsRaw {
+export interface DBConfigsYaml {
   database: string;
   schema: string;
   tables: string[];
@@ -17,16 +17,17 @@ export interface DBConfigs {
 
 export interface Database {
   id: string;
-  settings: {
-    name: string;
-    icon: string;
-    color: string;
-    bgType?: string | null;
-    backgroundClass?: string | null;
-    backgroundTimestamp?: number | null;
-  };
+  settings: DatabaseSettings;
 }
 
+export interface DatabaseSettings {
+  name: string;
+  icon: string;
+  color: string;
+  bgType?: string | null;
+  backgroundClass?: string | null;
+  backgroundTimestamp?: number | null;
+}
 export interface Schema {
   database: string;
   isProtected: boolean;
