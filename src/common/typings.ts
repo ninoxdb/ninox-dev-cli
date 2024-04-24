@@ -114,3 +114,9 @@ export interface Table {
 
   kind: "table" | "page";
 }
+
+export interface InitCommandOptions {
+  name: string;
+  id?: string;
+  description?: string;
+}

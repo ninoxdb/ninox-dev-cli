@@ -1,10 +1,11 @@
+#!/usr/bin/env node
 import { Command } from "commander";
 
 const figlet = require("figlet");
 
 const program = new Command();
 
-console.log(figlet.textSync("Ninox CLI SDK"));
+console.log(figlet.textSync("Ninox SDK CLI"));
 
 program
   .version("0.0.1")

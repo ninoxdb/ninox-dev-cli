@@ -10,6 +10,9 @@
     "start:quick": "node dist/commands/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "ninox": "dist/commands/index.js"
+  },
   "keywords": [],
   "author": "Muhammad Saqib <saqib.arfeen@ninox.com>",
   "license": "ISC",

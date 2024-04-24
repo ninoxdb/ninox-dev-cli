@@ -1,7 +1,7 @@
 import * as fsAsync from "fs/promises";
 import fs from "fs";
 import path from "path";
-import { DBConfigsRaw, Database } from "../common/typings";
+import { InitCommandOptions, DBConfigsRaw, Database } from "../common/typings";
 import { Schema, Table } from "../common/schemas";
 
 const ObjectsPath = path.join(process.cwd(), "src", "Objects");
@@ -90,4 +90,31 @@ export const readDefinedDatabaseConfigs = async () => {
     });
   }
   return databaseConfigs;
+};
+
+function normalizeFileName(name: string) {
+  // Replace sequences of non-alphanumeric characters (except underscores) with a single underscore
+  return name.replace(/[^a-z0-9_]+/gi, "_").toLowerCase();
+}
+
+export const createPackageJson = async (name: string, description?: string) => {
+  const packageJson = {
+    name: name,
+    version: "1.0.0",
+    description: description ?? "",
+    scripts: {
+      test: 'echo "Error: no test specified" && exit 1',
+    },
+    keywords: [],
+  };
+  const packageJsonPath = path.join(process.cwd(), "package.json");
+  if (fs.existsSync(packageJsonPath)) {
+    throw new Error(
+      "package.json already exists in the current directory. Please change the directory or remove the existing package.json file"
+    );
+  }
+  await fsAsync.writeFile(
+    packageJsonPath,
+    JSON.stringify(packageJson, null, 2)
+  );
 };
