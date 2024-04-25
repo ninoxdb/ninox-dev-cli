@@ -2,7 +2,7 @@
   "name": "ninox-cli",
   "version": "1.0.0",
   "description": "",
-  "main": "src/commands/index.js",
+  "main": "dist/src/commands/index.js",
   "scripts": {
     "build": "tsc",
     "start:dev": "ts-node src/commands/index.ts",

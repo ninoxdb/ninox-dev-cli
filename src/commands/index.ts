@@ -16,5 +16,5 @@ program
   .command("object:import", "Import an object from Ninox", {
     executableFile: "object-import",
   })
-  .command("deploy", "Deploy a Ninox SDK project", {executableFile: "deploy"})
+  .command("deploy", "Deploy a Ninox SDK project", { executableFile: "deploy" })
   .parse(process.argv);

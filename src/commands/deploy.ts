@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { run } from "../handlers/DeployHandler";
+import { isProjectInitialized } from "../util/fs.util";
 
 const deploy = new Command("deploy");
 
@@ -14,6 +15,10 @@ deploy
   .action(async (options) => {
     try {
       console.log("Deploy command called", options);
+      if (!isProjectInitialized())
+        throw new Error(
+          "Project not initialized. Please run init command or create a config.yaml file in the current directory."
+        );
       await run(options);
       console.log("Success: Deploy command completed");
     } catch (e) {

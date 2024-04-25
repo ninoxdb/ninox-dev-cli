@@ -1,7 +1,9 @@
 import * as fsAsync from "fs/promises";
 import fs from "fs";
 import path from "path";
-import { DBConfigsYaml, Database } from "../common/typings";
+import { DBConfigsYaml } from "../common/typings";
+import { createYamlDocument } from "./yaml.util";
+import { CREDENTIALS_FILE_NAME, ConfigYamlTemplate } from "../common/constants";
 
 const ObjectsPath = path.join(process.cwd(), "src", "Objects");
 const FilesPath = path.join(process.cwd(), "src", "Files");
@@ -121,4 +123,19 @@ export const createPackageJson = async (name: string, description?: string) => {
     packageJsonPath,
     JSON.stringify(packageJson, null, 2)
   );
+};
+
+export const createConfigYaml = async () => {
+  const credentialsPath = path.join(process.cwd(), CREDENTIALS_FILE_NAME);
+  if (fs.existsSync(credentialsPath)) {
+    return;
+  }
+  await fsAsync.writeFile(
+    credentialsPath,
+    createYamlDocument(ConfigYamlTemplate).toString()
+  );
+};
+
+export const isProjectInitialized = () => {
+  return fs.existsSync(path.join(process.cwd(), CREDENTIALS_FILE_NAME));
 };
