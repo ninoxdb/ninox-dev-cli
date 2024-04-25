@@ -3,6 +3,12 @@ export interface NinoxCredentials {
   domain: string;
   apiKey: string;
 }
+export interface Credentials {
+  apiKey: string;
+  domain: string;
+  workspaceId: string;
+  protocol?: "http" | "https";
+}
 export interface DBConfigsYaml {
   database: string;
   schema: string;

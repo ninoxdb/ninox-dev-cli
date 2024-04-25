@@ -17,7 +17,7 @@ init
       console.log(`Success: Project initialized with name: ${options.name}`);
     } catch (e) {
       if (e instanceof Error)
-        console.log("Failed to initialize project", e.message);
+        console.log("ERROR: Failed to initialize project", e.message);
     }
   })
   .parse(process.argv);

@@ -16,16 +16,15 @@ import {
   writeFile,
 } from "../util/fs.util";
 import { createYamlDocument } from "../util/yaml.util";
-import { NinoxCredentials, ImportCommandOptions } from "../common/typings";
+import {
+  NinoxCredentials,
+  ImportCommandOptions,
+  Credentials,
+} from "../common/typings";
 import { getDatabase } from "../util/ninox.client";
 
-export const run = async (opts: ImportCommandOptions) => {
+export const run = async (opts: ImportCommandOptions, creds: Credentials) => {
   const { domain, apiKey, workspaceId } = opts;
-  const creds: NinoxCredentials = {
-    apiKey,
-    domain,
-    workspaceId,
-  };
 
   // make a request to the Ninox API to get the database
   const dbData = await getDatabase(opts.id, creds, opts.protocol);

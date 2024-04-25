@@ -157,6 +157,13 @@ export const TableForUpload = z.object({
   children: z.union([z.array(z.any()), z.null()]).optional(),
 });
 
+export const Credentials = z.object({
+  domain: z.string().url(),
+  apiKey: z.string(),
+  workspaceId: z.string(),
+  protocol: z.enum(["http", "https"]).optional(),
+});
+
 export type DatabaseSchemaType = z.infer<typeof DatabaseSchema>;
 export type DatabaseSchemaLocalType = z.infer<typeof DatabaseSchemaLocal>;
 export type TableType = z.infer<typeof Table>;

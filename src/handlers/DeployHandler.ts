@@ -7,13 +7,13 @@ import {
 } from "../common/schemas";
 import { readDefinedDatabaseConfigsFromFiles } from "../util/fs.util";
 import { parseYamlDocument } from "../util/yaml.util";
-import { NinoxCredentials, DeployCommandOptions } from "../common/typings";
+import { NinoxCredentials, DeployCommandOptions, Credentials } from "../common/typings";
 import {
   updateDatabaseSettings,
   uploadDatabaseSchemaToNinox,
 } from "../util/ninox.client";
 
-export const run = async (opts: DeployCommandOptions) => {
+export const run = async (opts: DeployCommandOptions, creds: Credentials) => {
   const dbConfigsInYaml = await readDefinedDatabaseConfigsFromFiles();
   const dbConfigs = dbConfigsInYaml
     .map((dbConfigYaml) => {
@@ -66,12 +66,6 @@ export const run = async (opts: DeployCommandOptions) => {
     });
 
   for (const { database, schema } of dbConfigs) {
-    const { domain, apiKey, workspaceId } = opts;
-    const creds: NinoxCredentials = {
-      apiKey,
-      domain,
-      workspaceId,
-    };
     await updateDatabaseSettings(
       database.id,
       database.settings,

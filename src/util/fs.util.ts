@@ -7,6 +7,7 @@ import { CREDENTIALS_FILE_NAME, ConfigYamlTemplate } from "../common/constants";
 
 const ObjectsPath = path.join(process.cwd(), "src", "Objects");
 const FilesPath = path.join(process.cwd(), "src", "Files");
+const credentialsFilePath = path.join(process.cwd(), CREDENTIALS_FILE_NAME);
 
 export const ensureRootDirectoryStructure = async () => {
   await fsAsync.mkdir(ObjectsPath, { recursive: true });
@@ -126,16 +127,22 @@ export const createPackageJson = async (name: string, description?: string) => {
 };
 
 export const createConfigYaml = async () => {
-  const credentialsPath = path.join(process.cwd(), CREDENTIALS_FILE_NAME);
-  if (fs.existsSync(credentialsPath)) {
+  if (fs.existsSync(credentialsFilePath)) {
     return;
   }
   await fsAsync.writeFile(
-    credentialsPath,
+    credentialsFilePath,
     createYamlDocument(ConfigYamlTemplate).toString()
   );
 };
 
 export const isProjectInitialized = () => {
   return fs.existsSync(path.join(process.cwd(), CREDENTIALS_FILE_NAME));
+};
+
+export const readCredentials = () => {
+  if (!fs.existsSync(credentialsFilePath)) {
+    throw new Error("config.yaml file not found");
+  }
+  return fs.readFileSync(credentialsFilePath, "utf-8");
 };

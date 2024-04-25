@@ -1,6 +1,5 @@
 import { Command } from "commander";
 import { run } from "../handlers/ImportHandler";
-import { isProjectInitialized } from "../util/fs.util";
 
 const objectImport = new Command("object:import");
 
@@ -16,14 +15,10 @@ objectImport
     try {
       console.log("object:import command called", options);
       console.log("arguments", objectImport.args);
-      if (!isProjectInitialized())
-        throw new Error(
-          "Project not initialized. Please run init command or create a config.yaml file in the current directory."
-        );
-      await run(options);
+      await run(options, JSON.parse(process.env.ENVIRONMENT ?? ""));
       console.log("Success: object import command completed");
     } catch (e) {
-      if (e instanceof Error) console.log("Failed: to import", e.message);
+      if (e instanceof Error) console.log("ERROR: Failed to import", e.message);
     }
   })
   .parse(process.argv);

@@ -15,14 +15,10 @@ deploy
   .action(async (options) => {
     try {
       console.log("Deploy command called", options);
-      if (!isProjectInitialized())
-        throw new Error(
-          "Project not initialized. Please run init command or create a config.yaml file in the current directory."
-        );
-      await run(options);
+      await run(options, JSON.parse(process.env.ENVIRONMENT ?? ""));
       console.log("Success: Deploy command completed");
     } catch (e) {
-      if (e instanceof Error) console.log("Failed: to deploy", e.message);
+      if (e instanceof Error) console.log("ERROR: Failed to deploy", e.message);
     }
   })
   .parse(process.argv);
