@@ -3,7 +3,11 @@ import fs from "fs";
 import path from "path";
 import { DBConfigsYaml } from "../common/typings";
 import { createYamlDocument } from "./yaml.util";
-import { CREDENTIALS_FILE_NAME, ConfigYamlTemplate } from "../common/constants";
+import {
+  CREDENTIALS_FILE_NAME,
+  DB_BACKGROUND_FILE_NAME,
+  ConfigYamlTemplate,
+} from "../common/constants";
 
 const ObjectsPath = path.join(process.cwd(), "src", "Objects");
 const FilesPath = path.join(process.cwd(), "src", "Files");
@@ -62,6 +66,9 @@ export const readDefinedDatabaseConfigsFromFiles = async () => {
   }
   const databaseFolders = await fsAsync.readdir(ObjectsPath);
   for (const folder of databaseFolders) {
+    if(!folder.startsWith("Database_")){
+      continue;
+    }
     const databaseId = folder.split("_")[1];
     const files = await fsAsync.readdir(path.join(ObjectsPath, folder));
     const databaseFile = files.find((file) => file.startsWith("Database_"));
@@ -138,6 +145,19 @@ export const createConfigYaml = async () => {
 
 export const isProjectInitialized = () => {
   return fs.existsSync(path.join(process.cwd(), CREDENTIALS_FILE_NAME));
+};
+
+export const getDbBackgroundImagePath = (databaseId:string)=>{
+  return path.join(
+    FilesPath,
+    `Database_${databaseId}`,
+    DB_BACKGROUND_FILE_NAME
+  );
+}
+
+export const isDatabaseBackgroundFileExist = (databaseId: string) => {
+  const backgroundFilePath = getDbBackgroundImagePath(databaseId);
+  return fs.existsSync(backgroundFilePath);
 };
 
 export const readCredentials = () => {

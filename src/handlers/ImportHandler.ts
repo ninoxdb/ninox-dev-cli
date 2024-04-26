@@ -9,6 +9,7 @@ import {
   TableLocalType,
 } from "../common/schemas";
 import {
+  createDatabaseFolderInFiles,
   createDatabaseFolderInObjects,
   ensureRootDirectoryStructure,
   getObjectFileName,
@@ -21,7 +22,7 @@ import {
   ImportCommandOptions,
   Credentials,
 } from "../common/typings";
-import { getDatabase } from "../util/ninox.client";
+import { downloadDatabaseBackgroundImage, getDatabase } from "../util/ninox.client";
 
 export const run = async (opts: ImportCommandOptions, creds: Credentials) => {
   const { domain, apiKey, workspaceId } = opts;
@@ -36,6 +37,9 @@ export const run = async (opts: ImportCommandOptions, creds: Credentials) => {
     schemaData
   );
   await writeToFiles(database, schema, tables);
+  await createDatabaseFolderInFiles(opts.id);
+  // download the background image from /{accountId}/root/background.jpg
+  await downloadDatabaseBackgroundImage(opts,creds);
 };
 
 function ParseData(db: any, sc: any) {

@@ -14,6 +14,7 @@ import {
 } from "../common/typings";
 import {
   updateDatabaseSettings,
+  uploadDatabaseBackgroundImage,
   uploadDatabaseSchemaToNinox,
 } from "../util/ninox.client";
 
@@ -70,6 +71,12 @@ export const run = async (opts: DeployCommandOptions, creds: Credentials) => {
     });
 
   for (const { database, schema } of dbConfigs) {
+    // upload DB background
+    const isUploaded = await uploadDatabaseBackgroundImage(database.id, creds);
+    if (isUploaded) {
+      database.settings.bgType = "image";
+      database.settings.backgroundClass = "background-file";
+    }
     await updateDatabaseSettings(database.id, database.settings, creds);
 
     // upload database schema

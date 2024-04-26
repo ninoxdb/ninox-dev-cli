@@ -14,3 +14,4 @@ export const ConfigYamlTemplate = {
 };
 
 export const CREDENTIALS_FILE_NAME = "config.yaml";
+export const DB_BACKGROUND_FILE_NAME = "background.jpg"
