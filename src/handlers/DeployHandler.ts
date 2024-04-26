@@ -7,7 +7,11 @@ import {
 } from "../common/schemas";
 import { readDefinedDatabaseConfigsFromFiles } from "../util/fs.util";
 import { parseYamlDocument } from "../util/yaml.util";
-import { NinoxCredentials, DeployCommandOptions, Credentials } from "../common/typings";
+import {
+  NinoxCredentials,
+  DeployCommandOptions,
+  Credentials,
+} from "../common/typings";
 import {
   updateDatabaseSettings,
   uploadDatabaseSchemaToNinox,
@@ -66,19 +70,9 @@ export const run = async (opts: DeployCommandOptions, creds: Credentials) => {
     });
 
   for (const { database, schema } of dbConfigs) {
-    await updateDatabaseSettings(
-      database.id,
-      database.settings,
-      creds,
-      opts.protocol
-    );
+    await updateDatabaseSettings(database.id, database.settings, creds);
 
     // upload database schema
-    await uploadDatabaseSchemaToNinox(
-      database.id,
-      schema,
-      creds,
-      opts.protocol
-    );
+    await uploadDatabaseSchemaToNinox(database.id, schema, creds);
   }
 };

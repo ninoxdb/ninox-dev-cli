@@ -158,10 +158,12 @@ export const TableForUpload = z.object({
 });
 
 export const Credentials = z.object({
-  domain: z.string().url(),
+  domain: z
+    .string()
+    .url()
+    .transform((el) => el.replace(/\/$/, "")),
   apiKey: z.string(),
   workspaceId: z.string(),
-  protocol: z.enum(["http", "https"]).optional(),
 });
 
 export type DatabaseSchemaType = z.infer<typeof DatabaseSchema>;

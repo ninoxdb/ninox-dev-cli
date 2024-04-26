@@ -11,7 +11,6 @@ deploy
   .option("-d, --domain <domain>", "Domain")
   .option("-w, --workspaceId <workspaceId>", "Workspace ID")
   .option("-k, --apiKey <API Key>", "API Key")
-  .option("-p, --protocol <protocol>", "Protocol HTTP or HTTPS")
   .action(async (options) => {
     try {
       // console.log("Deploy command called", options);

@@ -10,7 +10,6 @@ objectImport
   .option("-d, --domain <domain>", "Domain")
   .option("-w, --workspaceId <workspaceId>", "Workspace ID")
   .option("-k, --apiKey <API Key>", "API Key")
-  .option("-p, --protocol <Protocol>", "Protocol HTTP or HTTPS")
   .action(async (options) => {
     try {
       // console.log("object:import command called", options);

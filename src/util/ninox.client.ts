@@ -2,14 +2,10 @@ import axios, { AxiosError } from "axios";
 import { DatabaseSettings, NinoxCredentials } from "../common/typings";
 import { DatabaseSchemaType } from "../common/schemas";
 
-export const getDatabase = async (
-  id: string,
-  creds: NinoxCredentials,
-  protocol: "http" | "https" = "https"
-) => {
+export const getDatabase = async (id: string, creds: NinoxCredentials) => {
   try {
     const response = await axios.get(
-      `${protocol}://${creds.domain}/v1/teams/${creds.workspaceId}/databases/${id}?human=T`,
+      `${creds.domain}/v1/teams/${creds.workspaceId}/databases/${id}?human=T`,
       {
         headers: {
           Authorization: `Bearer ${creds.apiKey}`,
@@ -28,13 +24,12 @@ export const getDatabase = async (
 export const updateDatabaseSettings = async (
   id: string,
   settings: DatabaseSettings,
-  creds: NinoxCredentials,
-  protocol: "http" | "https" = "https"
+  creds: NinoxCredentials
 ) => {
   try {
     const data = JSON.stringify(settings);
     const response = await axios.post(
-      `${protocol}://${creds.domain}/${creds.workspaceId}/${id}/settings/update`,
+      `${creds.domain}/${creds.workspaceId}/${id}/settings/update`,
       data,
       {
         headers: {
@@ -55,12 +50,11 @@ export const updateDatabaseSettings = async (
 export const uploadDatabaseSchemaToNinox = async (
   id: string,
   schema: DatabaseSchemaType,
-  creds: NinoxCredentials,
-  protocol: "http" | "https" = "https"
+  creds: NinoxCredentials
 ) => {
   try {
     const response = await axios.patch(
-      `${protocol}://${creds.domain}/v1/teams/${creds.workspaceId}/databases/${id}/schema?human=T`,
+      `${creds.domain}/v1/teams/${creds.workspaceId}/databases/${id}/schema?human=T`,
       schema,
       {
         headers: {

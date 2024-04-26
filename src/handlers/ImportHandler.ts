@@ -27,7 +27,7 @@ export const run = async (opts: ImportCommandOptions, creds: Credentials) => {
   const { domain, apiKey, workspaceId } = opts;
 
   // make a request to the Ninox API to get the database
-  const dbData = await getDatabase(opts.id, creds, opts.protocol);
+  const dbData = await getDatabase(opts.id, creds);
 
   const { schema: schemaData, ...dbRemainingData } = dbData;
 

@@ -7,7 +7,6 @@ export interface Credentials {
   apiKey: string;
   domain: string;
   workspaceId: string;
-  protocol?: "http" | "https";
 }
 export interface DBConfigsYaml {
   database: string;
@@ -128,7 +127,6 @@ export interface DeployCommandOptions {
   domain: string;
   workspaceId: string;
   apiKey: string;
-  protocol?: "http" | "https";
 }
 
 export interface ImportCommandOptions {
@@ -137,7 +135,6 @@ export interface ImportCommandOptions {
   domain: string;
   workspaceId: string;
   apiKey: string;
-  protocol?: "http" | "https";
 }
 
 export interface InitCommandOptions {
