@@ -8,7 +8,7 @@ const figlet = require("figlet");
 
 const program = new Command();
 
-console.log(figlet.textSync("Ninox SDK CLI"));
+console.log(figlet.textSync("Ninox SDK CLI"), "\n\n");
 
 preprocessArguments();
 
@@ -23,14 +23,16 @@ program
     executableFile: "object-import",
   })
   .command("deploy", "Deploy a Ninox SDK project", { executableFile: "deploy" })
-
+  .command("list", "List objects from a live Ninox Account", {
+    executableFile: "list",
+  })
   .parse(process.argv);
 
 function preprocessArguments() {
-  if (process.argv[3] !== "init") {
+  if (process.argv[2] !== "init") {
     if (!isProjectInitialized()) {
       console.log(
-        "ERROR: Project not initialized. Please run init command or create a config.yaml file in the current directory."
+        "ERROR: Project not initialized. Please initialize a Ninox project in your current directory by executing 'ninox init -n <name>' command or create a config.yaml file in the current directory."
       );
       process.exit(1);
     }

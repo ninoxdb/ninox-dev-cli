@@ -15,5 +15,4 @@ export const run = async (opts: InitCommandOptions) => {
     await createDatabaseFolderInObjects(opts.id);
     await createDatabaseFolderInFiles(opts.id);
   }
-  console.log("Success: Project Initialized");
 };

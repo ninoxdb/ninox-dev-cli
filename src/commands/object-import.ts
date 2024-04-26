@@ -4,17 +4,16 @@ import { run } from "../handlers/ImportHandler";
 const objectImport = new Command("object:import");
 
 objectImport
-  .description("Import an object from Ninox")
+  .description("Import an object from a live Ninox Database into your project")
+  .requiredOption("-id, --id <id>", "Object ID of the Ninox Database object to import")
   .option("-t, --type <type>", "Object Type e.g Database, Table, View, Field")
-  .option("-id, --id <id>", "Object ID")
   .option("-d, --domain <domain>", "Domain")
   .option("-w, --workspaceId <workspaceId>", "Workspace ID")
   .option("-k, --apiKey <API Key>", "API Key")
   .option("-p, --protocol <Protocol>", "Protocol HTTP or HTTPS")
   .action(async (options) => {
     try {
-      console.log("object:import command called", options);
-      console.log("arguments", objectImport.args);
+      // console.log("object:import command called", options);
       await run(options, JSON.parse(process.env.ENVIRONMENT ?? ""));
       console.log("Success: object import command completed");
     } catch (e) {

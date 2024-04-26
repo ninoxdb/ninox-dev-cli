@@ -5,7 +5,7 @@ const init = new Command("init");
 
 init
   .description("Initialize a new project")
-  .option("-n, --name <name>", "Name of the project")
+  .requiredOption("-n, --name <name>", "Name of the project")
   .option(
     "-d, --description <description>",
     "(optional) Description of the project"
