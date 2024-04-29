@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { run } from "../handlers/InitHandler";
+import { run } from "../handlers/init-handler";
 
 const init = new Command("init");
 

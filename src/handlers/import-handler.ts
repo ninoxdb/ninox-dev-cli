@@ -15,14 +15,14 @@ import {
   getObjectFileName,
   getObjectPath,
   writeFile,
-} from "../util/fs.util";
-import { createYamlDocument } from "../util/yaml.util";
+} from "../util/fs-util";
+import { createYamlDocument } from "../util/yaml-util";
 import {
   NinoxCredentials,
   ImportCommandOptions,
   Credentials,
 } from "../common/typings";
-import { downloadDatabaseBackgroundImage, getDatabase } from "../util/ninox.client";
+import { downloadDatabaseBackgroundImage, getDatabase } from "../util/ninox-client";
 
 export const run = async (opts: ImportCommandOptions, creds: Credentials) => {
   const { domain, apiKey, workspaceId } = opts;

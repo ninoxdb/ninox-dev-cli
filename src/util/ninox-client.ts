@@ -8,7 +8,7 @@ import { DatabaseSchemaType } from "../common/schemas";
 import {
   getDbBackgroundImagePath,
   isDatabaseBackgroundFileExist,
-} from "./fs.util";
+} from "./fs-util";
 const stream = require("stream");
 const { promisify } = require("util");
 const pipeline = promisify(stream.pipeline);

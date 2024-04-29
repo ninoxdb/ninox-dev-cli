@@ -5,7 +5,7 @@ import {
   createDatabaseFolderInFiles,
   createPackageJson,
   createConfigYaml,
-} from "../util/fs.util";
+} from "../util/fs-util";
 
 export const run = async (opts: InitCommandOptions) => {
   await createPackageJson(opts.name, opts.description);

@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { run } from "../handlers/ImportHandler";
+import { run } from "../handlers/import-handler";
 import { AxiosError } from "axios";
 
 const objectImport = new Command("object:import");

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { isProjectInitialized, readCredentials } from "../util/fs.util";
-import { parseYamlDocument } from "../util/yaml.util";
+import { isProjectInitialized, readCredentials } from "../util/fs-util";
+import { parseYamlDocument } from "../util/yaml-util";
 import { Credentials } from "../common/schemas";
 
 const figlet = require("figlet");

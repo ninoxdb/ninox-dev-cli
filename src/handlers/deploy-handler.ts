@@ -5,8 +5,8 @@ import {
   Table,
   TableBase,
 } from "../common/schemas";
-import { readDefinedDatabaseConfigsFromFiles } from "../util/fs.util";
-import { parseYamlDocument } from "../util/yaml.util";
+import { readDefinedDatabaseConfigsFromFiles } from "../util/fs-util";
+import { parseYamlDocument } from "../util/yaml-util";
 import {
   NinoxCredentials,
   DeployCommandOptions,
@@ -16,7 +16,7 @@ import {
   updateDatabaseSettings,
   uploadDatabaseBackgroundImage,
   uploadDatabaseSchemaToNinox,
-} from "../util/ninox.client";
+} from "../util/ninox-client";
 
 export const run = async (opts: DeployCommandOptions, creds: Credentials) => {
   const dbConfigsInYaml = await readDefinedDatabaseConfigsFromFiles();

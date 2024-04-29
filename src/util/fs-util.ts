@@ -2,7 +2,7 @@ import * as fsAsync from "fs/promises";
 import fs from "fs";
 import path from "path";
 import { DBConfigsYaml } from "../common/typings";
-import { createYamlDocument } from "./yaml.util";
+import { createYamlDocument } from "./yaml-util";
 import {
   CREDENTIALS_FILE_NAME,
   DB_BACKGROUND_FILE_NAME,
