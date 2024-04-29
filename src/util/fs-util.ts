@@ -66,26 +66,22 @@ export const readDefinedDatabaseConfigsFromFiles = async () => {
   }
   const databaseFolders = await fsAsync.readdir(ObjectsPath);
   for (const folder of databaseFolders) {
-    if(!folder.startsWith("Database_")){
+    if (!folder.startsWith("Database_")) {
       continue;
     }
-    const databaseId = folder.split("_")[1];
+    // const databaseId = folder.split("_")[1];
     const files = await fsAsync.readdir(path.join(ObjectsPath, folder));
     const databaseFile = files.find((file) => file.startsWith("Database_"));
     if (!databaseFile) {
       throw new Error("Database file not found");
     }
-    const schemaFile = files.find((file) => file.startsWith("Schema_"));
-    // TODO: assume schema is always present
-    if (!schemaFile) {
-      throw new Error("Schema file not found");
-    }
+    // const schemaFile = files.find((file) => file.startsWith("Schema_"));
+    // // TODO: assume schema is always present
+    // if (!schemaFile) {
+    //   throw new Error("Schema file not found");
+    // }
     const database = await fsAsync.readFile(
       path.join(ObjectsPath, folder, databaseFile), //`Database_${databaseId}.yaml`
-      "utf-8"
-    );
-    const schema = await fsAsync.readFile(
-      path.join(ObjectsPath, folder, schemaFile), //`Schema_${databaseId}.yaml`
       "utf-8"
     );
     const tableFiles = files.filter((file) => file.startsWith("Table_"));
@@ -99,7 +95,6 @@ export const readDefinedDatabaseConfigsFromFiles = async () => {
     );
     databaseConfigs.push({
       database,
-      schema,
       tables: tables,
     });
   }
@@ -147,13 +142,13 @@ export const isProjectInitialized = () => {
   return fs.existsSync(path.join(process.cwd(), CREDENTIALS_FILE_NAME));
 };
 
-export const getDbBackgroundImagePath = (databaseId:string)=>{
+export const getDbBackgroundImagePath = (databaseId: string) => {
   return path.join(
     FilesPath,
     `Database_${databaseId}`,
     DB_BACKGROUND_FILE_NAME
   );
-}
+};
 
 export const isDatabaseBackgroundFileExist = (databaseId: string) => {
   const backgroundFilePath = getDbBackgroundImagePath(databaseId);

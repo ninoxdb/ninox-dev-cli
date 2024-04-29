@@ -12,7 +12,7 @@ export const DatabaseSettings = z.object({
   rolesMassDataUpdate: z.array(z.string()).optional(),
   bgType: z.string().nullable().optional(),
   backgroundClass: z.string().nullable().optional(),
-  backgroundTimestamp: z.number().nullable().optional(),
+  // backgroundTimestamp: z.number().nullable().optional(),
 });
 
 export const Database = z.object({
@@ -48,14 +48,16 @@ export const DatabaseSchemaBase = z.object({
     .optional(),
 });
 
-export const DatabaseSchemaLocal = z.object({
-  schema: DatabaseSchemaBase.extend({
-    _database: z.string(), // Database ID for local reference,
-  }),
-});
-
 export const DatabaseSchema = DatabaseSchemaBase.extend({
   types: z.record(z.any()),
+});
+
+export const DatabaseFile = z.object({
+  database: Database.extend({
+    schema: DatabaseSchemaBase.extend({
+      _database: z.string(), // Database ID for local reference
+    }),
+  }),
 });
 
 export const TableBase = z.object({
@@ -87,12 +89,9 @@ export const TableBase = z.object({
   hasHistory: z.boolean().optional(),
 });
 
-export const Table = TableBase.extend({
-  _id: z.string(), // key of the Schema.types object e.g A
-});
-
-export const TableLocal = z.object({
-  table: Table.extend({
+export const TableFile = z.object({
+  table: TableBase.extend({
+    _id: z.string(), // key of the Schema.types object e.g A
     _database: z.string(), // Database ID for local reference
   }),
 });
@@ -166,9 +165,8 @@ export const Credentials = z.object({
   workspaceId: z.string(),
 });
 
-export type DatabaseSchemaType = z.infer<typeof DatabaseSchema>;
-export type DatabaseSchemaLocalType = z.infer<typeof DatabaseSchemaLocal>;
-export type TableType = z.infer<typeof Table>;
-export type TableLocalType = z.infer<typeof TableLocal>;
 export type DatabaseType = z.infer<typeof Database>;
-export type DatabaseSettingsType = z.infer<typeof DatabaseSettings>;
+export type DatabaseSchemaType = z.infer<typeof DatabaseSchema>;
+export type DatabaseSchemaBaseType = z.infer<typeof DatabaseSchemaBase>;
+export type DatabaseFileType = z.infer<typeof DatabaseFile>;
+export type TableFileType = z.infer<typeof TableFile>;

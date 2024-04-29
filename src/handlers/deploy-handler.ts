@@ -1,14 +1,15 @@
 import {
   Database,
-  DatabaseSchemaBase,
+  DatabaseFile,
+  DatabaseFileType,
   DatabaseSchemaType,
-  Table,
   TableBase,
+  TableFile,
+  TableFileType,
 } from "../common/schemas";
 import { readDefinedDatabaseConfigsFromFiles } from "../util/fs-util";
 import { parseYamlDocument } from "../util/yaml-util";
 import {
-  NinoxCredentials,
   DeployCommandOptions,
   Credentials,
 } from "../common/typings";
@@ -24,49 +25,48 @@ export const run = async (opts: DeployCommandOptions, creds: Credentials) => {
     .map((dbConfigYaml) => {
       const {
         database: databaseYaml,
-        schema: schemaYaml,
+        // schema: schemaYaml,
         tables: tablesYaml,
       } = dbConfigYaml;
       return {
-        database: parseYamlDocument(databaseYaml).database,
-        schema: parseYamlDocument(schemaYaml).schema,
-        tables: tablesYaml.map((table) => parseYamlDocument(table).table),
+        database: parseYamlDocument(databaseYaml) as DatabaseFileType,
+        // schema: parseYamlDocument(schemaYaml).schema,
+        tables: tablesYaml.map(
+          (table) => parseYamlDocument(table) as TableFileType
+        ),
       };
     })
 
     .filter((dbConfig) => {
-      return dbConfig.database.id === opts.id;
+      return dbConfig.database.database?.id === opts.id;
     })
 
     .map((dbConfig) => {
-      const databaseParseResult = Database.safeParse(dbConfig.database);
+      const databaseParseResult = DatabaseFile.safeParse(dbConfig.database);
       if (!databaseParseResult.success) {
         throw new Error(
-          "Database validation failed for database with id: " +
-            dbConfig.database.id
+          `Database validation failed for database: ${dbConfig.database?.database?.settings?.name} (${dbConfig.database.database.id})`
         );
       }
-      const schemaResult = DatabaseSchemaBase.safeParse(dbConfig.schema);
-      if (!schemaResult.success) {
-        throw new Error(
-          "Schema validation failed for database with id: " +
-            dbConfig.database.id
-        );
-      }
-      const schema: DatabaseSchemaType = { ...schemaResult.data, types: {} };
-      for (const tableData of dbConfig.tables) {
-        const tableResult = Table.safeParse(tableData);
+      const schema: DatabaseSchemaType = {
+        ...databaseParseResult.data.database.schema,
+        types: {},
+      };
+      for (const tableFileData of dbConfig.tables) {
+        const tableResult = TableFile.safeParse(tableFileData);
         if (!tableResult.success) {
           throw new Error(
-            "Table validation failed for table with id: " + tableData._id
+            "Table validation failed for table with id: " +
+              tableFileData.table._id
           );
         }
-        schema.types[tableResult.data._id] = TableBase.parse(tableResult.data);
+        schema.types[tableResult.data.table._id] = TableBase.parse(
+          tableResult.data.table
+        );
       }
-
       return {
-        database: databaseParseResult.data,
-        schema: schema,
+        database: Database.parse(databaseParseResult.data.database),
+        schema,
       };
     });
 

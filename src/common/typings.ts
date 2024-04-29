@@ -1,3 +1,4 @@
+// TODO: Remove Duplicate type definitions between this and schemas.ts
 export interface NinoxCredentials {
   workspaceId: string;
   domain: string;
@@ -10,7 +11,6 @@ export interface Credentials {
 }
 export interface DBConfigsYaml {
   database: string;
-  schema: string;
   tables: string[];
 }
 
@@ -31,7 +31,7 @@ export interface DatabaseSettings {
   color: string;
   bgType?: string | null;
   backgroundClass?: string | null;
-  backgroundTimestamp?: number | null;
+  // backgroundTimestamp?: number | null;
 }
 export interface Schema {
   database: string;
