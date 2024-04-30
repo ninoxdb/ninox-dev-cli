@@ -46,8 +46,8 @@ export const getFilePath = (databaseId: string, objectName: string) => {
   return path.join(FilesPath, `Database_${databaseId}`, `${objectName}.yaml`);
 };
 
-export const writeFile = async (path: string, data: string) => {
-  await fsAsync.writeFile(path, data, "utf-8");
+export const writeFile = async (filePath: string, data: string) => {
+  await fsAsync.writeFile(filePath, data, "utf-8");
 };
 
 export const getObjectFileName = (objectType: string, objectId: string) => {
@@ -56,9 +56,7 @@ export const getObjectFileName = (objectType: string, objectId: string) => {
 
 export const readDefinedDatabaseConfigsFromFiles = async () => {
   // do a scan of ObjectsPath dir
-  // read all the directories
   // each directory is a isolated database with its own schema, tables and views
-
   // return an array of database configs
   const databaseConfigs: DBConfigsYaml[] = [];
   if (!fs.existsSync(ObjectsPath)) {
@@ -69,28 +67,19 @@ export const readDefinedDatabaseConfigsFromFiles = async () => {
     if (!folder.startsWith("Database_")) {
       continue;
     }
-    // const databaseId = folder.split("_")[1];
     const files = await fsAsync.readdir(path.join(ObjectsPath, folder));
     const databaseFile = files.find((file) => file.startsWith("Database_"));
     if (!databaseFile) {
       throw new Error("Database file not found");
     }
-    // const schemaFile = files.find((file) => file.startsWith("Schema_"));
-    // // TODO: assume schema is always present
-    // if (!schemaFile) {
-    //   throw new Error("Schema file not found");
-    // }
     const database = await fsAsync.readFile(
-      path.join(ObjectsPath, folder, databaseFile), //`Database_${databaseId}.yaml`
+      path.join(ObjectsPath, folder, databaseFile),
       "utf-8"
     );
     const tableFiles = files.filter((file) => file.startsWith("Table_"));
     const tables = await Promise.all(
       tableFiles.map(async (table) => {
-        return await fsAsync.readFile(
-          path.join(ObjectsPath, folder, table),
-          "utf-8"
-        );
+        return fsAsync.readFile(path.join(ObjectsPath, folder, table), "utf-8");
       })
     );
     databaseConfigs.push({

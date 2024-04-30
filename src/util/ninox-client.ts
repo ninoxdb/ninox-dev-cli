@@ -1,17 +1,10 @@
 import axios, { AxiosError } from "axios";
-import {
-  DatabaseSettings,
-  ImportCommandOptions,
-  NinoxCredentials,
-} from "../common/typings";
-import { DatabaseSchemaType } from "../common/schemas";
+import { ImportCommandOptions, NinoxCredentials } from "../common/typings";
+import { DatabaseSchemaType, DatabaseSettingsType } from "../common/schemas";
 import {
   getDbBackgroundImagePath,
   isDatabaseBackgroundFileExist,
 } from "./fs-util";
-const stream = require("stream");
-const { promisify } = require("util");
-const pipeline = promisify(stream.pipeline);
 import fs from "fs";
 import { DB_BACKGROUND_FILE_NAME } from "../common/constants";
 const FormData = require("form-data");
@@ -37,7 +30,7 @@ export const getDatabase = async (id: string, creds: NinoxCredentials) => {
 
 export const updateDatabaseSettings = async (
   id: string,
-  settings: DatabaseSettings,
+  settings: DatabaseSettingsType,
   creds: NinoxCredentials
 ) => {
   try {
@@ -96,34 +89,12 @@ export const downloadDatabaseBackgroundImage = async (
   creds: NinoxCredentials
 ) => {
   try {
-    //
     const imagePath = getDbBackgroundImagePath(opts.id);
     const imageUrl = `${creds.domain}/${creds.workspaceId}/${opts.id}/files/${DB_BACKGROUND_FILE_NAME}`;
-
     await downloadImage(imageUrl, imagePath, creds.apiKey);
-    // const response = await axios(
-    //   imageUrl,
-    //   {
-    //     method: "GET",
-    //     responseType: "arraybuffer",
-    //     headers: {
-    //       Authorization: `Bearer ${creds.apiKey}`,
-    //     },
-    //   }
-    // );
-    // // Creating a write stream to the specified file path
-    // const writer = fs.createWriteStream(imagePath);
-
-    // // Streaming the data into the file
-    // await pipeline(response.data, writer);
-
-    console.log(`Image has been downloaded and saved to ${imagePath}`);
-  } catch (e) {
-    // console.log("Error");
-  }
+  } catch (e) {}
 };
 
-// try # 2
 async function downloadImage(url: string, path: string, apiKey: string) {
   try {
     // Axios GET request to fetch the image as a stream
@@ -146,12 +117,9 @@ async function downloadImage(url: string, path: string, apiKey: string) {
       writer.on("finish", resolve);
       writer.on("error", reject);
     });
-  } catch (error) {
-    // console.error("Error downloading the image:", error);
-  }
+  } catch (error) {}
 }
 
-// Upload: https://saqib2.ninoxdb.de/qnbfhl32kbi45d5ii/ist4yzlpvs6x/files/background.jpg
 export const uploadDatabaseBackgroundImage = async (
   databaseId: string,
   creds: NinoxCredentials
@@ -174,13 +142,11 @@ async function uploadImage(url: string, path: string, apiKey: string) {
   formData.append("file", fs.createReadStream(path));
 
   // Perform the PUT request with the form data
-  const response = await axios.post(url, formData, {
+  return axios.post(url, formData, {
     headers: {
       // FormData will generate the correct Content-Type boundary itself
       ...formData.getHeaders(),
       Authorization: `Bearer ${apiKey}`,
     },
   });
-
-  // console.log("File uploaded successfully:", response.data);
 }

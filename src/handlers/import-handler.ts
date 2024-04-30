@@ -7,8 +7,6 @@ import { ParseData, writeToFiles } from "../util/import-util";
 import { createDatabaseFolderInFiles } from "../util/fs-util";
 
 export const run = async (opts: ImportCommandOptions, creds: Credentials) => {
-  const { domain, apiKey, workspaceId } = opts;
-
   // make a request to the Ninox API to get the database
   const dbData = await getDatabase(opts.id, creds);
 

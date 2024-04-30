@@ -20,34 +20,30 @@ import { createYamlDocument } from "../util/yaml-util";
 
 export function ParseData(db: any, sc: any) {
   const parsedDatabase = Database.safeParse(db);
-  const tables: TableFileType[] = [];
   const parsedSchema = DatabaseSchema.safeParse(sc);
 
   if (!parsedDatabase.success || !parsedSchema.success)
     throw new Error("Validation errors: Database or Schema validation failed");
 
-  for (const key in parsedSchema.data.types) {
-    const parsedTable = TableBase.safeParse({
-      ...parsedSchema.data.types[key],
-    });
+  const schema = DatabaseSchemaBase.parse(parsedSchema.data);
+  const inputTypes = parsedSchema.data.types;
+
+  const tables = Object.entries(inputTypes).map(([key, value]) => {
+    const parsedTable = TableBase.safeParse(value);
     if (!parsedTable.success)
       throw new Error(
         `Validation errors: Table validation failed ${parsedSchema.data.types[key]?.caption}`
       );
-    tables.push(
-      TableFile.parse({
-        table: {
-          ...parsedTable.data,
-          _id: key,
-          _database: parsedDatabase.data.id,
-        },
-      })
-    );
-  }
+    return TableFile.parse({
+      table: {
+        ...parsedTable.data,
+        _id: key,
+        _database: parsedDatabase.data.id,
+      },
+    });
+  });
 
-  const database = parsedDatabase.data;
-  const schema = DatabaseSchemaBase.parse(parsedSchema.data);
-  return { database, tables, schema };
+  return { database: parsedDatabase.data, tables, schema };
 }
 
 // Write the database, schema and tables to their respective files

@@ -11,9 +11,6 @@ objectImport
     "Object ID of the Ninox Database object to import"
   )
   .option("-t, --type <type>", "Object Type e.g Database, Table, View, Field")
-  .option("-d, --domain <domain>", "Domain")
-  .option("-w, --workspaceId <workspaceId>", "Workspace ID")
-  .option("-k, --apiKey <API Key>", "API Key")
   .action(async (options) => {
     try {
       await run(options, JSON.parse(process.env.ENVIRONMENT ?? ""));

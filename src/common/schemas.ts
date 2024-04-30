@@ -166,7 +166,12 @@ export const Credentials = z.object({
 });
 
 export type DatabaseType = z.infer<typeof Database>;
+export type DatabaseSettingsType = z.infer<typeof DatabaseSettings>;
 export type DatabaseSchemaType = z.infer<typeof DatabaseSchema>;
 export type DatabaseSchemaBaseType = z.infer<typeof DatabaseSchemaBase>;
 export type DatabaseFileType = z.infer<typeof DatabaseFile>;
 export type TableFileType = z.infer<typeof TableFile>;
+export type DatabaseConfigFileContent = {
+  database: DatabaseFileType;
+  tables: TableFileType[];
+};
