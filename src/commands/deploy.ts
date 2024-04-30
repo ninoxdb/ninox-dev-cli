@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { run } from "../handlers/deploy-handler";
+import { run } from '@handlers/deploy-handler';
 import { AxiosError } from "axios";
 
 const deploy = new Command("deploy");

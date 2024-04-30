@@ -6,13 +6,13 @@ import {
   TableBase,
   TableFile,
   TableFileType,
-} from "../common/schemas";
+} from '@common/schemas';
 import { readDefinedDatabaseConfigsFromFiles } from "../util/fs-util";
 import { parseYamlDocument } from "../util/yaml-util";
 import {
   DeployCommandOptions,
   Credentials,
-} from "../common/typings";
+} from '@common/typings';
 import {
   updateDatabaseSettings,
   uploadDatabaseBackgroundImage,

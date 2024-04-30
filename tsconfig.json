@@ -1,12 +1,35 @@
 {
-    "compilerOptions": {
-      "rootDir": "src",
-      "outDir": "dist",
-      "strict": true,
-      "target": "es6",
-      "module": "commonjs",
-      "sourceMap": true,
-      "esModuleInterop": true,
-      "moduleResolution": "node"
+  "compilerOptions": {
+    "composite": true,
+    "removeComments": true,
+    "rootDir": "./src",
+    "outDir": "dist",
+    "strict": true,
+    "target": "es6",
+    "module": "commonjs",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "@src/*": [
+        "src/*"
+      ],
+      "@handlers/*": [
+        "src/handlers/*"
+      ],
+      "@common/*": [
+        "src/common/*"
+      ]
     }
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "infrastructure"
+  ],
+  "include": [
+    "src",
+    "tests"
+  ]
+}
