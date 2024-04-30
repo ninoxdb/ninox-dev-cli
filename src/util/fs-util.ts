@@ -76,7 +76,9 @@ export const readDefinedDatabaseConfigsFromFiles = async () => {
       path.join(ObjectsPath, folder, databaseFile),
       "utf-8"
     );
-    const tableFiles = files.filter((file) => file.startsWith("Table_"));
+    const tableFiles = files.filter(
+      (file) => file.startsWith("Table_") || file.startsWith("Page_")
+    );
     const tables = await Promise.all(
       tableFiles.map(async (table) => {
         return fsAsync.readFile(path.join(ObjectsPath, folder, table), "utf-8");

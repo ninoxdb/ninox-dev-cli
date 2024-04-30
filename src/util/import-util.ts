@@ -74,7 +74,10 @@ export async function writeToFiles(
     await writeFile(
       getObjectPath(
         database.id,
-        getObjectFileName("Table", table.table.caption as string)
+        getObjectFileName(
+          table.table.kind === "page" ? "Page" : "Table",
+          table.table.caption as string
+        )
       ),
       createYamlDocument(table).toString()
     );
