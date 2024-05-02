@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { run } from "../handlers/import-handler";
 import { AxiosError } from "axios";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../common/constants";
 
 const objectImport = new Command("object:import");
 
@@ -14,15 +15,15 @@ objectImport
   .action(async (options) => {
     try {
       await run(options, JSON.parse(process.env.ENVIRONMENT ?? ""));
-      console.log("Success: object import command completed");
+      console.log(SUCCESS_MESSAGES.IMPORT_SUCCESS);
     } catch (e) {
       if (e instanceof AxiosError)
         console.log(
-          `ERROR: Failed to deploy ${e.code} ${e.message}`,
+          `${ERROR_MESSAGES.IMPORT_FAILED} ${e.code} ${e.message}`,
           e.response?.data
         );
       else if (e instanceof Error)
-        console.log("ERROR: Failed to import", e.message);
+        console.log(ERROR_MESSAGES.IMPORT_FAILED, e.message);
     }
   })
   .parse(process.argv);

@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { run } from "../handlers/init-handler";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../common/constants";
 
 const init = new Command("init");
 
@@ -14,10 +15,10 @@ init
   .action(async (options) => {
     try {
       await run(options);
-      console.log(`Success: Project initialized with name: ${options.name}`);
+      console.log(`${SUCCESS_MESSAGES.INIT_SUCCESS}: ${options.name}`);
     } catch (e) {
       if (e instanceof Error)
-        console.log("ERROR: Failed to initialize project", e.message);
+        console.log(ERROR_MESSAGES.INIT_FAILED, e.message);
     }
   })
   .parse(process.argv);

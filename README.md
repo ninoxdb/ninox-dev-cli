@@ -1,25 +1,41 @@
-## First POC for the CLI for downloading a database
+## First POC for the CLI for downloading/uploading (aka importing/deploying) a database
 
+## Commands
+Usage: ninox [options] [command]
 
-### usage
+Ninox CLI SDK
+
+Options:
+  -V, --version   output the version number
+  -h, --help      display help for command
+
+Commands:
+  init            Initialize a new Ninox SDK project
+  object:import   Import an object from Ninox
+  deploy          Deploy a Ninox SDK project
+  list            List objects from a live Ninox Account
+  help [command]  display help for command
 
 Build the project
 ```bash
 npm run build
 ```
 
+### usage examples
+
+
 // Import a database
 e.g 
 
 ```bash
-npm run start:quick  -- object:import -id jcalcacgz6fd -w ryn13yp7yqzf0e9mx -t Database -d localhost:8080 -k b5736430-3833-11ee-80c3-8b4a1bbee840 -p http  
+npm run start:quick  -- production object:import -id jcalcacgz6fd  
 
-npm run start:quick  -- object:import -id v0bueq8w4n52 -w qnbfhl32kbi45d5ii -t Database -d saqib2.ninoxdb.de -k 557d8a80-7d5f-11ee-aee7-f3c1aeaf6d5b
+npm run start:quick  -- dev object:import -id v0bueq8w4n52
 ```
 
 // Deploy to a live database
 ```bash
-npm run start:quick  -- deploy -id jcalcacgz6fd -w ryn13yp7yqzf0e9mx -t Database -d localhost:8080 -k b5736430-3833-11ee-80c3-8b4a1bbee840 -p http
+npm run start:quick  -- production deploy -id jcalcacgz6fd
 
-npm run start:quick  -- deploy -id v0bueq8w4n52 -w qnbfhl32kbi45d5ii -t Database -d saqib2.ninoxdb.de -k 557d8a80-7d5f-11ee-aee7-f3c1aeaf6d5b
+npm run start:quick  -- dev deploy -id v0bueq8w4n52
 ```

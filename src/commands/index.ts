@@ -3,6 +3,7 @@ import { Command } from "commander";
 import { isProjectInitialized, readCredentials } from "../util/fs-util";
 import { parseYamlDocument } from "../util/yaml-util";
 import { Credentials } from "../common/schemas";
+import { ERROR_MESSAGES, HELP_PARAM } from "../common/constants";
 
 const figlet = require("figlet");
 
@@ -15,7 +16,6 @@ preprocessArguments();
 program
   .version("0.0.1")
   .description("Ninox CLI SDK")
-
   .command("init", "Initialize a new Ninox SDK project", {
     executableFile: "init",
   })
@@ -31,25 +31,23 @@ program
 function preprocessArguments() {
   if (process.argv[2] !== "init") {
     if (!isProjectInitialized()) {
-      console.log(
-        "ERROR: Project not initialized. Please initialize a Ninox project in your current directory by executing 'ninox init -n <name>' command or create a config.yaml file in the current directory."
-      );
+      console.log(ERROR_MESSAGES.PROJECT_NOT_INITIALIZED);
       process.exit(1);
     }
     const [env] = process.argv.splice(2, 1);
     if (!env) {
-      console.log(
-        "ERROR: Please provide the environment name as the first parameter"
-      );
+      console.log(ERROR_MESSAGES.ENV_NOT_PROVIDED);
       process.exit(1);
+    }
+    if (HELP_PARAM.includes(env)) {
+      return;
     }
     // try reading the environment file
     try {
       const credsRaw = readCredentials();
       const creds = parseYamlDocument(credsRaw);
-
       if (!creds?.environments?.[env]) {
-        console.log(`ERROR: Environment ${env} not found in config.yaml`);
+        console.log(`${ERROR_MESSAGES.ENV_NOT_FOUND}: ${env}`);
         process.exit(1);
       }
       // sanitise the environment object
