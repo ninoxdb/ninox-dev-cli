@@ -1,27 +1,20 @@
-import {Args, Flags} from '@oclif/core'
+import {Flags} from '@oclif/core'
 
 import {BaseCommand} from '../core/common/base.js'
-import {Credentials, ImportCommandOptions, NinoxCredentials} from '../core/common/typings.js'
+import {Credentials, ImportCommandOptions} from '../core/common/typings.js'
 import {EnvironmentConfig} from '../core/utils/config.js'
 import {createDatabaseFolderInFiles} from '../core/utils/fs-util.js'
 import {parseData, writeToFiles} from '../core/utils/import-util.js'
 import {downloadDatabaseBackgroundImage, getDatabase} from '../core/utils/ninox-client.js'
 
 export default class Download extends BaseCommand {
-  static override args = {
-    env: Args.string({description: 'file to read', required: true}),
-    id: Args.string({description: 'Database ID to Download', required: true}),
-  }
-
   static override description = 'describe the command here'
 
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   static override flags = {
-    // flag with no value (-f, --force)
-    force: Flags.boolean({char: 'f'}),
     // flag with a value (-n, --name=VALUE)
-    name: Flags.string({char: 'n', description: 'name to print'}),
+    id: Flags.string({char: 'i', description: 'Database ID to Download', required: true}),
   }
 
   private handle = async (opts: ImportCommandOptions, creds: Credentials): Promise<void> => {
@@ -38,10 +31,9 @@ export default class Download extends BaseCommand {
   }
 
   public async run(): Promise<void> {
-    const {args} = await this.parse(Download)
-    this.log(args.toString())
-    await this.handle({id: args.id}, this.environment as EnvironmentConfig)
+    const {flags} = await this.parse(Download)
+    await this.handle({id: flags.id}, this.environment as EnvironmentConfig)
 
-    this.log(`hello from /Users/muhammad/Code/Ninox/database-cli/src/commands/download.ts`)
+    this.debug(`hello from /Users/muhammad/Code/Ninox/database-cli/src/commands/download.ts`)
   }
 }

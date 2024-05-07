@@ -7,22 +7,15 @@ import {DatabaseMetadata, DatabaseSchemaType, DatabaseSettingsType, DatabaseType
 import {ImportCommandOptions, NinoxCredentials} from '../common/typings.js'
 import {getDbBackgroundImagePath, isDatabaseBackgroundFileExist} from './fs-util.js'
 
-export const getDatabase = async (id: string, creds: NinoxCredentials) => {
-  try {
-    const response = await axios.get(`${creds.domain}/v1/teams/${creds.workspaceId}/databases/${id}?human=T`, {
+export const getDatabase = async (id: string, creds: NinoxCredentials) =>
+  axios
+    .get(`${creds.domain}/v1/teams/${creds.workspaceId}/databases/${id}?human=T`, {
       headers: {
         Authorization: `Bearer ${creds.apiKey}`,
       },
     })
-    return response.data
-  } catch (error) {
-    if (error instanceof Error) {
-      console.log('Error in request', error.message)
-    }
-
-    throw error
-  }
-}
+    .then((response) => response.data)
+    .catch(handleAxiosError)
 
 export const listDatabases = async (creds: NinoxCredentials) =>
   axios
@@ -35,22 +28,16 @@ export const listDatabases = async (creds: NinoxCredentials) =>
     .catch(handleAxiosError)
 
 export const updateDatabaseSettings = async (id: string, settings: DatabaseSettingsType, creds: NinoxCredentials) => {
-  try {
-    const data = JSON.stringify(settings)
-    const response = await axios.post(`${creds.domain}/${creds.workspaceId}/${id}/settings/update`, data, {
+  const data = JSON.stringify(settings)
+  return axios
+    .post(`${creds.domain}/${creds.workspaceId}/${id}/settings/update`, data, {
       headers: {
         Authorization: `Bearer ${creds.apiKey}`,
         'Content-Type': 'text/plain',
       },
     })
-    return response.data
-  } catch (error) {
-    if (error instanceof Error) {
-      console.log('Error in request', error.message)
-    }
-
-    throw error
-  }
+    .then((response) => response.data)
+    .catch(handleAxiosError)
 }
 
 export const uploadDatabaseSchemaToNinox = async (id: string, schema: DatabaseSchemaType, creds: NinoxCredentials) => {
