@@ -18,7 +18,7 @@ import {
 } from './fs-util.js'
 import {createYamlDocument} from './yaml-util.js'
 
-export function ParseData(db: any, sc: any) {
+export function parseData(db: any, sc: any) {
   const parsedDatabase = Database.safeParse(db)
   const parsedSchema = DatabaseSchema.safeParse(sc)
 
