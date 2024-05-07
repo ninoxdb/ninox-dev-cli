@@ -1,13 +1,13 @@
 import {Args, Command} from '@oclif/core'
 
-import {EnvironmentConfig, getEnvironment} from '../core/utils/config.js'
+import {EnvironmentConfig, getEnvironment} from '../utils/config.js'
 
 
 
 
 export abstract class BaseCommand extends Command {
   static override args = {
-    env: Args.string({description: 'environment to read'}),
+    env: Args.string({description: 'environment to read', required: true}),
   }
 
   environment?: EnvironmentConfig
@@ -20,7 +20,8 @@ export abstract class BaseCommand extends Command {
     await super.init()
 
     // Override this function in each command to selectively load the environment
-    const {argv} = await this.parse(BaseCommand)
+    // const {argv} = await this.parse(BaseCommand);
+    const {argv} = this;
     // if (!isHelpArg(args)) {
     //   debug('loading config file')
     //   try {
@@ -53,7 +54,7 @@ export abstract class BaseCommand extends Command {
       }
 
       // Remove the first argument (environment name) for subcommands
-      argv.shift()
+      // argv.shift()
     }
   }
 

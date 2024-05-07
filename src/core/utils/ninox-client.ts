@@ -1,11 +1,11 @@
 import axios, {AxiosError} from 'axios'
+import FormData from 'form-data'
 import fs from 'node:fs'
 
 import {DB_BACKGROUND_FILE_NAME} from '../common/constants.js'
-import {DatabaseSchemaType, DatabaseSettingsType} from '../common/schemas.js'
+import {DatabaseSchemaType, DatabaseSettingsType, DatabaseType} from '../common/schemas.js'
 import {ImportCommandOptions, NinoxCredentials} from '../common/typings.js'
 import {getDbBackgroundImagePath, isDatabaseBackgroundFileExist} from './fs-util.js'
-const FormData = require('form-data')
 
 export const getDatabase = async (id: string, creds: NinoxCredentials) => {
   try {
@@ -56,18 +56,17 @@ export const uploadDatabaseSchemaToNinox = async (id: string, schema: DatabaseSc
     )
     return response.data
   } catch (error) {
-    if (error instanceof Error) {
+    if (error instanceof Error && error instanceof AxiosError) {
+      let {message, response} = error;
+        const data = response?.data
+        message = `${data?.message ?? data} \nFailed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.` 
+        throw new Error(message);
+      }
+
       console.log(
         'Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.',
-        error.message,
+        error,
       )
-    }
-
-    if (error instanceof AxiosError) {
-      console.log('Response:', error.response?.data)
-    }
-
-    throw error
   }
 }
 
@@ -102,6 +101,20 @@ async function downloadImage(url: string, path: string, apiKey: string) {
       writer.on('error', reject)
     })
   } catch {}
+}
+
+export const uploadDatabase = async (database: DatabaseType, schema: DatabaseSchemaType, creds: NinoxCredentials) => {
+  // upload DB background
+
+  const isUploaded = await uploadDatabaseBackgroundImage(database.id, creds)
+  if (isUploaded) {
+    database.settings.bgType = 'image'
+    database.settings.backgroundClass = 'background-file'
+  }
+
+  await updateDatabaseSettings(database.id, database.settings, creds)
+  // upload database schema
+  await uploadDatabaseSchemaToNinox(database.id, schema, creds)
 }
 
 export const uploadDatabaseBackgroundImage = async (databaseId: string, creds: NinoxCredentials) => {

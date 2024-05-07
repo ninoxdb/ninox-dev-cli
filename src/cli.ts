@@ -91,7 +91,7 @@ function isHelpArg(args: string[]): boolean {
 }
 
 function needsEnvironment(command: string): boolean {
-  return ['download', 'list', 'upload'].includes(command)
+  return ['download', 'list', 'list3','upload'].includes(command)
 }
 // async function main() {
 //   const argv = process.argv.slice(2)

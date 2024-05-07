@@ -15,12 +15,10 @@ export interface DBConfigsYaml {
 }
 export interface DeployCommandOptions {
   id: string;
-  type: string;
 }
 
 export interface ImportCommandOptions {
   id: string;
-  type: string;
 }
 
 export interface InitCommandOptions {
