@@ -3,7 +3,7 @@ import FormData from 'form-data'
 import fs from 'node:fs'
 
 import {DB_BACKGROUND_FILE_NAME} from '../common/constants.js'
-import {DatabaseSchemaType, DatabaseSettingsType, DatabaseType} from '../common/schemas.js'
+import {DatabaseMetadata, DatabaseSchemaType, DatabaseSettingsType, DatabaseType} from '../common/schemas.js'
 import {ImportCommandOptions, NinoxCredentials} from '../common/typings.js'
 import {getDbBackgroundImagePath, isDatabaseBackgroundFileExist} from './fs-util.js'
 
@@ -23,6 +23,16 @@ export const getDatabase = async (id: string, creds: NinoxCredentials) => {
     throw error
   }
 }
+
+export const listDatabases = async (creds: NinoxCredentials) =>
+  axios
+    .get(`${creds.domain}/v1/teams/${creds.workspaceId}/databases`, {
+      headers: {
+        Authorization: `Bearer ${creds.apiKey}`,
+      },
+    })
+    .then((response) => response.data as DatabaseMetadata[])
+    .catch(handleAxiosError)
 
 export const updateDatabaseSettings = async (id: string, settings: DatabaseSettingsType, creds: NinoxCredentials) => {
   try {
@@ -56,17 +66,19 @@ export const uploadDatabaseSchemaToNinox = async (id: string, schema: DatabaseSc
     )
     return response.data
   } catch (error) {
-    if (error instanceof Error && error instanceof AxiosError) {
-      let {message, response} = error;
-        const data = response?.data
-        message = `${data?.message ?? data} \nFailed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.` 
-        throw new Error(message);
-      }
+    if (error instanceof AxiosError) {
+      let {message, response} = error
+      const data = response?.data
+      message = `${
+        data?.message ?? data
+      } \nFailed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.`
+      throw new Error(message)
+    }
 
-      console.log(
-        'Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.',
-        error,
-      )
+    console.log(
+      'Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.',
+      error,
+    )
   }
 }
 
@@ -144,4 +156,17 @@ async function uploadImage(url: string, path: string, apiKey: string) {
       Authorization: `Bearer ${apiKey}`,
     },
   })
+}
+
+function handleAxiosError(error: unknown) {
+  if (error instanceof AxiosError) {
+    let {message, response} = error
+    const data = response?.data
+    message = `${
+      data?.message ?? data
+    } \nFailed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.`
+    throw new Error(message)
+  }
+
+  throw error
 }
