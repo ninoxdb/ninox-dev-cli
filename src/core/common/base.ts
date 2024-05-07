@@ -2,12 +2,10 @@ import {Args, Command} from '@oclif/core'
 
 import {EnvironmentConfig, getEnvironment} from '../utils/config.js'
 
-
-
-
 export abstract class BaseCommand extends Command {
   static override args = {
     env: Args.string({description: 'environment to read', required: true}),
+    // id: Args.string({description: 'Database ID to Download', required: true}),
   }
 
   environment?: EnvironmentConfig
@@ -20,28 +18,10 @@ export abstract class BaseCommand extends Command {
     await super.init()
 
     // Override this function in each command to selectively load the environment
-    // const {argv} = await this.parse(BaseCommand);
-    const {argv} = this;
-    // if (!isHelpArg(args)) {
-    //   debug('loading config file')
-    //   try {
-    //     const _env = getEnvironment(environment)
-    //     _args = [command, ...restArgs]
-
-    //     const ninoxEnv: NinoxEnvironment = {
-    //       NX_API_KEY: _env.apiKey,
-    //       NX_DOMAIN: _env.domain,
-    //       NX_WORKSPACE_ID: _env.workspaceId,
-    //     }
-    //     // const env = new Env(ninoxEnv);
-    //     // process.env.set('saqib', 'ali');
-    //     for (const [key, value] of Object.entries(ninoxEnv)) {
-    //       process.env[key] = value
-    //     }
-    //   } catch {}
-    // }
+    // const {argv} = await this.parse(BaseCommand)
+    const {argv} = this
     if (this.needsEnvironment() && argv.length > 0) {
-      const envName = argv[0] as string
+      const envName = argv.at(-1) as string
 
       try {
         this.environment = getEnvironment(envName) // envName ?  : getDefaultEnvironment()
@@ -54,7 +34,8 @@ export abstract class BaseCommand extends Command {
       }
 
       // Remove the first argument (environment name) for subcommands
-      // argv.shift()
+      // argv.shift(-1)
+      argv.pop()
     }
   }
 
