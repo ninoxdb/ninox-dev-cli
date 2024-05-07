@@ -1,6 +1,6 @@
 import {Args, Command} from '@oclif/core'
 
-import {EnvironmentConfig, getEnvironment} from '../utils/config.js'
+import {EnvironmentConfig, getEnvironment} from '../core/utils/config.js'
 
 export abstract class BaseCommand extends Command {
   static override args = {
@@ -17,16 +17,15 @@ export abstract class BaseCommand extends Command {
     await super.init()
 
     // Override this function in each command to selectively load the environment
-    const { argv } = await this.parse(BaseCommand);
+    const {argv} = await this.parse(BaseCommand)
 
-    if (argv.length > 0 && this.needsEnvironment()) {
+    if (this.needsEnvironment() && process.env.NX_WORKSPACE_ID && argv.length > 0) {
       const envName = argv[0] as string
 
       try {
-        this.environment = getEnvironment(envName); // envName ?  : getDefaultEnvironment()
+        this.environment = getEnvironment(envName) // envName ?  : getDefaultEnvironment()
       } catch (error) {
-        if(error instanceof Error)
-          this.error(error.message)
+        if (error instanceof Error) this.error(error.message)
       }
 
       if (!this.environment) {

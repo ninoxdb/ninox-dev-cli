@@ -5,7 +5,7 @@ import Debug from 'debug'
 import {resolve} from 'node:path'
 import {fileURLToPath} from 'node:url'
 
-import {getEnvironment} from './utils/config.js'
+import {getEnvironment} from './core/utils/config.js'
 
 // eslint-disable-next-line new-cap
 const debug = Debug('ninox:cli')
@@ -47,19 +47,22 @@ export function create({bin, channel, development, run, version}: CreateOptions)
       let _args = args
       // try loading the config file
       if (!isHelpArg(args)) {
-        _args = [command, ...restArgs]
         debug('loading config file')
-        const _env = getEnvironment(environment)
-        const ninoxEnv: NinoxEnvironment = {
-          NX_API_KEY: _env.apiKey,
-          NX_DOMAIN: _env.domain,
-          NX_WORKSPACE_ID: _env.workspaceId,
-        }
-        // const env = new Env(ninoxEnv);
-        // process.env.set('saqib', 'ali');
-        for (const [key, value] of Object.entries(ninoxEnv)) {
-          process.env[key] = value
-        }
+        try {
+          const _env = getEnvironment(environment)
+          _args = [command, ...restArgs]
+
+          const ninoxEnv: NinoxEnvironment = {
+            NX_API_KEY: _env.apiKey,
+            NX_DOMAIN: _env.domain,
+            NX_WORKSPACE_ID: _env.workspaceId,
+          }
+          // const env = new Env(ninoxEnv);
+          // process.env.set('saqib', 'ali');
+          for (const [key, value] of Object.entries(ninoxEnv)) {
+            process.env[key] = value
+          }
+        } catch {}
       }
 
       const config = new Config({
