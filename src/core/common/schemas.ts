@@ -165,6 +165,11 @@ export const Credentials = z.object({
   workspaceId: z.string(),
 });
 
+export type DatabaseMetadata = {
+  id: string;
+  name: string;
+}
+
 export type DatabaseType = z.infer<typeof Database>;
 export type DatabaseSettingsType = z.infer<typeof DatabaseSettings>;
 export type DatabaseSchemaType = z.infer<typeof DatabaseSchema>;
