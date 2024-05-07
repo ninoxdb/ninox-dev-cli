@@ -12,8 +12,11 @@
     "@oclif/plugin-help": "^6",
     "@oclif/plugin-plugins": "^5",
     "@salesforce/kit": "^3.1.1",
+    "axios": "^1.6.8",
     "debug": "^4.3.4",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "yaml": "^2.4.2",
+    "zod": "^3.23.6"
   },
   "devDependencies": {
     "@oclif/prettier-config": "^0.2.1",
