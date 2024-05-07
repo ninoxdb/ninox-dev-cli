@@ -1,5 +1,7 @@
 import yaml from 'js-yaml';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 export interface EnvironmentConfig {
   apiKey: string;
@@ -12,7 +14,10 @@ export interface Config {
   environments: Record<string, EnvironmentConfig>;
 }
 
-const configFile = './config.yml';
+// const configFile = './config.yml';
+const CREDENTIALS_FILE_NAME = 'config.yaml';
+const configFile = path.join(process.cwd(), CREDENTIALS_FILE_NAME);
+
 
 export function readConfig(): Config {
   if (!fs.existsSync(configFile)) {
@@ -25,7 +30,7 @@ export function readConfig(): Config {
 export function getEnvironment(env: string): EnvironmentConfig {
   const config = readConfig();
   if (!config.environments[env]) {
-    throw new Error(`Environment "${env}" not found in config`);
+    throw new Error(`Environment "${env}" not found in config\nUsage: ninox <environment> <command>\ne.g: ninox dev list`);
   }
 
   return config.environments[env];
@@ -39,7 +44,7 @@ export function getDefaultEnvironment() {
 export function setDefaultEnvironment(env: string): void {
   const config = readConfig();
   if (!config.environments[env]) {
-    throw new Error(`Environment "${env}" not found in config`);
+    throw new Error(`Environment "${env}" not found in config\n Usage: ninox <environment> <command>`);
   }
 
   config.default = env;

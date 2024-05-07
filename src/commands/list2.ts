@@ -4,8 +4,8 @@ import { BaseCommand } from './base.js';
 
 export default class List2 extends BaseCommand {
   //   static args = [{ name: 'environment', required: false, description: 'Environment to use (optional)' }];
-static override args = {
-    environment: Args.string({description: 'file to read'}),
+  static override args = {
+    env: Args.string({description: 'environment to read'}),
   }
 
 static description = 'List tasks';
@@ -16,8 +16,8 @@ static description = 'List tasks';
 
   async run() {
     const { args } = await this.parse(List2);
-    this.log(`List tasks in environment: ${args.environment}`);
-    const { workspaceId } = this.environment!;
+    this.log(`List tasks in environment: ${JSON.stringify(args)}`);
+    // const { workspaceId } = this.environment!;
 
     // const response = await fetch(`${domain}tasks`, {
     //   headers: {
@@ -31,7 +31,7 @@ static description = 'List tasks';
     // }
 
     // const tasks = await response.json();
-    this.log(`Tasks in environment "${workspaceId}":`);
+    // this.log(`Tasks in environment "${workspaceId}":`);
     // console.table(tasks);
   }
 }
