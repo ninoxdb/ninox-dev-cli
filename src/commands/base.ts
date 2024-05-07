@@ -2,6 +2,9 @@ import {Args, Command} from '@oclif/core'
 
 import {EnvironmentConfig, getEnvironment} from '../core/utils/config.js'
 
+
+
+
 export abstract class BaseCommand extends Command {
   static override args = {
     env: Args.string({description: 'environment to read'}),
@@ -18,8 +21,25 @@ export abstract class BaseCommand extends Command {
 
     // Override this function in each command to selectively load the environment
     const {argv} = await this.parse(BaseCommand)
+    // if (!isHelpArg(args)) {
+    //   debug('loading config file')
+    //   try {
+    //     const _env = getEnvironment(environment)
+    //     _args = [command, ...restArgs]
 
-    if (this.needsEnvironment() && process.env.NX_WORKSPACE_ID && argv.length > 0) {
+    //     const ninoxEnv: NinoxEnvironment = {
+    //       NX_API_KEY: _env.apiKey,
+    //       NX_DOMAIN: _env.domain,
+    //       NX_WORKSPACE_ID: _env.workspaceId,
+    //     }
+    //     // const env = new Env(ninoxEnv);
+    //     // process.env.set('saqib', 'ali');
+    //     for (const [key, value] of Object.entries(ninoxEnv)) {
+    //       process.env[key] = value
+    //     }
+    //   } catch {}
+    // }
+    if (this.needsEnvironment() && argv.length > 0) {
       const envName = argv[0] as string
 
       try {
