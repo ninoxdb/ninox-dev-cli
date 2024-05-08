@@ -5,7 +5,8 @@ import {Credentials, ImportCommandOptions} from '../core/common/typings.js'
 import {EnvironmentConfig} from '../core/utils/config.js'
 import {createDatabaseFolderInFiles} from '../core/utils/fs-util.js'
 import {parseData, writeToFiles} from '../core/utils/import-util.js'
-import {downloadDatabaseBackgroundImage, getDatabase} from '../core/utils/ninox-client.js'
+// import {downloadDatabaseBackgroundImage, getDatabase} from '../core/utils/ninox-client.js'
+import { NinoxClient } from '../core/utils/ninox-client.js'
 
 export default class Download extends BaseCommand {
   static override description = 'describe the command here'
@@ -19,7 +20,7 @@ export default class Download extends BaseCommand {
 
   private handle = async (opts: ImportCommandOptions, creds: Credentials): Promise<void> => {
     // make a request to the Ninox API to get the database
-    const dbData = await getDatabase(opts.id, creds)
+    const dbData = await NinoxClient.getDatabase(opts.id, creds)
 
     const {schema: schemaData, ...dbRemainingData} = dbData
 
@@ -27,7 +28,7 @@ export default class Download extends BaseCommand {
     await writeToFiles(database, schema, tables)
     await createDatabaseFolderInFiles(opts.id)
     // download the background image from /{accountId}/root/background.jpg
-    await downloadDatabaseBackgroundImage(opts, creds)
+    await NinoxClient.downloadDatabaseBackgroundImage(opts, creds)
   }
 
   public async run(): Promise<void> {

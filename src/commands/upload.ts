@@ -8,7 +8,8 @@ import {
   parseDatabaseConfigFileContentFromYaml,
 } from '../core/utils/deploy-util.js'
 import {readDefinedDatabaseConfigsFromFiles} from '../core/utils/fs-util.js'
-import {uploadDatabase} from '../core/utils/ninox-client.js'
+// import {uploadDatabase} from '../core/utils/ninox-client.js'
+import { NinoxClient } from '../core/utils/ninox-client.js'
 
 export default class Upload extends BaseCommand {
   static override description = 'describe the command here'
@@ -29,7 +30,7 @@ export default class Upload extends BaseCommand {
 
     const results = []
     for (const {database, schema} of dbConfigs) {
-      results.push(uploadDatabase(database, schema, creds))
+      results.push(NinoxClient.uploadDatabase(database, schema, creds))
     }
 
     Promise.all(results)

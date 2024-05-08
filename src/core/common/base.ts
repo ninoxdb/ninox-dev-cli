@@ -1,10 +1,11 @@
 import {Args, Command} from '@oclif/core'
+import {env} from 'node:process'
 
 import {EnvironmentConfig, getEnvironment} from '../utils/config.js'
 
 export abstract class BaseCommand extends Command {
   static override args = {
-    env: Args.string({description: 'environment to read', required: true}),
+    env: Args.string({description: 'environment to read', hidden: true, required: true}),
     // id: Args.string({description: 'Database ID to Download', required: true}),
   }
 
@@ -19,17 +20,28 @@ export abstract class BaseCommand extends Command {
 
     // Override this function in each command to selectively load the environment
     // const {argv} = await this.parse(BaseCommand)
+    this.environment = this.readEnvironmentConfig()
+  }
+
+  // This method will be overridden in commands to indicate if an environment is needed
+  needsEnvironment(): boolean {
+    return true
+  }
+
+  public readEnvironmentConfig(): EnvironmentConfig | undefined {
     const {argv} = this
-    if (this.needsEnvironment() && argv.length > 0) {
+    let environment
+    if (this.needsEnvironment()) {
+      // && argv.length > 0
       const envName = argv.at(-1) as string
 
       try {
-        this.environment = getEnvironment(envName) // envName ?  : getDefaultEnvironment()
+        environment = getEnvironment(envName) // envName ?  : getDefaultEnvironment()
       } catch (error) {
         if (error instanceof Error) this.error(error.message)
       }
 
-      if (!this.environment) {
+      if (!environment) {
         this.error('No environment specified and no default environment set')
       }
 
@@ -37,10 +49,7 @@ export abstract class BaseCommand extends Command {
       // argv.shift(-1)
       argv.pop()
     }
-  }
 
-  // This method will be overridden in commands to indicate if an environment is needed
-  needsEnvironment(): boolean {
-    return true
+    return environment
   }
 }
