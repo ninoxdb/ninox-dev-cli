@@ -32,7 +32,7 @@ export default class Upload extends BaseCommand {
       results.push(NinoxClient.uploadDatabase(database, schema, creds))
     }
 
-    Promise.all(results)
+    await Promise.all(results)
   }
 
   public async run(): Promise<void> {
