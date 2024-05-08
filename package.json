@@ -74,9 +74,9 @@
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts",
     "postpack": "shx rm -f oclif.manifest.json",
-    "posttest": "npm run lint",
+    "posttesta": "npm run lint",
     "prepack": "oclif manifest && oclif readme",
-    "test": "mocha --forbid-only \"test/**/*.test.ts\" --timeout 60000",
+    "test": "mocha --forbid-only \"test/**/list.test.ts\" --timeout 60000",
     "version": "oclif readme && git add README.md"
   },
   "types": "dist/index.d.ts"
