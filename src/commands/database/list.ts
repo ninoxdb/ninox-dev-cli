@@ -1,10 +1,7 @@
-import {Args, Flags} from '@oclif/core'
-
 import {BaseCommand} from '../../core/common/base.js'
 import {DatabaseMetadata} from '../../core/common/schemas.js'
 import {EnvironmentConfig} from '../../core/utils/config.js'
-// import {listDatabases} from '../../core/utils/ninox-client.js'
-import { NinoxClient } from '../../core/utils/ninox-client.js'
+import {NinoxClient} from '../../core/utils/ninox-client.js'
 
 export default class List extends BaseCommand {
   static override description = 'describe the command here'

@@ -11,9 +11,10 @@ export abstract class BaseCommand extends Command {
 
   environment?: EnvironmentConfig
 
-  async catch(err: Error): Promise<void> {
-    this.error(err.message)
-  }
+  // async catch(err: Error): Promise<void> {
+  //   // this.error(err.message)
+  //   throw err;
+  // }
 
   async init(): Promise<void> {
     await super.init()
@@ -25,7 +26,8 @@ export abstract class BaseCommand extends Command {
 
   // This method will be overridden in commands to indicate if an environment is needed
   needsEnvironment(): boolean {
-    return true
+    // return process.env.NODE_ENV!=='test'
+    return true;
   }
 
   public readEnvironmentConfig(): EnvironmentConfig | undefined {
