@@ -15,7 +15,7 @@ export const getDatabase = async (id: string, creds: NinoxCredentials) =>
       },
     })
     .then((response) => response.data)
-    .catch(handleAxiosError)
+    .catch((error) => handleAxiosError(error, 'Failed to fetch database'))
 
 export const listDatabases = async (creds: NinoxCredentials) =>
   axios
@@ -25,7 +25,7 @@ export const listDatabases = async (creds: NinoxCredentials) =>
       },
     })
     .then((response) => response.data as DatabaseMetadata[])
-    .catch(handleAxiosError)
+    .catch((error) => handleAxiosError(error, 'Failed to list databases'))
 
 export const updateDatabaseSettings = async (id: string, settings: DatabaseSettingsType, creds: NinoxCredentials) => {
   const data = JSON.stringify(settings)
@@ -37,37 +37,23 @@ export const updateDatabaseSettings = async (id: string, settings: DatabaseSetti
       },
     })
     .then((response) => response.data)
-    .catch(handleAxiosError)
+    .catch((error) => handleAxiosError(error, 'Failed to Update Database settings.'))
 }
 
-export const uploadDatabaseSchemaToNinox = async (id: string, schema: DatabaseSchemaType, creds: NinoxCredentials) => {
-  try {
-    const response = await axios.patch(
-      `${creds.domain}/v1/teams/${creds.workspaceId}/databases/${id}/schema?human=T`,
-      schema,
-      {
-        headers: {
-          Authorization: `Bearer ${creds.apiKey}`,
-        },
+export const uploadDatabaseSchemaToNinox = async (id: string, schema: DatabaseSchemaType, creds: NinoxCredentials) =>
+  axios
+    .patch(`${creds.domain}/v1/teams/${creds.workspaceId}/databases/${id}/schema?human=T`, schema, {
+      headers: {
+        Authorization: `Bearer ${creds.apiKey}`,
       },
+    })
+    .then((response) => response.data)
+    .catch((error) =>
+      handleAxiosError(
+        error,
+        'Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.',
+      ),
     )
-    return response.data
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      let {message, response} = error
-      const data = response?.data
-      message = `${
-        data?.message ?? data
-      } \nFailed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.`
-      throw new Error(message)
-    }
-
-    console.log(
-      'Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.',
-      error,
-    )
-  }
-}
 
 export const downloadDatabaseBackgroundImage = async (opts: ImportCommandOptions, creds: NinoxCredentials) => {
   try {
@@ -145,13 +131,11 @@ async function uploadImage(url: string, path: string, apiKey: string) {
   })
 }
 
-function handleAxiosError(error: unknown) {
+function handleAxiosError(error: unknown, msg: string) {
   if (error instanceof AxiosError) {
     let {message, response} = error
     const data = response?.data
-    message = `${
-      data?.message ?? data
-    } \nFailed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.`
+    message = `${msg}\n${data?.message ?? data ?? message}`
     throw new Error(message)
   }
 
