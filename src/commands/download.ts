@@ -3,9 +3,8 @@ import {Flags} from '@oclif/core'
 import {BaseCommand} from '../core/common/base.js'
 import {Credentials, ImportCommandOptions} from '../core/common/typings.js'
 import {EnvironmentConfig} from '../core/utils/config.js'
-import {createDatabaseFolderInFiles} from '../core/utils/fs-util.js'
+import {FSUtil} from '../core/utils/fs-util.js'
 import {parseData, writeToFiles} from '../core/utils/import-util.js'
-// import {downloadDatabaseBackgroundImage, getDatabase} from '../core/utils/ninox-client.js'
 import { NinoxClient } from '../core/utils/ninox-client.js'
 
 export default class Download extends BaseCommand {
@@ -26,7 +25,7 @@ export default class Download extends BaseCommand {
 
     const {database, schema, tables} = parseData({...dbRemainingData, id: opts.id}, schemaData)
     await writeToFiles(database, schema, tables)
-    await createDatabaseFolderInFiles(opts.id)
+    await FSUtil.createDatabaseFolderInFiles(opts.id)
     // download the background image from /{accountId}/root/background.jpg
     await NinoxClient.downloadDatabaseBackgroundImage(opts, creds)
   }

@@ -9,13 +9,7 @@ import {
   TableFile,
   TableFileType,
 } from '../common/schemas.js'
-import {
-  createDatabaseFolderInObjects,
-  ensureRootDirectoryStructure,
-  getObjectFileName,
-  getObjectPath,
-  writeFile,
-} from './fs-util.js'
+import {FSUtil} from './fs-util.js'
 import {createYamlDocument} from './yaml-util.js'
 
 export function parseData(db: any, sc: any) {
@@ -46,11 +40,11 @@ export function parseData(db: any, sc: any) {
 
 // Write the database, schema and tables to their respective files
 export async function writeToFiles(database: DatabaseType, schema: DatabaseSchemaBaseType, tables: TableFileType[]) {
-  await ensureRootDirectoryStructure()
+  await FSUtil.ensureRootDirectoryStructure()
   // Create a subfolder in the root directory/Objects with name Database_${id}
-  await createDatabaseFolderInObjects(database.id)
-  await writeFile(
-    getObjectPath(database.id, getObjectFileName('Database', database.settings.name)),
+  await FSUtil.createDatabaseFolderInObjects(database.id)
+  await FSUtil.writeFile(
+    FSUtil.getObjectPath(database.id, FSUtil.getObjectFileName('Database', database.settings.name)),
     createYamlDocument(
       DatabaseFile.parse({
         database: {
@@ -63,10 +57,10 @@ export async function writeToFiles(database: DatabaseType, schema: DatabaseSchem
   // table
   for (const table of tables) {
     // eslint-disable-next-line no-await-in-loop
-    await writeFile(
-      getObjectPath(
+    await FSUtil.writeFile(
+      FSUtil.getObjectPath(
         database.id,
-        getObjectFileName(table.table.kind === 'page' ? 'Page' : 'Table', table.table.caption as string),
+        FSUtil.getObjectFileName(table.table.kind === 'page' ? 'Page' : 'Table', table.table.caption as string),
       ),
       createYamlDocument(table).toString(),
     )
