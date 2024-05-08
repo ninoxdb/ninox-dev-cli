@@ -5,7 +5,7 @@ import {Credentials, ImportCommandOptions} from '../core/common/typings.js'
 import {EnvironmentConfig} from '../core/utils/config.js'
 import {FSUtil} from '../core/utils/fs-util.js'
 import {parseData, writeToFiles} from '../core/utils/import-util.js'
-import { NinoxClient } from '../core/utils/ninox-client.js'
+import {NinoxClient} from '../core/utils/ninox-client.js'
 
 export default class Download extends BaseCommand {
   static override description = 'describe the command here'
@@ -28,6 +28,7 @@ export default class Download extends BaseCommand {
     await FSUtil.createDatabaseFolderInFiles(opts.id)
     // download the background image from /{accountId}/root/background.jpg
     await NinoxClient.downloadDatabaseBackgroundImage(opts, creds)
+    this.log(`Downloaded database ${opts.id} successfully!`)
   }
 
   public async run(): Promise<void> {
