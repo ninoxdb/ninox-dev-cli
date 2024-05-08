@@ -1,7 +1,6 @@
 import {expect, test} from '@oclif/test'
 import sinon from 'sinon';
 
-// import {BaseCommand} from '../../../src/core/common/base.js'
 import List from '../../../src/commands/database/list.js';
 import {NinoxClient} from '../../../src/core/utils/ninox-client.js';
 // return this.environment as unknown as sinon.SinonStub<any[], any>;
@@ -37,22 +36,26 @@ describe('database/list', () => {
     expect(ctx.stdout).to.contain('mocked-id')
   })
 
-  // test
-  // .stdout()
-  // .command(['database list', '--name', 'jeff'])
-  // .it('runs hello --name jeff', ctx => {
-  //   expect(ctx.stdout).to.contain('hello jeff')
-  // })
-
-
-
   // error case
-  test.stderr()
-  .command(['database list','--name','jeff'])
-  .exit(2)
+  // test.stderr()
+  // .command(['database list','--name','jeff'])
+  // .exit(2)
   // .it('error case', ctx => {
   //   expect(ctx.stderr).to.contain('Nonexistent flag: --name')
   // })
+
+  test
+    .stderr()
+    .command(['database list', '--nonexistent-flag', 'value'])
+    .exit(2)
+    // .catch(error => {
+    //   expect(error.message).to.contain('Nonexistent flag: --name')
+    // })
+    .it('errors with non-existent flag', (ctx) => {
+      console.log(ctx.stderr);
+    })
+    
+    
 
 
 })
