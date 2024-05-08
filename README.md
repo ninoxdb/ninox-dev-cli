@@ -16,39 +16,39 @@ Ninox DB cli
 <!-- usage -->
 ```sh-session
 $ npm install -g database-cli
-$ dbcli COMMAND
+$ ninox COMMAND
 running command...
-$ dbcli (--version)
+$ ninox (--version)
 database-cli/0.0.0 darwin-arm64 node-v20.12.2
-$ dbcli --help [COMMAND]
+$ ninox --help [COMMAND]
 USAGE
-  $ dbcli COMMAND
+  $ ninox COMMAND
 ...
 ```
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`dbcli hello PERSON`](#dbcli-hello-person)
-* [`dbcli hello world`](#dbcli-hello-world)
-* [`dbcli help [COMMAND]`](#dbcli-help-command)
-* [`dbcli plugins`](#dbcli-plugins)
-* [`dbcli plugins add PLUGIN`](#dbcli-plugins-add-plugin)
-* [`dbcli plugins:inspect PLUGIN...`](#dbcli-pluginsinspect-plugin)
-* [`dbcli plugins install PLUGIN`](#dbcli-plugins-install-plugin)
-* [`dbcli plugins link PATH`](#dbcli-plugins-link-path)
-* [`dbcli plugins remove [PLUGIN]`](#dbcli-plugins-remove-plugin)
-* [`dbcli plugins reset`](#dbcli-plugins-reset)
-* [`dbcli plugins uninstall [PLUGIN]`](#dbcli-plugins-uninstall-plugin)
-* [`dbcli plugins unlink [PLUGIN]`](#dbcli-plugins-unlink-plugin)
-* [`dbcli plugins update`](#dbcli-plugins-update)
+* [`ninox hello PERSON`](#ninox-hello-person)
+* [`ninox hello world`](#ninox-hello-world)
+* [`ninox help [COMMAND]`](#ninox-help-command)
+* [`ninox plugins`](#ninox-plugins)
+* [`ninox plugins add PLUGIN`](#ninox-plugins-add-plugin)
+* [`ninox plugins:inspect PLUGIN...`](#ninox-pluginsinspect-plugin)
+* [`ninox plugins install PLUGIN`](#ninox-plugins-install-plugin)
+* [`ninox plugins link PATH`](#ninox-plugins-link-path)
+* [`ninox plugins remove [PLUGIN]`](#ninox-plugins-remove-plugin)
+* [`ninox plugins reset`](#ninox-plugins-reset)
+* [`ninox plugins uninstall [PLUGIN]`](#ninox-plugins-uninstall-plugin)
+* [`ninox plugins unlink [PLUGIN]`](#ninox-plugins-unlink-plugin)
+* [`ninox plugins update`](#ninox-plugins-update)
 
-## `dbcli hello PERSON`
+## `ninox hello PERSON`
 
 Say hello
 
 ```
 USAGE
-  $ dbcli hello PERSON -f <value>
+  $ ninox hello PERSON -f <value>
 
 ARGUMENTS
   PERSON  Person to say hello to
@@ -60,37 +60,37 @@ DESCRIPTION
   Say hello
 
 EXAMPLES
-  $ dbcli hello friend --from oclif
+  $ ninox hello friend --from oclif
   hello friend from oclif! (./src/commands/hello/index.ts)
 ```
 
 _See code: [src/commands/hello/index.ts](https://github.com/Ninox/database-cli/blob/v0.0.0/src/commands/hello/index.ts)_
 
-## `dbcli hello world`
+## `ninox hello world`
 
 Say hello world
 
 ```
 USAGE
-  $ dbcli hello world
+  $ ninox hello world
 
 DESCRIPTION
   Say hello world
 
 EXAMPLES
-  $ dbcli hello world
+  $ ninox hello world
   hello world! (./src/commands/hello/world.ts)
 ```
 
 _See code: [src/commands/hello/world.ts](https://github.com/Ninox/database-cli/blob/v0.0.0/src/commands/hello/world.ts)_
 
-## `dbcli help [COMMAND]`
+## `ninox help [COMMAND]`
 
-Display help for dbcli.
+Display help for ninox.
 
 ```
 USAGE
-  $ dbcli help [COMMAND...] [-n]
+  $ ninox help [COMMAND...] [-n]
 
 ARGUMENTS
   COMMAND...  Command to show help for.
@@ -99,18 +99,18 @@ FLAGS
   -n, --nested-commands  Include all nested commands in the output.
 
 DESCRIPTION
-  Display help for dbcli.
+  Display help for ninox.
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v6.0.21/src/commands/help.ts)_
 
-## `dbcli plugins`
+## `ninox plugins`
 
 List installed plugins.
 
 ```
 USAGE
-  $ dbcli plugins [--json] [--core]
+  $ ninox plugins [--json] [--core]
 
 FLAGS
   --core  Show core plugins.
@@ -122,18 +122,18 @@ DESCRIPTION
   List installed plugins.
 
 EXAMPLES
-  $ dbcli plugins
+  $ ninox plugins
 ```
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.0.19/src/commands/plugins/index.ts)_
 
-## `dbcli plugins add PLUGIN`
+## `ninox plugins add PLUGIN`
 
-Installs a plugin into dbcli.
+Installs a plugin into ninox.
 
 ```
 USAGE
-  $ dbcli plugins add PLUGIN... [--json] [-f] [-h] [-s | -v]
+  $ ninox plugins add PLUGIN... [--json] [-f] [-h] [-s | -v]
 
 ARGUMENTS
   PLUGIN...  Plugin to install.
@@ -148,39 +148,39 @@ GLOBAL FLAGS
   --json  Format output as json.
 
 DESCRIPTION
-  Installs a plugin into dbcli.
+  Installs a plugin into ninox.
 
-  Uses bundled npm executable to install plugins into /Users/muhammad/.local/share/dbcli
+  Uses bundled npm executable to install plugins into /Users/muhammad/.local/share/ninox
 
   Installation of a user-installed plugin will override a core plugin.
 
-  Use the DBCLI_NPM_LOG_LEVEL environment variable to set the npm loglevel.
-  Use the DBCLI_NPM_REGISTRY environment variable to set the npm registry.
+  Use the ninox_NPM_LOG_LEVEL environment variable to set the npm loglevel.
+  Use the ninox_NPM_REGISTRY environment variable to set the npm registry.
 
 ALIASES
-  $ dbcli plugins add
+  $ ninox plugins add
 
 EXAMPLES
   Install a plugin from npm registry.
 
-    $ dbcli plugins add myplugin
+    $ ninox plugins add myplugin
 
   Install a plugin from a github url.
 
-    $ dbcli plugins add https://github.com/someuser/someplugin
+    $ ninox plugins add https://github.com/someuser/someplugin
 
   Install a plugin from a github slug.
 
-    $ dbcli plugins add someuser/someplugin
+    $ ninox plugins add someuser/someplugin
 ```
 
-## `dbcli plugins:inspect PLUGIN...`
+## `ninox plugins:inspect PLUGIN...`
 
 Displays installation properties of a plugin.
 
 ```
 USAGE
-  $ dbcli plugins inspect PLUGIN...
+  $ ninox plugins inspect PLUGIN...
 
 ARGUMENTS
   PLUGIN...  [default: .] Plugin to inspect.
@@ -196,18 +196,18 @@ DESCRIPTION
   Displays installation properties of a plugin.
 
 EXAMPLES
-  $ dbcli plugins inspect myplugin
+  $ ninox plugins inspect myplugin
 ```
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.0.19/src/commands/plugins/inspect.ts)_
 
-## `dbcli plugins install PLUGIN`
+## `ninox plugins install PLUGIN`
 
-Installs a plugin into dbcli.
+Installs a plugin into ninox.
 
 ```
 USAGE
-  $ dbcli plugins install PLUGIN... [--json] [-f] [-h] [-s | -v]
+  $ ninox plugins install PLUGIN... [--json] [-f] [-h] [-s | -v]
 
 ARGUMENTS
   PLUGIN...  Plugin to install.
@@ -222,41 +222,41 @@ GLOBAL FLAGS
   --json  Format output as json.
 
 DESCRIPTION
-  Installs a plugin into dbcli.
+  Installs a plugin into ninox.
 
-  Uses bundled npm executable to install plugins into /Users/muhammad/.local/share/dbcli
+  Uses bundled npm executable to install plugins into /Users/muhammad/.local/share/ninox
 
   Installation of a user-installed plugin will override a core plugin.
 
-  Use the DBCLI_NPM_LOG_LEVEL environment variable to set the npm loglevel.
-  Use the DBCLI_NPM_REGISTRY environment variable to set the npm registry.
+  Use the ninox_NPM_LOG_LEVEL environment variable to set the npm loglevel.
+  Use the ninox_NPM_REGISTRY environment variable to set the npm registry.
 
 ALIASES
-  $ dbcli plugins add
+  $ ninox plugins add
 
 EXAMPLES
   Install a plugin from npm registry.
 
-    $ dbcli plugins install myplugin
+    $ ninox plugins install myplugin
 
   Install a plugin from a github url.
 
-    $ dbcli plugins install https://github.com/someuser/someplugin
+    $ ninox plugins install https://github.com/someuser/someplugin
 
   Install a plugin from a github slug.
 
-    $ dbcli plugins install someuser/someplugin
+    $ ninox plugins install someuser/someplugin
 ```
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.0.19/src/commands/plugins/install.ts)_
 
-## `dbcli plugins link PATH`
+## `ninox plugins link PATH`
 
 Links a plugin into the CLI for development.
 
 ```
 USAGE
-  $ dbcli plugins link PATH [-h] [--install] [-v]
+  $ ninox plugins link PATH [-h] [--install] [-v]
 
 ARGUMENTS
   PATH  [default: .] path to plugin
@@ -275,18 +275,18 @@ DESCRIPTION
 
 
 EXAMPLES
-  $ dbcli plugins link myplugin
+  $ ninox plugins link myplugin
 ```
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.0.19/src/commands/plugins/link.ts)_
 
-## `dbcli plugins remove [PLUGIN]`
+## `ninox plugins remove [PLUGIN]`
 
 Removes a plugin from the CLI.
 
 ```
 USAGE
-  $ dbcli plugins remove [PLUGIN...] [-h] [-v]
+  $ ninox plugins remove [PLUGIN...] [-h] [-v]
 
 ARGUMENTS
   PLUGIN...  plugin to uninstall
@@ -299,20 +299,20 @@ DESCRIPTION
   Removes a plugin from the CLI.
 
 ALIASES
-  $ dbcli plugins unlink
-  $ dbcli plugins remove
+  $ ninox plugins unlink
+  $ ninox plugins remove
 
 EXAMPLES
-  $ dbcli plugins remove myplugin
+  $ ninox plugins remove myplugin
 ```
 
-## `dbcli plugins reset`
+## `ninox plugins reset`
 
 Remove all user-installed and linked plugins.
 
 ```
 USAGE
-  $ dbcli plugins reset [--hard] [--reinstall]
+  $ ninox plugins reset [--hard] [--reinstall]
 
 FLAGS
   --hard       Delete node_modules and package manager related files in addition to uninstalling plugins.
@@ -321,13 +321,13 @@ FLAGS
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.0.19/src/commands/plugins/reset.ts)_
 
-## `dbcli plugins uninstall [PLUGIN]`
+## `ninox plugins uninstall [PLUGIN]`
 
 Removes a plugin from the CLI.
 
 ```
 USAGE
-  $ dbcli plugins uninstall [PLUGIN...] [-h] [-v]
+  $ ninox plugins uninstall [PLUGIN...] [-h] [-v]
 
 ARGUMENTS
   PLUGIN...  plugin to uninstall
@@ -340,22 +340,22 @@ DESCRIPTION
   Removes a plugin from the CLI.
 
 ALIASES
-  $ dbcli plugins unlink
-  $ dbcli plugins remove
+  $ ninox plugins unlink
+  $ ninox plugins remove
 
 EXAMPLES
-  $ dbcli plugins uninstall myplugin
+  $ ninox plugins uninstall myplugin
 ```
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.0.19/src/commands/plugins/uninstall.ts)_
 
-## `dbcli plugins unlink [PLUGIN]`
+## `ninox plugins unlink [PLUGIN]`
 
 Removes a plugin from the CLI.
 
 ```
 USAGE
-  $ dbcli plugins unlink [PLUGIN...] [-h] [-v]
+  $ ninox plugins unlink [PLUGIN...] [-h] [-v]
 
 ARGUMENTS
   PLUGIN...  plugin to uninstall
@@ -368,20 +368,20 @@ DESCRIPTION
   Removes a plugin from the CLI.
 
 ALIASES
-  $ dbcli plugins unlink
-  $ dbcli plugins remove
+  $ ninox plugins unlink
+  $ ninox plugins remove
 
 EXAMPLES
-  $ dbcli plugins unlink myplugin
+  $ ninox plugins unlink myplugin
 ```
 
-## `dbcli plugins update`
+## `ninox plugins update`
 
 Update installed plugins.
 
 ```
 USAGE
-  $ dbcli plugins update [-h] [-v]
+  $ ninox plugins update [-h] [-v]
 
 FLAGS
   -h, --help     Show CLI help.
