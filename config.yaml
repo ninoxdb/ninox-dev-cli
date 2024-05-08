@@ -1,9 +1,0 @@
-environments:
-  dev:
-    domain: http://localhost:8080/
-    workspaceId: ryn13yp7yqzf0e9mx
-    apiKey: b5736430-3833-11ee-80c3-8b4a1bbee839
-  production:
-    domain: https://saqib2.ninoxdb.de
-    workspaceId: qnbfhl32kbi45d5ii
-    apiKey: 557d8a80-7d5f-11ee-aee7-f3c1aeaf6d5a
