@@ -8,7 +8,7 @@ import {
   parseDatabaseConfigFileContentFromYaml,
 } from '../core/utils/deploy-util.js'
 import {FSUtil} from '../core/utils/fs-util.js'
-import { NinoxClient } from '../core/utils/ninox-client.js'
+import {NinoxClient} from '../core/utils/ninox-client.js'
 
 export default class Upload extends BaseCommand {
   static override description = 'describe the command here'
@@ -39,5 +39,6 @@ export default class Upload extends BaseCommand {
     const {flags} = await this.parse(Upload)
     await this.handle(flags, this.environment as EnvironmentConfig)
     this.debug(`hello from /Users/muhammad/Code/Ninox/database-cli/src/commands/upload.ts`)
+    this.log(`Uploaded database ${flags.id} successfully!`)
   }
 }
