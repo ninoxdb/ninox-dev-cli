@@ -3,7 +3,8 @@ import {Args, Flags} from '@oclif/core'
 import {BaseCommand} from '../../core/common/base.js'
 import {DatabaseMetadata} from '../../core/common/schemas.js'
 import {EnvironmentConfig} from '../../core/utils/config.js'
-import {listDatabases} from '../../core/utils/ninox-client.js'
+// import {listDatabases} from '../../core/utils/ninox-client.js'
+import { NinoxClient } from '../../core/utils/ninox-client.js'
 
 export default class List extends BaseCommand {
   static override description = 'describe the command here'
@@ -11,7 +12,7 @@ export default class List extends BaseCommand {
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   private handle = async (): Promise<void> => {
-    const dbs = (await listDatabases(this.environment as EnvironmentConfig)) as DatabaseMetadata[]
+    const dbs = (await NinoxClient.listDatabases(this.environment as EnvironmentConfig)) as DatabaseMetadata[]
     for (const db of dbs) {
       this.log(db.name, db.id)
     }
