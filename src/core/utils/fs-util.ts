@@ -7,43 +7,25 @@ import {DBConfigsYaml} from '../common/typings.js'
 import {createYamlDocument} from './yaml-util.js'
 
 export class FSUtil {
-  static _credentialsFilePath = path.join(process.cwd(), CREDENTIALS_FILE_NAME)
-
-  static _filesPath = path.join(process.cwd(), 'src', 'Files')
-
-  static _objectsPath = path.join(process.cwd(), 'src', 'Objects')
-
-  static get credentialsFilePath(): string {
-    return FSUtil._credentialsFilePath
-  }
-
-  static get filesPath(): string {
-    return FSUtil._filesPath
-  }
-
-  static get objectsPath(): string {
-    return FSUtil._objectsPath
-  }
-
   // eslint-disable-next-line perfectionist/sort-classes
   public static createConfigYaml = async () => {
-    if (fs.existsSync(this.credentialsFilePath)) {
+    if (this.fileExists(this.credentialsFilePath)) {
       return
     }
 
-    await fsAsync.writeFile(this.credentialsFilePath, createYamlDocument(ConfigYamlTemplate).toString())
+    await this.writeFile(this.credentialsFilePath, createYamlDocument(ConfigYamlTemplate).toString())
   }
 
   public static createDatabaseFolderInFiles = async (databaseId: string) => {
     // create folder src/Files/Database_${databaseid}
-    await fsAsync.mkdir(path.join(this.filesPath, `Database_${databaseId}`), {
+    await this.mkdir(path.join(this.filesPath, `Database_${databaseId}`), {
       recursive: true,
     })
   }
 
   public static createDatabaseFolderInObjects = async (databaseId: string) => {
     // create folder src/Object/Database_${databaseid}
-    await fsAsync.mkdir(path.join(this.objectsPath, `Database_${databaseId}`), {
+    await this.mkdir(path.join(this.objectsPath, `Database_${databaseId}`), {
       recursive: true,
     })
   }
@@ -59,19 +41,21 @@ export class FSUtil {
       version: '1.0.0',
     }
     const packageJsonPath = path.join(process.cwd(), 'package.json')
-    if (fs.existsSync(packageJsonPath)) {
+    if (this.fileExists(packageJsonPath)) {
       throw new Error(
         'package.json already exists in the current directory. Please change the directory or remove the existing package.json file',
       )
     }
 
-    await fsAsync.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2))
+    await this.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2))
   }
 
   public static ensureRootDirectoryStructure = async () => {
-    await fsAsync.mkdir(this.objectsPath, {recursive: true})
-    await fsAsync.mkdir(this.filesPath, {recursive: true})
+    await this.mkdir(this.objectsPath, {recursive: true})
+    await this.mkdir(this.filesPath, {recursive: true})
   }
+
+  static fileExists = (filePath: string) => fs.existsSync(filePath)
 
   public static getDbBackgroundImagePath = (databaseId: string) =>
     path.join(this.filesPath, `Database_${databaseId}`, DB_BACKGROUND_FILE_NAME)
@@ -101,6 +85,11 @@ export class FSUtil {
   }
 
   public static isProjectInitialized = () => fs.existsSync(path.join(process.cwd(), CREDENTIALS_FILE_NAME))
+
+  // eslint-disable-next-line perfectionist/sort-classes
+  public static mkdir = async (dirPath: string, options: fs.MakeDirectoryOptions) => {
+    await fsAsync.mkdir(dirPath, options)
+  }
 
   public static readCredentials = () => {
     if (!fs.existsSync(this.credentialsFilePath)) {
@@ -150,6 +139,24 @@ export class FSUtil {
 
   public static writeFile = async (filePath: string, data: string) => {
     await fsAsync.writeFile(filePath, data, 'utf8')
+  }
+
+  static _credentialsFilePath = path.join(process.cwd(), CREDENTIALS_FILE_NAME)
+
+  static _filesPath = path.join(process.cwd(), 'src', 'Files')
+
+  static _objectsPath = path.join(process.cwd(), 'src', 'Objects')
+
+  static get credentialsFilePath(): string {
+    return FSUtil._credentialsFilePath
+  }
+
+  static get filesPath(): string {
+    return FSUtil._filesPath
+  }
+
+  static get objectsPath(): string {
+    return FSUtil._objectsPath
   }
 
   private static normalizeFileName(name: string) {
