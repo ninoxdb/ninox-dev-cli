@@ -1,7 +1,7 @@
 import {Args, Command, Flags} from '@oclif/core'
 
 import {InitCommandOptions} from '../core/common/typings.js'
-import {createConfigYaml, createPackageJson, ensureRootDirectoryStructure} from '../core/utils/fs-util.js'
+import {FSUtil} from '../core/utils/fs-util.js'
 
 export default class Init extends Command {
   static override args = {
@@ -29,7 +29,7 @@ export default class Init extends Command {
 }
 
 export const handle = async (opts: InitCommandOptions) => {
-  await createPackageJson(opts.name, opts.description)
-  await createConfigYaml()
-  await ensureRootDirectoryStructure()
+  await FSUtil.createPackageJson(opts.name, opts.description)
+  await FSUtil.createConfigYaml()
+  await FSUtil.ensureRootDirectoryStructure()
 }

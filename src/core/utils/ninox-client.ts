@@ -5,12 +5,12 @@ import fs from 'node:fs'
 import {DB_BACKGROUND_FILE_NAME} from '../common/constants.js'
 import {DatabaseMetadata, DatabaseSchemaType, DatabaseSettingsType, DatabaseType} from '../common/schemas.js'
 import {ImportCommandOptions, NinoxCredentials} from '../common/typings.js'
-import {getDbBackgroundImagePath, isDatabaseBackgroundFileExist} from './fs-util.js'
+import {FSUtil} from './fs-util.js'
 
 export class NinoxClient {
   public static downloadDatabaseBackgroundImage = async (opts: ImportCommandOptions, creds: NinoxCredentials) => {
     try {
-      const imagePath = getDbBackgroundImagePath(opts.id)
+      const imagePath = FSUtil.getDbBackgroundImagePath(opts.id)
       const imageUrl = `${creds.domain}/${creds.workspaceId}/${opts.id}/files/${DB_BACKGROUND_FILE_NAME}`
       await this.downloadImage(imageUrl, imagePath, creds.apiKey)
     } catch {}
@@ -72,11 +72,11 @@ export class NinoxClient {
   }
 
   public static uploadDatabaseBackgroundImage = async (databaseId: string, creds: NinoxCredentials) => {
-    if (!isDatabaseBackgroundFileExist(databaseId)) {
+    if (!FSUtil.isDatabaseBackgroundFileExist(databaseId)) {
       return
     }
 
-    const imagePath = getDbBackgroundImagePath(databaseId)
+    const imagePath = FSUtil.getDbBackgroundImagePath(databaseId)
     const imageUrl = `${creds.domain}/${creds.workspaceId}/${databaseId}/files/${DB_BACKGROUND_FILE_NAME}`
 
     await this.uploadImage(imageUrl, imagePath, creds.apiKey)
