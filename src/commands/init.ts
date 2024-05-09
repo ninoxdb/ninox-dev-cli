@@ -23,7 +23,7 @@ export default class Init extends Command {
   public async run(): Promise<void> {
     const {args} = await this.parse(Init)
 
-    this.debug(`hello from /Users/muhammad/Code/Ninox/database-cli/src/commands/init.ts`)
+    this.debug(`hello from src/commands/init.ts`)
     await this.handle({name: args.name})
     this.log(`Initialized Ninox project ${args.name} successfully!`);
   }

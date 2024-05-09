@@ -38,7 +38,7 @@ export default class Upload extends BaseCommand {
   public async run(): Promise<void> {
     const {flags} = await this.parse(Upload)
     await this.handle(flags, this.environment as EnvironmentConfig)
-    this.debug(`hello from /Users/muhammad/Code/Ninox/database-cli/src/commands/upload.ts`)
+    this.debug(`hello from src/commands/upload.ts`)
     this.log(`Uploaded database ${flags.id} successfully!`)
   }
 }

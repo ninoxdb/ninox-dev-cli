@@ -1,12 +1,12 @@
 {
   "name": "ninox",
-  "description": "Ninox DB cli",
+  "description": "Ninox Dev CLI",
   "version": "0.1.0",
   "author": "Muhammad Saqib Arfeen",
   "bin": {
     "ninox": "./bin/run.js"
   },
-  "bugs": "https://github.com/Ninox/ninox/cli/issues",
+  "bugs": "https://github.com/ninoxdb/ninox-dev-cli/issues",
   "dependencies": {
     "@oclif/core": "^3",
     "@oclif/plugin-help": "^6",
@@ -48,7 +48,7 @@
     "/dist",
     "/oclif.manifest.json"
   ],
-  "homepage": "https://github.com/Ninox/ninox/cli",
+  "homepage": "https://github.com/ninoxdb/ninox-dev-cli",
   "keywords": [
     "oclif"
   ],
@@ -70,7 +70,10 @@
       }
     }
   },
-  "repository": "Ninox/ninox/cli",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ninoxdb/ninox-dev-cli.git"
+  },
   "scripts": {
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts",
