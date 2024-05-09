@@ -35,6 +35,6 @@ export default class Download extends BaseCommand {
     const {flags} = await this.parse(Download)
     await this.handle({id: flags.id}, this.environment as EnvironmentConfig)
 
-    this.debug(`hello from /Users/muhammad/Code/Ninox/database-cli/src/commands/download.ts`)
+    this.debug(`hello from src/commands/download.ts`)
   }
 }
