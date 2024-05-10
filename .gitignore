@@ -7,6 +7,8 @@
 /node_modules
 oclif.manifest.json
 
+.vscode
+
 config.yaml
 src/Objects
 src/Files
