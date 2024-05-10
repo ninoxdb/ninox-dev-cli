@@ -51,8 +51,4 @@ describe('upload', () => {
     })
 
   // TODO: Another test case where schema version is lower than the current version
-  // test
-  //   .stdout()
-  //   .command(['upload', '--id', dbId])
-  //   .it('runs hello', (ctx) => {
 })

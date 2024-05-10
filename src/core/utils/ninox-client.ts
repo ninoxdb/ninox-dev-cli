@@ -8,6 +8,7 @@ import {ImportCommandOptions, NinoxCredentials} from '../common/typings.js'
 import {FSUtil} from './fs-util.js'
 
 export class NinoxClient {
+  // download the background image from /{accountId}/root/background.jpg
   public static downloadDatabaseBackgroundImage = async (opts: ImportCommandOptions, creds: NinoxCredentials) => {
     try {
       const imagePath = FSUtil.getDbBackgroundImagePath(opts.id)

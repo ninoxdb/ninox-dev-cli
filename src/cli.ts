@@ -1,5 +1,4 @@
 import {Config, execute, run as oclifRun} from '@oclif/core'
-import {Env} from '@salesforce/kit'
 import Debug from 'debug'
 import {resolve} from 'node:path'
 import {fileURLToPath} from 'node:url'
@@ -42,14 +41,6 @@ export function create({bin, channel, development, run, version}: CreateOptions)
   }
 }
 
-function isHelpArg(args: string[]): boolean {
-  return args.includes('--help') || args.includes('-h') || args.includes('help')
-}
-
 function needsEnvironment(command: string): boolean {
   return ['database', 'download', 'list', 'list3', 'upload'].includes(command)
-}
-
-function isTopicName(command: string): boolean {
-  return ['database'].includes(command)
 }

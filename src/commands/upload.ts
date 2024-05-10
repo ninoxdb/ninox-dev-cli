@@ -15,7 +15,6 @@ export default class Upload extends BaseCommand {
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   static override flags = {
-    // flag with a value (-n, --name=VALUE)
     id: Flags.string({char: 'i', description: 'Database ID to Download', required: true}),
   }
 
@@ -38,7 +37,7 @@ export default class Upload extends BaseCommand {
   public async run(): Promise<void> {
     const {flags} = await this.parse(Upload)
     await this.handle(flags, this.environment as EnvironmentConfig)
-    this.debug(`hello from src/commands/upload.ts`)
+    this.debug(`success src/commands/upload.ts`)
     this.log(`Uploaded database ${flags.id} successfully!`)
   }
 }
