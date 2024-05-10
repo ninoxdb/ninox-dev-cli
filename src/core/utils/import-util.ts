@@ -12,6 +12,7 @@ import {
 import {FSUtil} from './fs-util.js'
 import {createYamlDocument} from './yaml-util.js'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function parseData(db: any, sc: any) {
   const parsedDatabase = Database.safeParse(db)
   const parsedSchema = DatabaseSchema.safeParse(sc)

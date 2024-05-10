@@ -10,7 +10,6 @@ describe('download', () => {
   const dbId = '4321'
   before(() => {
     const databaseJSONMock = loadJsonMock('download-database-info.json')
-    // const databaseJSONMock =  require('../mocks/database-info.json');
     nock('https://mocked.example.com')
       .get(`/v1/teams/mocked-workspace/databases/${dbId}?human=T`)
       .reply(200, databaseJSONMock)
@@ -39,6 +38,7 @@ describe('download', () => {
     .command(['download', dbId])
     .catch((error) => {
       expect(error.message).to.contain(`Unexpected argument: ${dbId}\nSee more help with --help`)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((error as any).oclif.exit).to.equal(2)
     })
     .it(`Should throw exception when run download with argument instead of flag i.e download ${dbId}`, (ctx) => {

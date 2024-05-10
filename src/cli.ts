@@ -1,10 +1,9 @@
 import {Config, execute, run as oclifRun} from '@oclif/core'
-import Debug from 'debug'
+import debug from 'debug'
 import {resolve} from 'node:path'
 import {fileURLToPath} from 'node:url'
 
-// eslint-disable-next-line new-cap
-const debug = Debug('ninox:cli')
+const logger = debug('ninox:cli')
 
 type CreateOptions = {
   bin: string | undefined
@@ -27,7 +26,7 @@ export function create({bin, channel, development, run, version}: CreateOptions)
         version,
       })
       await config.load()
-      debug(version, channel, config)
+      logger(version, channel, config)
 
       // Extract the environment argument and then pass the rest to oclif
       const [environment, topic, command, ...restArgs] = args
