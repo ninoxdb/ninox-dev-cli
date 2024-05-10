@@ -2,7 +2,7 @@
   "name": "ninox",
   "description": "Ninox Dev CLI",
   "version": "0.1.0",
-  "author": "Muhammad Saqib Arfeen",
+  "author": "Muhammad Saqib Arfeen<saqib.arfeen@ninox.com>",
   "bin": {
     "ninox": "./bin/run.js"
   },
@@ -60,11 +60,7 @@
     "dirname": "ninox",
     "commands": "./dist/commands",
     "topicSeparator": " ",
-    "topics": {
-      "hello": {
-        "description": "Say hello to the world and others"
-      }
-    }
+    "topics": {}
   },
   "repository": {
     "type": "git",
@@ -76,7 +72,7 @@
     "postpack": "shx rm -f oclif.manifest.json",
     "posttesta": "npm run lint",
     "prepack": "oclif manifest && oclif readme",
-    "test": "mocha --forbid-only \"test/**/*.test.ts\" --timeout 60000",
+    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif readme && git add README.md"
   },
   "types": "dist/index.d.ts"

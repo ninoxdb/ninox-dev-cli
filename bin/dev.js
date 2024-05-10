@@ -19,9 +19,3 @@ async function main() {
 }
 
 await main()
-//
-// import {execute} from '@oclif/core'
-
-// await execute({development: true, dir: import.meta.url})
-// Pre-process/prune flags before creating or running the actual CLI
-// (await import('../dist/flags.js')).preprocessCliFlags(process);

@@ -18,6 +18,6 @@ export default class List extends BaseCommand {
   public async run(): Promise<void> {
     await this.parse(List)
     await this.handle()
-    this.debug(`hello from src/commands/list.ts`)
+    this.debug(`success src/commands/list.ts`)
   }
 }

@@ -13,7 +13,7 @@ export default class Init extends Command {
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   private handle = async (opts: InitCommandOptions) => {
-    await FSUtil.createPackageJson(opts.name, opts.description)
+    await FSUtil.createPackageJson(opts.name)
     await FSUtil.createConfigYaml()
     await FSUtil.ensureRootDirectoryStructure()
   }
@@ -23,8 +23,8 @@ export default class Init extends Command {
   public async run(): Promise<void> {
     const {args} = await this.parse(Init)
 
-    this.debug(`hello from src/commands/init.ts`)
     await this.handle({name: args.name})
-    this.log(`Initialized Ninox project ${args.name} successfully!`);
+    this.debug(`success src/commands/init.ts`)
+    this.log(`Initialized Ninox project ${args.name} successfully!`)
   }
 }

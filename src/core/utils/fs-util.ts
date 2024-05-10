@@ -7,7 +7,6 @@ import {DBConfigsYaml} from '../common/typings.js'
 import {createYamlDocument} from './yaml-util.js'
 
 export class FSUtil {
-  // eslint-disable-next-line perfectionist/sort-classes
   public static createConfigYaml = async () => {
     if (this.fileExists(this.credentialsFilePath)) {
       return
@@ -16,15 +15,15 @@ export class FSUtil {
     await this.writeFile(this.credentialsFilePath, createYamlDocument(ConfigYamlTemplate).toString())
   }
 
+  // create folder src/Files/Database_${databaseid}
   public static createDatabaseFolderInFiles = async (databaseId: string) => {
-    // create folder src/Files/Database_${databaseid}
     await this.mkdir(path.join(this.filesPath, `Database_${databaseId}`), {
       recursive: true,
     })
   }
 
+  // create folder src/Object/Database_${databaseid}
   public static createDatabaseFolderInObjects = async (databaseId: string) => {
-    // create folder src/Object/Database_${databaseid}
     await this.mkdir(path.join(this.objectsPath, `Database_${databaseId}`), {
       recursive: true,
     })
@@ -86,7 +85,6 @@ export class FSUtil {
 
   public static isProjectInitialized = () => fs.existsSync(path.join(process.cwd(), CREDENTIALS_FILE_NAME))
 
-  // eslint-disable-next-line perfectionist/sort-classes
   public static mkdir = async (dirPath: string, options: fs.MakeDirectoryOptions) => {
     await fsAsync.mkdir(dirPath, options)
   }

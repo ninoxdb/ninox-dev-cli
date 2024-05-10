@@ -30,8 +30,6 @@ USAGE
 <!-- commands -->
 * [`ninox database list`](#ninox-database-list)
 * [`ninox download`](#ninox-download)
-* [`ninox hello PERSON`](#ninox-hello-person)
-* [`ninox hello world`](#ninox-hello-world)
 * [`ninox init NAME`](#ninox-init-name)
 * [`ninox upload`](#ninox-upload)
 
@@ -71,48 +69,6 @@ EXAMPLES
 ```
 
 _See code: [src/commands/download.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.0/src/commands/download.ts)_
-
-## `ninox hello PERSON`
-
-Say hello
-
-```
-USAGE
-  $ ninox hello PERSON -f <value>
-
-ARGUMENTS
-  PERSON  Person to say hello to
-
-FLAGS
-  -f, --from=<value>  (required) Who is saying hello
-
-DESCRIPTION
-  Say hello
-
-EXAMPLES
-  $ ninox hello friend --from oclif
-  hello friend from oclif! (./src/commands/hello/index.ts)
-```
-
-_See code: [src/commands/hello/index.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.0/src/commands/hello/index.ts)_
-
-## `ninox hello world`
-
-Say hello world
-
-```
-USAGE
-  $ ninox hello world
-
-DESCRIPTION
-  Say hello world
-
-EXAMPLES
-  $ ninox hello world
-  hello world! (./src/commands/hello/world.ts)
-```
-
-_See code: [src/commands/hello/world.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.0/src/commands/hello/world.ts)_
 
 ## `ninox init NAME`
 
