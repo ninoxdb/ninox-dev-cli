@@ -1,7 +1,6 @@
 import {Args, Command} from '@oclif/core'
 
-import {InitCommandOptions} from '../core/common/typings.js'
-import {FSUtil} from '../core/utils/fs-util.js'
+import {NinoxProjectService} from '../core/services/ninoxproject-service.js'
 
 export default class Init extends Command {
   static override args = {
@@ -12,18 +11,16 @@ export default class Init extends Command {
 
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
-  private handle = async (opts: InitCommandOptions) => {
-    await FSUtil.createPackageJson(opts.name)
-    await FSUtil.createConfigYaml()
-    await FSUtil.ensureRootDirectoryStructure()
-  }
+  protected ninoxProjectService!: NinoxProjectService
 
-  public foo(): void {}
+  private handle = async () => {
+    this.ninoxProjectService.initialiseProject()
+  }
 
   public async run(): Promise<void> {
     const {args} = await this.parse(Init)
-
-    await this.handle({name: args.name})
+    this.ninoxProjectService = new NinoxProjectService('', args.name)
+    await this.handle()
     this.debug(`success src/commands/init.ts`)
     this.log(`Initialized Ninox project ${args.name} successfully!`)
   }

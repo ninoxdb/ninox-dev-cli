@@ -1,8 +1,7 @@
 import {expect, test} from '@oclif/test'
 import sinon from 'sinon'
 
-import InitCommand from '../../src/commands/init.js'
-import {FSUtil} from '../../src/core/utils/fs-util.js'
+import {FSUtil} from '../../src/core/utils/fs.js'
 
 describe('init', () => {
   const ninoxProjectName = 'ninox-project'
@@ -13,8 +12,6 @@ describe('init', () => {
     stubReadEnvironmentConfig = sinon.stub(FSUtil, 'mkdir').callsFake(() => Promise.resolve())
     fsExistsSyncStub = sinon.stub(FSUtil, 'fileExists').callsFake(() => false)
     writeFileStub = sinon.stub(FSUtil, 'writeFile').callsFake(() => Promise.resolve())
-
-    sinon.stub(InitCommand.prototype, 'foo').callsFake(() => 'bar')
   })
 
   after(() => {

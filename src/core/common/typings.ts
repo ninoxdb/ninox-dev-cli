@@ -22,7 +22,7 @@ export interface ImportCommandOptions {
 export interface InitCommandOptions {
   name: string
 }
-// TODO: These types are defined here just for documentation
+// These types are defined here just for documentation
 /*
 export interface Database {
   id: string;

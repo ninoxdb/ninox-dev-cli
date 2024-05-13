@@ -3,50 +3,57 @@ import FormData from 'form-data'
 import fs from 'node:fs'
 
 import {DB_BACKGROUND_FILE_NAME} from '../common/constants.js'
-import {DatabaseMetadata, DatabaseSchemaType, DatabaseSettingsType, DatabaseType} from '../common/schemas.js'
-import {ImportCommandOptions, NinoxCredentials} from '../common/typings.js'
-import {FSUtil} from './fs-util.js'
+import {DatabaseMetadata, DatabaseSchemaType, DatabaseSettingsType} from '../common/schemas.js'
+import {NinoxCredentials} from '../common/typings.js'
+import {FSUtil} from './fs.js'
 
 export class NinoxClient {
+  apiKey: string
+  domain: string
+  workspaceId: string
+
+  constructor(creds: NinoxCredentials) {
+    this.apiKey = creds.apiKey
+    this.domain = creds.domain
+    this.workspaceId = creds.workspaceId
+  }
+
   // download the background image from /{accountId}/root/background.jpg
-  public static downloadDatabaseBackgroundImage = async (opts: ImportCommandOptions, creds: NinoxCredentials) => {
+  // eslint-disable-next-line perfectionist/sort-classes
+  public downloadDatabaseBackgroundImage = async (databaseId: string) => {
     try {
-      const imagePath = FSUtil.getDbBackgroundImagePath(opts.id)
-      const imageUrl = `${creds.domain}/${creds.workspaceId}/${opts.id}/files/${DB_BACKGROUND_FILE_NAME}`
-      await this.downloadImage(imageUrl, imagePath, creds.apiKey)
+      const imagePath = FSUtil.getDbBackgroundImagePath(databaseId)
+      const imageUrl = `${this.domain}/${this.workspaceId}/${databaseId}/files/${DB_BACKGROUND_FILE_NAME}`
+      await this.downloadImage(imageUrl, imagePath)
     } catch {}
   }
 
-  public static getDatabase = async (id: string, creds: NinoxCredentials) =>
+  public getDatabase = async (id: string) =>
     axios
-      .get(`${creds.domain}/v1/teams/${creds.workspaceId}/databases/${id}?human=T`, {
+      .get(`${this.domain}/v1/teams/${this.workspaceId}/databases/${id}?human=T`, {
         headers: {
-          Authorization: `Bearer ${creds.apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
         },
       })
       .then((response) => response.data)
       .catch((error) => handleAxiosError(error, 'Failed to fetch database'))
 
-  public static listDatabases = async (creds: NinoxCredentials) =>
+  public listDatabases = async () =>
     axios
-      .get(`${creds.domain}/v1/teams/${creds.workspaceId}/databases`, {
+      .get(`${this.domain}/v1/teams/${this.workspaceId}/databases`, {
         headers: {
-          Authorization: `Bearer ${creds.apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
         },
       })
       .then((response) => response.data as DatabaseMetadata[])
       .catch((error) => handleAxiosError(error, 'Failed to list databases'))
 
-  public static updateDatabaseSettings = async (
-    id: string,
-    settings: DatabaseSettingsType,
-    creds: NinoxCredentials,
-  ) => {
+  public updateDatabaseSettings = async (id: string, settings: DatabaseSettingsType) => {
     const data = JSON.stringify(settings)
     return axios
-      .post(`${creds.domain}/${creds.workspaceId}/${id}/settings/update`, data, {
+      .post(`${this.domain}/${this.workspaceId}/${id}/settings/update`, data, {
         headers: {
-          Authorization: `Bearer ${creds.apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
           'Content-Type': 'text/plain',
         },
       })
@@ -54,41 +61,23 @@ export class NinoxClient {
       .catch((error) => handleAxiosError(error, 'Failed to Update Database settings.'))
   }
 
-  public static uploadDatabase = async (
-    database: DatabaseType,
-    schema: DatabaseSchemaType,
-    creds: NinoxCredentials,
-  ) => {
-    // upload DB background
-
-    const isUploaded = await this.uploadDatabaseBackgroundImage(database.id, creds)
-    if (isUploaded) {
-      database.settings.bgType = 'image'
-      database.settings.backgroundClass = 'background-file'
-    }
-
-    await this.updateDatabaseSettings(database.id, database.settings, creds)
-    // upload database schema
-    await this.uploadDatabaseSchemaToNinox(database.id, schema, creds)
-  }
-
-  public static uploadDatabaseBackgroundImage = async (databaseId: string, creds: NinoxCredentials) => {
+  public uploadDatabaseBackgroundImage = async (databaseId: string) => {
     if (!FSUtil.isDatabaseBackgroundFileExist(databaseId)) {
       return
     }
 
     const imagePath = FSUtil.getDbBackgroundImagePath(databaseId)
-    const imageUrl = `${creds.domain}/${creds.workspaceId}/${databaseId}/files/${DB_BACKGROUND_FILE_NAME}`
+    const imageUrl = `${this.domain}/${this.workspaceId}/${databaseId}/files/${DB_BACKGROUND_FILE_NAME}`
 
-    await this.uploadImage(imageUrl, imagePath, creds.apiKey)
+    await this.uploadImage(imageUrl, imagePath)
     return true
   }
 
-  public static uploadDatabaseSchemaToNinox = async (id: string, schema: DatabaseSchemaType, creds: NinoxCredentials) =>
+  public uploadDatabaseSchemaToNinox = async (id: string, schema: DatabaseSchemaType) =>
     axios
-      .patch(`${creds.domain}/v1/teams/${creds.workspaceId}/databases/${id}/schema?human=T`, schema, {
+      .patch(`${this.domain}/v1/teams/${this.workspaceId}/databases/${id}/schema?human=T`, schema, {
         headers: {
-          Authorization: `Bearer ${creds.apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
         },
       })
       .then((response) => response.data)
@@ -99,12 +88,11 @@ export class NinoxClient {
         ),
       )
 
-  private static async downloadImage(url: string, path: string, apiKey: string) {
+  private async downloadImage(url: string, path: string) {
     try {
-      // Axios GET request to fetch the image as a stream
       const response = await axios({
         headers: {
-          Authorization: `Bearer ${apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
         },
         method: 'GET',
         responseType: 'stream',
@@ -124,7 +112,7 @@ export class NinoxClient {
     } catch {}
   }
 
-  private static async uploadImage(url: string, path: string, apiKey: string) {
+  private async uploadImage(url: string, path: string) {
     // Create a new instance of FormData
     const formData = new FormData()
 
@@ -136,7 +124,7 @@ export class NinoxClient {
       headers: {
         // FormData will generate the correct Content-Type boundary itself
         ...formData.getHeaders(),
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${this.apiKey}`,
       },
     })
   }

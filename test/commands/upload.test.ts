@@ -4,7 +4,7 @@ import sinon from 'sinon'
 
 import UploadCommand from '../../src/commands/upload.js'
 import {DB_BACKGROUND_FILE_NAME} from '../../src/core/common/constants.js'
-import {FSUtil} from '../../src/core/utils/fs-util.js'
+import {FSUtil} from '../../src/core/utils/fs.js'
 import {filesPath, mockNinoxEnvironment, objectsPath} from '../common/test-utils.js'
 
 describe('upload', () => {

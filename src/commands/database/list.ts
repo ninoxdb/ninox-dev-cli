@@ -1,5 +1,5 @@
 import {BaseCommand} from '../../core/base.js'
-import {DatabaseMetadata} from '../../core/common/schemas.js'
+import {DatabaseService} from '../../core/services/database-service.js'
 import {EnvironmentConfig} from '../../core/utils/config.js'
 import {NinoxClient} from '../../core/utils/ninox-client.js'
 
@@ -9,11 +9,21 @@ export default class List extends BaseCommand {
 
   static override examples = ['<%= config.bin %> <%= command.args.env.default %> <%= command.id %>']
 
+  protected databaseService!: DatabaseService
+
   private handle = async (): Promise<void> => {
-    const dbs = (await NinoxClient.listDatabases(this.environment as EnvironmentConfig)) as DatabaseMetadata[]
+    const dbs = await this.databaseService.listDatabases()
     for (const db of dbs) {
       this.log(db.name, db.id)
     }
+  }
+
+  async init(): Promise<void> {
+    await super.init()
+    this.databaseService = new DatabaseService(
+      new NinoxClient(this.environment as EnvironmentConfig),
+      this.environment.workspaceId,
+    )
   }
 
   public async run(): Promise<void> {

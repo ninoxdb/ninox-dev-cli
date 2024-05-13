@@ -7,7 +7,7 @@ export abstract class BaseCommand extends Command {
     env: Args.string({default: 'DEV', description: 'environment to read', hidden: true, required: true}),
   }
 
-  environment?: EnvironmentConfig
+  environment: EnvironmentConfig = {apiKey: '', domain: '', workspaceId: ''}
 
   async init(): Promise<void> {
     await super.init()
@@ -19,11 +19,14 @@ export abstract class BaseCommand extends Command {
     return true
   }
 
-  public readEnvironmentConfig(): EnvironmentConfig | undefined {
+  public readEnvironmentConfig(): EnvironmentConfig {
     const {argv} = this
-    let environment
+    let environment: EnvironmentConfig = {apiKey: '', domain: '', workspaceId: ''}
     if (this.needsEnvironment()) {
       const envName = argv.at(-1) as string
+      if (!envName) {
+        this.error('No environment specified and no default environment set')
+      }
 
       try {
         environment = getEnvironment(envName)
@@ -31,8 +34,8 @@ export abstract class BaseCommand extends Command {
         if (error instanceof Error) this.error(error.message)
       }
 
-      if (!environment) {
-        this.error('No environment specified and no default environment set')
+      if (environment.apiKey === '' && environment.domain === '' && environment.workspaceId === '') {
+        this.error('Missing environment configuration. Please check your configuration file.')
       }
 
       // remove the last argument
