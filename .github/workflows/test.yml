@@ -1,0 +1,46 @@
+name: tests
+on:
+  push:
+    branches-ignore: [main]
+  workflow_dispatch:
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: npm
+      - run: npm ci
+      - run: npm run test:unit
+  integration-tests:
+    needs: [unit-tests]
+    strategy:
+      matrix:
+        os: ['macos-latest', 'windows-latest']
+        node_version: [lts/-1, lts/*]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node_version }}
+          cache: npm
+      - name: Cache node modules
+        uses: actions/cache@v3
+        continue-on-error: true
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test
