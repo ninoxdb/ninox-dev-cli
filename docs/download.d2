@@ -1,0 +1,85 @@
+shape: sequence_diagram
+
+vars: {
+  id: '4321'
+}
+# Participants
+c: Ninox User {
+  shape: person
+}
+
+pc: Ninox CLI: {
+  icon: https://icons.terrastruct.com/tech%2Flaptop.svg
+  shape: image
+}
+
+t: Ninox API: {
+  icon: https://icons.terrastruct.com/essentials%2F112-server.svg
+  shape: image
+}
+
+fs: FSUtil {
+  icon: https://icons.terrastruct.com/essentials%2F257-file.svg
+  shape: image
+}
+
+# Diagram actions
+c -> pc: Download {
+  shape: arrow
+  style: solid
+  label: Download ninox database ${id}
+}
+
+pc -> t: GET https://api.ninox.com/databases/${id} {
+  shape: arrow
+  style: solid
+  label: Get Database Data
+}
+
+t -> pc: Return Database Data {
+  style.stroke-dash: 5
+  label: Database info including Schema
+}
+
+pc -> pc: {
+  style.stroke-dash: 5
+  label: Parse Database Schema and Data
+}
+
+pc -> fs: Write Data to Files {
+  shape: arrow
+  style: solid
+  label: writeToFiles(database, schema, tables)
+}
+
+fs -> pc: Confirm Data Written {
+  style.stroke-dash: 5
+  label: Files written successfully
+}
+
+pc -> fs: Create Database Folder {
+  shape: arrow
+  style: solid
+  label: createDatabaseFolderInFiles(opts.id)
+}
+
+fs -> pc: Confirm Folder Created {
+  style.stroke-dash: 5
+  label: Folder created successfully
+}
+
+pc -> t: GET https://api.ninox.com/databases/${id}/background {
+  shape: arrow
+  style: solid
+  label: Download Database Background Image
+}
+
+t -> pc: Return Background Image {
+  style.stroke-dash: 5
+  label: Background image data
+}
+
+pc -> c: {
+  style.stroke-dash: 5
+  label: Database ${id} Downloaded successfully!
+}

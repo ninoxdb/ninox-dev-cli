@@ -1,0 +1,45 @@
+shape: sequence_diagram
+
+# Participants
+c: Ninox User {
+  shape: person
+}
+
+pc: Ninox CLI: {
+  icon: https://icons.terrastruct.com/tech%2Flaptop.svg
+  shape: image
+}
+
+t: Ninox API: {
+  icon: https://icons.terrastruct.com/essentials%2F112-server.svg
+  shape: image
+}
+
+# Diagram actions
+c -> pc: List Databases {
+  shape: arrow
+  style: solid
+  label: List all databases
+}
+
+pc -> t: GET https://api.ninox.com/databases {
+  shape: arrow
+  style: solid
+  label: List Databases
+}
+
+t -> pc: Return List of Databases {
+  style.stroke-dash: 5
+  label: List of databases (metadata)
+}
+
+pc -> pc: {
+  style.stroke-dash: 5
+  label: Iterate over databases and log details
+}
+
+pc -> c: Display Database Info {
+  shape: arrow
+  style: solid
+  label: Log each database name and id
+}
