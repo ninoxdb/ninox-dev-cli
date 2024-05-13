@@ -1,10 +1,10 @@
 import {Args, Command} from '@oclif/core'
 
-import {EnvironmentConfig, getEnvironment} from '../utils/config.js'
+import {EnvironmentConfig, getEnvironment} from './utils/config.js'
 
 export abstract class BaseCommand extends Command {
   static override args = {
-    env: Args.string({description: 'environment to read', hidden: true, required: true}),
+    env: Args.string({default: 'DEV', description: 'environment to read', hidden: true, required: true}),
   }
 
   environment?: EnvironmentConfig

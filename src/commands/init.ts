@@ -8,7 +8,7 @@ export default class Init extends Command {
     name: Args.string({description: 'Name of the Ninox project', required: true}),
   }
 
-  static override description = 'describe the command here'
+  static override description = 'Initialize a new Ninox project in the current directory'
 
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
