@@ -1,0 +1,35 @@
+module.exports = {
+  parser: "@typescript-eslint/parser",
+  parserOptions: {
+    project: "tsconfig.json",
+    tsconfigRootDir: __dirname,
+    sourceType: "module",
+  },
+  plugins: ["@typescript-eslint/eslint-plugin"],
+  extends: [
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended",
+    "plugin:unicorn/recommended",
+  ],
+  root: true,
+  env: {
+    node: true,
+    jest: true,
+  },
+
+  ignorePatterns: [
+    ".eslintrc.js",
+    "jest-unit.config.ts",
+    "jest-api.config.ts",
+    "commitlint.config.js",
+    "init.d/**",
+    "src/database/**",
+  ],
+  rules: {
+    "@typescript-eslint/interface-name-prefix": "off",
+    "@typescript-eslint/explicit-function-return-type": "error",
+    "@typescript-eslint/explicit-module-boundary-types": "error",
+    "@typescript-eslint/explicit-member-accessibility": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+  },
+};
