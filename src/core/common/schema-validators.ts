@@ -12,7 +12,6 @@ export const DatabaseSettings = z.object({
   rolesMassDataUpdate: z.array(z.string()).optional(),
   rolesOpen: z.array(z.string()).optional(),
   rolesPrint: z.array(z.string()).optional(),
-  // backgroundTimestamp: z.number().nullable().optional(),
 })
 
 export const Database = z.object({
@@ -50,11 +49,13 @@ export const DatabaseSchema = DatabaseSchemaBase.extend({
   types: z.record(z.any()),
 })
 
+export const DatabaseSchemaInFile = DatabaseSchemaBase.extend({
+  _database: z.string(), // Database ID for local reference
+})
+
 export const DatabaseFile = z.object({
   database: Database.extend({
-    schema: DatabaseSchemaBase.extend({
-      _database: z.string(), // Database ID for local reference
-    }),
+    schema: DatabaseSchemaInFile,
   }),
 })
 
@@ -172,9 +173,11 @@ export type DatabaseType = z.infer<typeof Database>
 export type DatabaseSettingsType = z.infer<typeof DatabaseSettings>
 export type DatabaseSchemaType = z.infer<typeof DatabaseSchema>
 export type DatabaseSchemaBaseType = z.infer<typeof DatabaseSchemaBase>
+export type DatabaseSchemaInFileType = z.infer<typeof DatabaseSchemaInFile>
 export type DatabaseFileType = z.infer<typeof DatabaseFile>
 export type TableFileType = z.infer<typeof TableFile>
 export type DatabaseConfigFileContent = {
   database: DatabaseFileType
   tables: TableFileType[]
 }
+export type TableBaseType = z.infer<typeof TableBase>

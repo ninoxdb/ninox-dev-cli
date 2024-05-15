@@ -3,17 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import {CREDENTIALS_FILE_NAME} from '../common/constants.js'
-
-export interface EnvironmentConfig {
-  apiKey: string
-  domain: string
-  workspaceId: string
-}
-
-export interface Config {
-  default?: string
-  environments: Record<string, EnvironmentConfig>
-}
+import {Config, EnvironmentConfig} from '../common/types.js'
 
 const configFile = path.join(process.cwd(), CREDENTIALS_FILE_NAME)
 
@@ -34,19 +24,4 @@ export function getEnvironment(env: string): EnvironmentConfig {
   }
 
   return config.environments[env]
-}
-
-export function getDefaultEnvironment() {
-  const config = readConfig()
-  return config.default ? config.environments[config.default] : undefined
-}
-
-export function setDefaultEnvironment(env: string): void {
-  const config = readConfig()
-  if (!config.environments[env]) {
-    throw new Error(`Environment "${env}" not found in config\n Usage: ninox <environment> <command>`)
-  }
-
-  config.default = env
-  fs.writeFileSync(configFile, yaml.dump(config))
 }

@@ -1,8 +1,9 @@
 import {Args, Command} from '@oclif/core'
 
+import {InitCommandOptions} from '../core/common/types.js'
 import {NinoxProjectService} from '../core/services/ninoxproject-service.js'
 
-export default class Init extends Command {
+export default class InitCommand extends Command {
   static override args = {
     name: Args.string({description: 'Name of the Ninox project', required: true}),
   }
@@ -13,14 +14,19 @@ export default class Init extends Command {
 
   protected ninoxProjectService!: NinoxProjectService
 
-  private handle = async () => {
-    this.ninoxProjectService.initialiseProject()
+  private async handle(opts: InitCommandOptions) {
+    this.ninoxProjectService.initialiseProject(opts.name)
+  }
+
+  // eslint-disable-next-line perfectionist/sort-classes
+  async init(): Promise<void> {
+    await super.init()
+    this.ninoxProjectService = new NinoxProjectService()
   }
 
   public async run(): Promise<void> {
-    const {args} = await this.parse(Init)
-    this.ninoxProjectService = new NinoxProjectService('', args.name)
-    await this.handle()
+    const {args} = await this.parse(InitCommand)
+    await this.handle(args)
     this.debug(`success src/commands/init.ts`)
     this.log(`Initialized Ninox project ${args.name} successfully!`)
   }

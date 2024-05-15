@@ -1,6 +1,7 @@
 import {Args, Command} from '@oclif/core'
 
-import {EnvironmentConfig, getEnvironment} from './utils/config.js'
+import { EnvironmentConfig } from './common/types.js'
+import {getEnvironment} from './utils/config.js'
 
 export abstract class BaseCommand extends Command {
   static override args = {
@@ -34,7 +35,8 @@ export abstract class BaseCommand extends Command {
         if (error instanceof Error) this.error(error.message)
       }
 
-      if (environment.apiKey === '' && environment.domain === '' && environment.workspaceId === '') {
+      // TODO: runtime validate environment after reading from file
+      if (!environment.apiKey || !environment.domain || !environment.workspaceId) {
         this.error('Missing environment configuration. Please check your configuration file.')
       }
 

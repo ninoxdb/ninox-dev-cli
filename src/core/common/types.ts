@@ -22,6 +22,15 @@ export interface ImportCommandOptions {
 export interface InitCommandOptions {
   name: string
 }
+export interface EnvironmentConfig {
+  apiKey: string
+  domain: string
+  workspaceId: string
+}
+
+export interface Config {
+  environments: Record<string, EnvironmentConfig>
+}
 // These types are defined here just for documentation
 /*
 export interface Database {

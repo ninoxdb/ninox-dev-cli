@@ -34,3 +34,6 @@ export const SUCCESS_MESSAGES = {
 export const CREDENTIALS_FILE_NAME = 'config.yaml'
 export const DB_BACKGROUND_FILE_NAME = 'background.jpg'
 export const HELP_PARAM = ['--help', '-h']
+export const DEFAULT_NAME = 'ninox-project'
+export const DEFAULT_DESCRIPTION = 'Ninox project'
+export const DEFAULT_VERSION = '1.0.0'

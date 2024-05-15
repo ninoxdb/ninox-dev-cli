@@ -3,8 +3,15 @@ import fs from 'node:fs'
 import * as fsAsync from 'node:fs/promises'
 import path from 'node:path'
 
-import {CREDENTIALS_FILE_NAME, ConfigYamlTemplate, DB_BACKGROUND_FILE_NAME} from '../common/constants.js'
-import {DBConfigsYaml} from '../common/typings.js'
+import {
+  CREDENTIALS_FILE_NAME,
+  ConfigYamlTemplate,
+  DB_BACKGROUND_FILE_NAME,
+  DEFAULT_DESCRIPTION,
+  DEFAULT_NAME,
+  DEFAULT_VERSION,
+} from '../common/constants.js'
+import {DBConfigsYaml} from '../common/types.js'
 
 export class FSUtil {
   static _credentialsFilePath = path.join(process.cwd(), CREDENTIALS_FILE_NAME)
@@ -23,27 +30,27 @@ export class FSUtil {
 
   // create folder src/Files/Database_${databaseid}
   public static async createDatabaseFolderInFiles(databaseId: string) {
-    await this.mkdir(path.join(this.getDatabaseFilesPath(databaseId)), {
+    await this.mkdir(path.join(this.getDatabaseFilesDirectoryPath(databaseId)), {
       recursive: true,
     })
   }
 
   // create folder src/Object/Database_${databaseid}
   public static async createDatabaseFolderInObjects(databaseId: string) {
-    return this.mkdir(this.getDatabaseObjectsPath(databaseId), {
+    return this.mkdir(this.getDatabaseObjectsDirectoryPath(databaseId), {
       recursive: true,
     })
   }
 
-  public static async createPackageJson(name: string, description?: string) {
+  public static async createPackageJson(name: string = DEFAULT_NAME, description: string = DEFAULT_DESCRIPTION) {
     const packageJson = {
-      description: description ?? '',
+      description,
       keywords: [],
       name,
       scripts: {
         test: 'echo "Error: no test specified" && exit 1',
       },
-      version: '1.0.0',
+      version: DEFAULT_VERSION,
     }
     const packageJsonPath = path.join(process.cwd(), 'package.json')
     if (this.fileExists(packageJsonPath)) {
@@ -56,7 +63,7 @@ export class FSUtil {
   }
 
   static get credentialsFilePath(): string {
-    return FSUtil._credentialsFilePath
+    return this._credentialsFilePath
   }
 
   public static async ensureRootDirectoryStructure() {
@@ -69,27 +76,27 @@ export class FSUtil {
   }
 
   static get filesPath(): string {
-    return FSUtil._filesPath
+    return this._filesPath
   }
 
-  static getDatabaseFilesPath(databaseId: string) {
+  static getDatabaseFilesDirectoryPath(databaseId: string) {
     return path.join(this.filesPath, `Database_${databaseId}`)
   }
 
-  static getDatabaseObjectsPath(databaseId: string) {
+  static getDatabaseObjectsDirectoryPath(databaseId: string) {
     return path.join(this.objectsPath, `Database_${databaseId}`)
   }
 
   public static getDbBackgroundImagePath(databaseId: string) {
-    return path.join(this.getDatabaseFilesPath(databaseId), DB_BACKGROUND_FILE_NAME)
+    return path.join(this.getDatabaseFilesDirectoryPath(databaseId), DB_BACKGROUND_FILE_NAME)
   }
 
   public static getFilePath(databaseId: string, objectName: string) {
-    if (!fs.existsSync(path.join(this.getDatabaseFilesPath(databaseId)))) {
+    if (!fs.existsSync(this.getDatabaseFilesDirectoryPath(databaseId))) {
       throw new Error('File path not set')
     }
 
-    return path.join(this.getDatabaseFilesPath(databaseId), `${objectName}.yaml`)
+    return path.join(this.getDatabaseFilesDirectoryPath(databaseId), `${objectName}.yaml`)
   }
 
   public static getObjectFileName(objectType: string, objectId: string) {
@@ -97,12 +104,12 @@ export class FSUtil {
   }
 
   public static getObjectPath(databaseId: string, objectName: string) {
-    const databaseFolderPath = this.getDatabaseObjectsPath(databaseId)
+    const databaseFolderPath = this.getDatabaseObjectsDirectoryPath(databaseId)
     if (!fs.existsSync(databaseFolderPath)) {
       throw new Error(`Database folder not found: ${databaseFolderPath}`)
     }
 
-    return path.join(this.getDatabaseObjectsPath(databaseId), `${objectName}.yaml`)
+    return path.join(this.getDatabaseObjectsDirectoryPath(databaseId), `${objectName}.yaml`)
   }
 
   public static isDatabaseBackgroundFileExist(databaseId: string) {
@@ -119,7 +126,7 @@ export class FSUtil {
   }
 
   static get objectsPath(): string {
-    return FSUtil._objectsPath
+    return this._objectsPath
   }
 
   public static readCredentials() {
@@ -131,7 +138,7 @@ export class FSUtil {
   }
 
   public static async readDatabaseConfig(databaseId: string) {
-    return this.readDBConfigFromFolder(this.getDatabaseObjectsPath(databaseId))
+    return this.readDBConfigFromFolder(this.getDatabaseObjectsDirectoryPath(databaseId))
   }
 
   public static async readDefinedDatabaseConfigsFromFiles() {
@@ -179,7 +186,7 @@ export class FSUtil {
     const tableFiles = files.filter((file) => file.startsWith('Table_') || file.startsWith('Page_'))
 
     const tables = await Promise.all(
-      tableFiles.map(async (table) => fsAsync.readFile(path.join(databaseFolderPath, table), 'utf8')),
+      tableFiles.map((table) => fsAsync.readFile(path.join(databaseFolderPath, table), 'utf8')),
     )
     return {
       database,

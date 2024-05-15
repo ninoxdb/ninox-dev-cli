@@ -1,4 +1,4 @@
-import {DatabaseMetadata, DatabaseSchemaType, DatabaseType} from '../common/schemas.js'
+import {DatabaseMetadata, DatabaseSchemaType, DatabaseType} from '../common/schema-validators.js'
 import {NinoxClient} from '../utils/ninox-client.js'
 
 export class DatabaseService {
@@ -12,8 +12,8 @@ export class DatabaseService {
     this.databaseId = databaseId
   }
 
-  async downloadDatabaseBackgroundImage() {
-    return this.ninoxClient.downloadDatabaseBackgroundImage(this.databaseId as string)
+  async downloadDatabaseBackgroundImage(dbId: string = this.databaseId as string) {
+    return this.ninoxClient.downloadDatabaseBackgroundImage(dbId);
   }
 
   async getDatabase(id: string) {

@@ -3,7 +3,7 @@ import nock from 'nock'
 import sinon from 'sinon'
 
 import List from '../../../src/commands/database/list.js'
-import {DatabaseMetadata} from '../../../src/core/common/schemas.js'
+import {DatabaseMetadata} from '../../../src/core/common/schema-validators.js'
 import {loadJsonMock, mockNinoxEnvironment} from '../../common/test-utils.js'
 describe('database/list', () => {
   let stubReadEnvironmentConfig: sinon.SinonStub
