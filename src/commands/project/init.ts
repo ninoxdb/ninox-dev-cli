@@ -1,8 +1,8 @@
 import {Args, Command} from '@oclif/core'
 
-import {InitCommandOptions} from '../core/common/types.js'
-import {NinoxProjectService} from '../core/services/ninoxproject-service.js'
-import {FSUtil} from '../core/utils/fs.js'
+import {InitCommandOptions} from '../../core/common/types.js'
+import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
+import {FSUtil} from '../../core/utils/fs.js'
 
 export default class InitCommand extends Command {
   static override args = {

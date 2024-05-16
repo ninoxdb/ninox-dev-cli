@@ -28,85 +28,86 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
+* [`ninox database download`](#ninox-database-download)
 * [`ninox database list`](#ninox-database-list)
-* [`ninox download`](#ninox-download)
-* [`ninox init NAME`](#ninox-init-name)
-* [`ninox upload`](#ninox-upload)
+* [`ninox database upload`](#ninox-database-upload)
+* [`ninox project init NAME`](#ninox-project-init-name)
+
+## `ninox database download`
+
+Download the settings and configuration (e.g Tables, Fields, Views and Reports) of a Ninox database to the local filesystem. The ENV argument comes before the command name.
+
+```
+USAGE
+  $ ninox database download ENV -i <value>
+
+FLAGS
+  -i, --id=<value>  (required) Database ID to Download
+
+DESCRIPTION
+  Download the settings and configuration (e.g Tables, Fields, Views and Reports) of a Ninox database to the local
+  filesystem. The ENV argument comes before the command name.
+
+EXAMPLES
+  $ ninox DEV database download -i 1234
+```
+
+_See code: [src/commands/database/download.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.0/src/commands/database/download.ts)_
 
 ## `ninox database list`
 
-describe the command here
+List all the database names and ids in the Ninox cloud server. The ENV argument comes before the command name.
 
 ```
 USAGE
   $ ninox database list ENV
 
 DESCRIPTION
-  describe the command here
+  List all the database names and ids in the Ninox cloud server. The ENV argument comes before the command name.
 
 EXAMPLES
-  $ ninox database list
+  $ ninox DEV database list
 ```
 
 _See code: [src/commands/database/list.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.0/src/commands/database/list.ts)_
 
-## `ninox download`
+## `ninox database upload`
 
-describe the command here
+Deploy the local database configuration to the Ninox cloud server. The ENV argument comes before the command name.
 
 ```
 USAGE
-  $ ninox download ENV -i <value>
+  $ ninox database upload ENV -i <value>
 
 FLAGS
   -i, --id=<value>  (required) Database ID to Download
 
 DESCRIPTION
-  describe the command here
+  Deploy the local database configuration to the Ninox cloud server. The ENV argument comes before the command name.
 
 EXAMPLES
-  $ ninox download
+  $ ninox DEV database upload -i 1234
 ```
 
-_See code: [src/commands/download.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.0/src/commands/download.ts)_
+_See code: [src/commands/database/upload.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.0/src/commands/database/upload.ts)_
 
-## `ninox init NAME`
+## `ninox project init NAME`
 
-describe the command here
+Initialize a new Ninox project in the current directory
 
 ```
 USAGE
-  $ ninox init NAME
+  $ ninox project init NAME
 
 ARGUMENTS
   NAME  Name of the Ninox project
 
 DESCRIPTION
-  describe the command here
+  Initialize a new Ninox project in the current directory
 
 EXAMPLES
-  $ ninox init
+  $ ninox project init
 ```
 
-_See code: [src/commands/init.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.0/src/commands/init.ts)_
-
-## `ninox upload`
-
-describe the command here
-
-```
-USAGE
-  $ ninox upload ENV -i <value>
-
-FLAGS
-  -i, --id=<value>  (required) Database ID to Download
-
-DESCRIPTION
-  describe the command here
-
-EXAMPLES
-  $ ninox upload
-```
-
-_See code: [src/commands/upload.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.0/src/commands/upload.ts)_
+_See code: [src/commands/project/init.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.0/src/commands/project/init.ts)_
 <!-- commandsstop -->

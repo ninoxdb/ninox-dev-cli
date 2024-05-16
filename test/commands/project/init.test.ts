@@ -1,9 +1,9 @@
 import {expect, test} from '@oclif/test'
 import sinon from 'sinon'
 
-import {FSUtil} from '../../src/core/utils/fs.js'
+import {FSUtil} from '../../../src/core/utils/fs.js'
 
-describe('init', () => {
+describe('project/init', () => {
   const ninoxProjectName = 'ninox-project'
   let fsUtil: FSUtil
   let stubReadEnvironmentConfig: sinon.SinonStub
@@ -24,7 +24,7 @@ describe('init', () => {
 
   test
     .stdout()
-    .command(['init', ninoxProjectName])
+    .command(['project init', ninoxProjectName])
     .it('init commmand: Should initialize the project and exit successfully', (ctx) => {
       expect(ctx.stdout).to.contain(`Initialized Ninox project ${ninoxProjectName} successfully!`)
     })

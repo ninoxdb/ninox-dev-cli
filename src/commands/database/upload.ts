@@ -1,11 +1,11 @@
 import {Flags} from '@oclif/core'
 
-import {BaseCommand} from '../core/base.js'
-import {DeployCommandOptions, EnvironmentConfig} from '../core/common/types.js'
-import {DatabaseService} from '../core/services/database-service.js'
-import {NinoxProjectService} from '../core/services/ninoxproject-service.js'
-import {FSUtil} from '../core/utils/fs.js'
-import {NinoxClient} from '../core/utils/ninox-client.js'
+import {BaseCommand} from '../../core/base.js'
+import {DeployCommandOptions, EnvironmentConfig} from '../../core/common/types.js'
+import {DatabaseService} from '../../core/services/database-service.js'
+import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
+import {FSUtil} from '../../core/utils/fs.js'
+import {NinoxClient} from '../../core/utils/ninox-client.js'
 
 export default class UploadCommand extends BaseCommand {
   static override description =

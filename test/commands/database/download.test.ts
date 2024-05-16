@@ -2,10 +2,10 @@ import {expect, test} from '@oclif/test'
 import nock from 'nock'
 import sinon from 'sinon'
 
-import DownloadCommand from '../../src/commands/download.js'
-import {loadJsonMock} from '../common/test-utils.js'
+import DownloadCommand from '../../../src/commands/database/download.js'
+import {loadJsonMock} from '../../common/test-utils.js'
 
-describe('download', () => {
+describe('database/download', () => {
   let stubReadEnvironmentConfig: sinon.SinonStub
   const dbId = '4321'
   before(() => {
@@ -29,13 +29,13 @@ describe('download', () => {
 
   test
     .stdout()
-    .command(['download', '--id', dbId])
+    .command(['database download', '--id', dbId])
     .it('runs download', (ctx) => {
       expect(ctx.stdout).to.contain(`Downloaded database ${dbId} successfully!`)
     })
   test
     .stderr()
-    .command(['download', dbId])
+    .command(['database download', dbId])
     .catch((error) => {
       expect(error.message).to.contain(`Unexpected argument: ${dbId}\nSee more help with --help`)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

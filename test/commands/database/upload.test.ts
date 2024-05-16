@@ -2,12 +2,12 @@ import {expect, test} from '@oclif/test'
 import nock from 'nock'
 import sinon from 'sinon'
 
-import UploadCommand from '../../src/commands/upload.js'
-import {DB_BACKGROUND_FILE_NAME} from '../../src/core/common/constants.js'
-import {FSUtil} from '../../src/core/utils/fs.js'
-import {filesPath, mockNinoxEnvironment, objectsPath} from '../common/test-utils.js'
+import UploadCommand from '../../../src/commands/database/upload.js'
+import {DB_BACKGROUND_FILE_NAME} from '../../../src/core/common/constants.js'
+import {FSUtil} from '../../../src/core/utils/fs.js'
+import {filesPath, mockNinoxEnvironment, objectsPath} from '../../common/test-utils.js'
 
-describe('upload', () => {
+describe('database/upload', () => {
   let fsUtil: FSUtil
   let stubReadEnvironmentConfig: sinon.SinonStub
   const dbId = '4321'
@@ -46,7 +46,7 @@ describe('upload', () => {
 
   test
     .stdout()
-    .command(['upload', '--id', dbId])
+    .command(['database upload', '--id', dbId])
     .it('Should upload the mock nx-project database files', (ctx) => {
       expect(ctx.stdout).to.contain(`Uploaded database ${dbId} successfully!`)
     })
