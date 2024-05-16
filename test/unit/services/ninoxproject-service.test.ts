@@ -16,6 +16,8 @@ import {
 } from '../../common/test-utils.js'
 
 describe('NinoxProjectService', () => {
+  const testDbId = 'testDatabaseId'
+  const testProjectName = 'testProject'
   let fsUtil: FSUtil
   let ninoxProjectService: NinoxProjectService
   let sandbox: sinon.SinonSandbox & sinon.SinonStubbedInstance<typeof FSUtil>
@@ -34,7 +36,7 @@ describe('NinoxProjectService', () => {
     // Resetting environment for each test
     sandbox = sinon.createSandbox() as sinon.SinonSandbox & sinon.SinonStubbedInstance<typeof FSUtil>
     fsUtil = new FSUtil()
-    ninoxProjectService = new NinoxProjectService(fsUtil, 'testDatabaseId', 'testProject')
+    ninoxProjectService = new NinoxProjectService(fsUtil)
 
     // Stubbing FSUtil methods
     FSUtilStubs.createDatabaseFolderInFiles = sandbox.stub(fsUtil, 'createDatabaseFolderInFiles').resolves()
@@ -60,14 +62,14 @@ describe('NinoxProjectService', () => {
 
   describe('createDatabaseFolderInFiles', () => {
     it('should call FSUtil.createDatabaseFolderInFiles with correct database ID', async () => {
-      await ninoxProjectService.createDatabaseFolderInFiles()
+      await ninoxProjectService.createDatabaseFolderInFiles(testDbId)
       sinon.assert.calledWith(FSUtilStubs.createDatabaseFolderInFiles, 'testDatabaseId')
     })
   })
 
   describe('initialiseProject', () => {
     it('should call necessary FSUtil methods to initialize a project', async () => {
-      await ninoxProjectService.initialiseProject()
+      await ninoxProjectService.initialiseProject(testProjectName)
       sinon.assert.calledOnce(FSUtilStubs.createPackageJson)
       sinon.assert.calledOnce(FSUtilStubs.createConfigYaml)
       sinon.assert.calledOnce(FSUtilStubs.ensureRootDirectoryStructure)
@@ -105,7 +107,7 @@ describe('NinoxProjectService', () => {
         .stub(ninoxProjectService, 'parseDatabaseAndSchemaFromFileContent')
         .returns({database: testDatabase, schema: testSchema})
 
-      const result = await ninoxProjectService.readDatabaseConfig()
+      const result = await ninoxProjectService.readDatabaseConfig(testDbId)
       expect(result).to.have.property('database')
       expect(result).to.have.property('schema')
     })

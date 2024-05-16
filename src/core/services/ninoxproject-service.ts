@@ -18,16 +18,12 @@ import {DBConfigsYaml} from '../common/types.js'
 import {FSUtil} from '../utils/fs.js'
 
 export class NinoxProjectService {
-  databaseId?: string
   fsUtil: FSUtil
-  name?: string
-  constructor(fsUtil: FSUtil, databaseId?: string, name?: string) {
+  constructor(fsUtil: FSUtil) {
     this.fsUtil = fsUtil
-    this.databaseId = databaseId
-    this.name = name
   }
 
-  public async createDatabaseFolderInFiles(dbId: string = this.databaseId as string) {
+  public async createDatabaseFolderInFiles(dbId: string) {
     await this.fsUtil.createDatabaseFolderInFiles(dbId)
   }
 
@@ -35,7 +31,7 @@ export class NinoxProjectService {
     return this.fsUtil.getDbBackgroundImagePath(dbId)
   }
 
-  public async initialiseProject(name: string = this.name as string): Promise<void> {
+  public async initialiseProject(name: string): Promise<void> {
     await this.fsUtil.createPackageJson(name)
     await this.fsUtil.createConfigYaml()
     await this.fsUtil.ensureRootDirectoryStructure()
@@ -104,9 +100,7 @@ export class NinoxProjectService {
     }
   }
 
-  public async readDatabaseConfig(
-    dbId: string = this.databaseId as string,
-  ): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
+  public async readDatabaseConfig(dbId: string): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
     const dbConfigInYaml = await this.fsUtil.readDatabaseConfig(dbId)
     const dbConfig = this.parseDatabaseConfigFileContentFromYaml(dbConfigInYaml)
     const parsedDBConfig = this.parseDatabaseAndSchemaFromFileContent(dbConfig)
