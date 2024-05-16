@@ -36,4 +36,9 @@ describe('database/list', () => {
     .it('errors with non-existent flag', (ctx) => {
       console.log(ctx.stderr)
     })
+    // TODO: Following test cases are pending
+    // invalid config.yml
+    // invalid db id
+    // invalid api key
+    // handling of invalid credentials
 })

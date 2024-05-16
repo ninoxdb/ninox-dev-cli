@@ -85,7 +85,7 @@ export class NinoxClient {
 
   public uploadDatabaseBackgroundImage = async (databaseId: string) => {
     if (!FSUtil.isDatabaseBackgroundFileExist(databaseId)) {
-      return
+      return false
     }
 
     const imagePath = FSUtil.getDbBackgroundImagePath(databaseId)
@@ -98,12 +98,15 @@ export class NinoxClient {
     formData.append('file', fs.createReadStream(imagePath))
 
     // Perform the PUT request with the form data
-    this.client.post(imageUrl, formData, {
-      headers: {
-        // FormData will generate the correct Content-Type boundary itself
-        ...formData.getHeaders(),
-      },
-    })
+    await this.client
+      .post(imageUrl, formData, {
+        headers: {
+          // FormData will generate the correct Content-Type boundary itself
+          ...formData.getHeaders(),
+        },
+      })
+      .catch(() => false)
+    return true
   }
 
   public uploadDatabaseSchemaToNinox = async (id: string, schema: DatabaseSchemaType) =>

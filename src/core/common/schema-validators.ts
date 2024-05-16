@@ -177,7 +177,7 @@ export type DatabaseSchemaInFileType = z.infer<typeof DatabaseSchemaInFile>
 export type DatabaseFileType = z.infer<typeof DatabaseFile>
 export type TableFileType = z.infer<typeof TableFile>
 export type DatabaseConfigFileContent = {
-  database: DatabaseFileType
-  tables: TableFileType[]
+  databaseLocal: DatabaseFileType
+  tablesLocal: TableFileType[]
 }
 export type TableBaseType = z.infer<typeof TableBase>

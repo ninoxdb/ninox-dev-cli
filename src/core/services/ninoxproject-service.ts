@@ -68,10 +68,10 @@ export class NinoxProjectService {
     database: DatabaseType
     schema: DatabaseSchemaType
   } {
-    const databaseParseResult = DatabaseFile.safeParse(dbConfig.database)
+    const databaseParseResult = DatabaseFile.safeParse(dbConfig.databaseLocal)
     if (!databaseParseResult.success) {
       throw new Error(
-        `Database validation failed for database: ${dbConfig.database?.database?.settings?.name} (${dbConfig.database.database.id})`,
+        `Database validation failed for database: ${dbConfig.databaseLocal?.database?.settings?.name} (${dbConfig.databaseLocal.database.id})`,
       )
     }
 
@@ -79,7 +79,7 @@ export class NinoxProjectService {
       ...databaseParseResult.data.database.schema,
       types: {},
     }
-    for (const tableFileData of dbConfig.tables) {
+    for (const tableFileData of dbConfig.tablesLocal) {
       const tableResult = TableFile.safeParse(tableFileData)
       if (!tableResult.success) {
         throw new Error('Table validation failed for table with id: ' + tableFileData.table._id)
@@ -121,13 +121,16 @@ export class NinoxProjectService {
     )
     const fileWritePromises = []
     // table
-    for (const table of tables) {
+    for (const tableFileData of tables) {
       const fileWritePromise = FSUtil.writeFile(
         FSUtil.getObjectPath(
           database.id,
-          FSUtil.getObjectFileName(table.table.kind === 'page' ? 'Page' : 'Table', table.table.caption as string),
+          FSUtil.getObjectFileName(
+            tableFileData.table.kind === 'page' ? 'Page' : 'Table',
+            tableFileData.table.caption as string,
+          ),
         ),
-        yaml.dump(table),
+        yaml.dump(tableFileData),
       )
       fileWritePromises.push(fileWritePromise)
     }
@@ -138,8 +141,8 @@ export class NinoxProjectService {
   private parseDatabaseConfigFileContentFromYaml(dbConfigYaml: DBConfigsYaml) {
     const {database: databaseYaml, tables: tablesYaml} = dbConfigYaml
     return {
-      database: yaml.load(databaseYaml) as DatabaseFileType,
-      tables: tablesYaml.map((table) => yaml.load(table) as TableFileType),
+      databaseLocal: yaml.load(databaseYaml) as DatabaseFileType,
+      tablesLocal: tablesYaml.map((table) => yaml.load(table) as TableFileType),
     } satisfies DatabaseConfigFileContent
   }
 }

@@ -46,7 +46,7 @@ describe('NinoxProjectService', () => {
     FSUtilStub.getObjectPath = sandbox
       .stub(FSUtil, 'getObjectPath')
       .callsFake((databaseId: string, objectName: string) =>
-        path.join(FSUtil.getDatabaseObjectsPath(databaseId), `${objectName}.yaml`),
+        path.join(FSUtil.getDatabaseObjectsDirectoryPath(databaseId), `${objectName}.yaml`),
       )
     FSUtilStub.createDatabaseFolderInObjects = sandbox.stub(FSUtil, 'createDatabaseFolderInObjects').resolves()
   })

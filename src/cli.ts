@@ -13,7 +13,9 @@ type CreateOptions = {
   version: string
 }
 
-export function create({bin, channel, development, run, version}: CreateOptions): {run: () => Promise<unknown>} {
+export function create({bin, channel, development, run: runLocal, version}: CreateOptions): {
+  run: () => Promise<unknown>
+} {
   const root = resolve(fileURLToPath(import.meta.url), '..')
   const args = process.argv.slice(2)
 
@@ -35,7 +37,7 @@ export function create({bin, channel, development, run, version}: CreateOptions)
 
       // Example of how run is used in a test https://github.com/salesforcecli/cli/pull/171/files#diff-1deee0a575599b2df117c280da319f7938aaf6fdb0c04bcdbde769dbf464be69R46
       if (development) return execute({args: _args, development, dir: import.meta.url})
-      return run ? run(_args, config) : oclifRun(_args, config)
+      return runLocal ? runLocal(_args, config) : oclifRun(_args, config)
     },
   }
 }

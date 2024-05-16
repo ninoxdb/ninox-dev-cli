@@ -14,11 +14,10 @@ import {
 import {DBConfigsYaml} from '../common/types.js'
 
 export class FSUtil {
-  static _credentialsFilePath = path.join(process.cwd(), CREDENTIALS_FILE_NAME)
+  static readonly credentialsFilePath = path.join(process.cwd(), CREDENTIALS_FILE_NAME)
+  static readonly filesPath = path.join(process.cwd(), 'src', 'Files')
 
-  static _filesPath = path.join(process.cwd(), 'src', 'Files')
-
-  static _objectsPath = path.join(process.cwd(), 'src', 'Objects')
+  static readonly objectsPath = path.join(process.cwd(), 'src', 'Objects')
 
   public static async createConfigYaml() {
     if (this.fileExists(this.credentialsFilePath)) {
@@ -62,10 +61,6 @@ export class FSUtil {
     await this.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2))
   }
 
-  static get credentialsFilePath(): string {
-    return this._credentialsFilePath
-  }
-
   public static async ensureRootDirectoryStructure() {
     await this.mkdir(this.objectsPath, {recursive: true})
     await this.mkdir(this.filesPath, {recursive: true})
@@ -73,10 +68,6 @@ export class FSUtil {
 
   static fileExists(filePath: string) {
     return fs.existsSync(filePath)
-  }
-
-  static get filesPath(): string {
-    return this._filesPath
   }
 
   static getDatabaseFilesDirectoryPath(databaseId: string) {
@@ -123,10 +114,6 @@ export class FSUtil {
 
   public static async mkdir(dirPath: string, options: fs.MakeDirectoryOptions) {
     await fsAsync.mkdir(dirPath, options)
-  }
-
-  static get objectsPath(): string {
-    return this._objectsPath
   }
 
   public static readCredentials() {
