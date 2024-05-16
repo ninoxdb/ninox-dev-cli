@@ -8,6 +8,7 @@ import {FSUtil} from '../../src/core/utils/fs.js'
 import {filesPath, mockNinoxEnvironment, objectsPath} from '../common/test-utils.js'
 
 describe('upload', () => {
+  let fsUtil: FSUtil
   let stubReadEnvironmentConfig: sinon.SinonStub
   const dbId = '4321'
   let credentialsPathStub: sinon.SinonStub
@@ -26,10 +27,10 @@ describe('upload', () => {
       .reply(200)
       .patch(`/v1/teams/${mockNinoxEnvironment.workspaceId}/databases/${dbId}/schema?human=T`)
       .reply(200)
-
-    credentialsPathStub = sinon.stub(FSUtil, 'credentialsFilePath').get(() => '/mocked/path/to/credentials')
-    filesPathStub = sinon.stub(FSUtil, 'filesPath').get(() => filesPath)
-    objectsPathStub = sinon.stub(FSUtil, 'objectsPath').get(() => objectsPath)
+    fsUtil = new FSUtil()
+    credentialsPathStub = sinon.stub(fsUtil, 'getCredentialsPath').get(() => '/mocked/path/to/credentials')
+    filesPathStub = sinon.stub(fsUtil, 'getFilesPath').get(() => filesPath)
+    objectsPathStub = sinon.stub(fsUtil, 'getObjectsPath').get(() => objectsPath)
 
     stubReadEnvironmentConfig = sinon
       .stub(UploadCommand.prototype, 'readEnvironmentConfig')

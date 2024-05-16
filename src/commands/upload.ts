@@ -4,6 +4,7 @@ import {BaseCommand} from '../core/base.js'
 import {DeployCommandOptions, EnvironmentConfig} from '../core/common/types.js'
 import {DatabaseService} from '../core/services/database-service.js'
 import {NinoxProjectService} from '../core/services/ninoxproject-service.js'
+import {FSUtil} from '../core/utils/fs.js'
 import {NinoxClient} from '../core/utils/ninox-client.js'
 
 export default class UploadCommand extends BaseCommand {
@@ -21,7 +22,9 @@ export default class UploadCommand extends BaseCommand {
 
   private async handle(opts: DeployCommandOptions): Promise<void> {
     const {database, schema} = await this.ninoxProjectService.readDatabaseConfig(opts.id)
-    await this.databaseService.uploadDatabase(database, schema)
+    const bgImagePath = this.ninoxProjectService.getDbBackgroundImagePath(opts.id)
+    const bgImageExists = await this.ninoxProjectService.isDbBackgroundImageExists(opts.id, bgImagePath)
+    await this.databaseService.uploadDatabase(database, schema, bgImagePath, bgImageExists)
   }
 
   // eslint-disable-next-line perfectionist/sort-classes
@@ -31,7 +34,8 @@ export default class UploadCommand extends BaseCommand {
       new NinoxClient(this.environment as EnvironmentConfig),
       this.environment.workspaceId,
     )
-    this.ninoxProjectService = new NinoxProjectService()
+    const fsUtil = new FSUtil()
+    this.ninoxProjectService = new NinoxProjectService(fsUtil)
   }
 
   public async run(): Promise<void> {

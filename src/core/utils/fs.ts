@@ -14,12 +14,18 @@ import {
 import {DBConfigsYaml} from '../common/types.js'
 
 export class FSUtil {
-  static readonly credentialsFilePath = path.join(process.cwd(), CREDENTIALS_FILE_NAME)
-  static readonly filesPath = path.join(process.cwd(), 'src', 'Files')
+  private credentialsFilePath: string
+  private filesPath: string
+  private objectsPath: string
 
-  static readonly objectsPath = path.join(process.cwd(), 'src', 'Objects')
+  // TODO: if required inject fs and fsAsync to make it testable
+  constructor(private basePath: string = process.cwd()) {
+    this.credentialsFilePath = path.join(this.basePath, CREDENTIALS_FILE_NAME)
+    this.filesPath = path.join(this.basePath, 'src', 'Files')
+    this.objectsPath = path.join(this.basePath, 'src', 'Objects')
+  }
 
-  public static async createConfigYaml() {
+  public async createConfigYaml() {
     if (this.fileExists(this.credentialsFilePath)) {
       return
     }
@@ -28,20 +34,20 @@ export class FSUtil {
   }
 
   // create folder src/Files/Database_${databaseid}
-  public static async createDatabaseFolderInFiles(databaseId: string) {
-    await this.mkdir(path.join(this.getDatabaseFilesDirectoryPath(databaseId)), {
+  public async createDatabaseFolderInFiles(databaseId: string) {
+    return this.mkdir(path.join(this.getDatabaseFilesDirectoryPath(databaseId)), {
       recursive: true,
     })
   }
 
   // create folder src/Object/Database_${databaseid}
-  public static async createDatabaseFolderInObjects(databaseId: string) {
+  public async createDatabaseFolderInObjects(databaseId: string) {
     return this.mkdir(this.getDatabaseObjectsDirectoryPath(databaseId), {
       recursive: true,
     })
   }
 
-  public static async createPackageJson(name: string = DEFAULT_NAME, description: string = DEFAULT_DESCRIPTION) {
+  public async createPackageJson(name: string = DEFAULT_NAME, description: string = DEFAULT_DESCRIPTION) {
     const packageJson = {
       description,
       keywords: [],
@@ -61,28 +67,32 @@ export class FSUtil {
     await this.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2))
   }
 
-  public static async ensureRootDirectoryStructure() {
+  public async ensureRootDirectoryStructure() {
     await this.mkdir(this.objectsPath, {recursive: true})
     await this.mkdir(this.filesPath, {recursive: true})
   }
 
-  static fileExists(filePath: string) {
+  public fileExists(filePath: string) {
     return fs.existsSync(filePath)
   }
 
-  static getDatabaseFilesDirectoryPath(databaseId: string) {
+  public getCredentialsPath() {
+    return this.credentialsFilePath
+  }
+
+  public getDatabaseFilesDirectoryPath(databaseId: string) {
     return path.join(this.filesPath, `Database_${databaseId}`)
   }
 
-  static getDatabaseObjectsDirectoryPath(databaseId: string) {
+  public getDatabaseObjectsDirectoryPath(databaseId: string) {
     return path.join(this.objectsPath, `Database_${databaseId}`)
   }
 
-  public static getDbBackgroundImagePath(databaseId: string) {
+  public getDbBackgroundImagePath(databaseId: string) {
     return path.join(this.getDatabaseFilesDirectoryPath(databaseId), DB_BACKGROUND_FILE_NAME)
   }
 
-  public static getFilePath(databaseId: string, objectName: string) {
+  public getFilePath(databaseId: string, objectName: string) {
     if (!fs.existsSync(this.getDatabaseFilesDirectoryPath(databaseId))) {
       throw new Error('File path not set')
     }
@@ -90,11 +100,15 @@ export class FSUtil {
     return path.join(this.getDatabaseFilesDirectoryPath(databaseId), `${objectName}.yaml`)
   }
 
-  public static getObjectFileName(objectType: string, objectId: string) {
+  public getFilesPath() {
+    return this.filesPath
+  }
+
+  public getObjectFileName(objectType: string, objectId: string) {
     return `${objectType}_${this.normalizeFileName(objectId)}`
   }
 
-  public static getObjectPath(databaseId: string, objectName: string) {
+  public getObjectPath(databaseId: string, objectName: string) {
     const databaseFolderPath = this.getDatabaseObjectsDirectoryPath(databaseId)
     if (!fs.existsSync(databaseFolderPath)) {
       throw new Error(`Database folder not found: ${databaseFolderPath}`)
@@ -103,20 +117,25 @@ export class FSUtil {
     return path.join(this.getDatabaseObjectsDirectoryPath(databaseId), `${objectName}.yaml`)
   }
 
-  public static isDatabaseBackgroundFileExist(databaseId: string) {
-    const backgroundFilePath = this.getDbBackgroundImagePath(databaseId)
+  public getObjectsPath() {
+    return this.objectsPath
+  }
+
+  public isDatabaseBackgroundFileExist(databaseId: string, imagePath?: string) {
+    const backgroundFilePath = imagePath ?? this.getDbBackgroundImagePath(databaseId)
     return fs.existsSync(backgroundFilePath)
   }
 
-  public static isProjectInitialized() {
+  public isProjectInitialized() {
     return fs.existsSync(path.join(process.cwd(), CREDENTIALS_FILE_NAME))
   }
 
-  public static async mkdir(dirPath: string, options: fs.MakeDirectoryOptions) {
+  public async mkdir(dirPath: string, options: fs.MakeDirectoryOptions) {
     await fsAsync.mkdir(dirPath, options)
   }
 
-  public static readCredentials() {
+  // TODO: merge it with the config.ts and add runtime validation
+  public readCredentials() {
     if (!fs.existsSync(this.credentialsFilePath)) {
       throw new Error('config.yaml file not found')
     }
@@ -124,11 +143,11 @@ export class FSUtil {
     return fs.readFileSync(this.credentialsFilePath, 'utf8')
   }
 
-  public static async readDatabaseConfig(databaseId: string) {
+  public async readDatabaseConfig(databaseId: string) {
     return this.readDBConfigFromFolder(this.getDatabaseObjectsDirectoryPath(databaseId))
   }
 
-  public static async readDefinedDatabaseConfigsFromFiles() {
+  public async readDefinedDatabaseConfigsFromFiles() {
     // do a scan of this.objectsPath dir
     // each directory is a isolated database with its own schema, tables and views
     // return an array of database configs
@@ -149,16 +168,16 @@ export class FSUtil {
     return Promise.all(databaseConfigs)
   }
 
-  public static async writeFile(filePath: string, data: string) {
+  public async writeFile(filePath: string, data: string) {
     await fsAsync.writeFile(filePath, data, 'utf8')
   }
 
-  private static normalizeFileName(name: string) {
+  private normalizeFileName(name: string) {
     // Replace sequences of non-alphanumeric characters (except underscores) with a single underscore
     return name.replaceAll(/\W+/gi, '_').toLowerCase()
   }
 
-  private static async readDBConfigFromFolder(databaseFolderPath: string) {
+  private async readDBConfigFromFolder(databaseFolderPath: string) {
     if (!fs.existsSync(databaseFolderPath)) {
       throw new Error(`Database folder not found: ${databaseFolderPath}`)
     }

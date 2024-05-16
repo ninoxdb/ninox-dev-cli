@@ -1,5 +1,5 @@
 import {BaseCommand} from '../../core/base.js'
-import { EnvironmentConfig } from '../../core/common/types.js'
+import {EnvironmentConfig} from '../../core/common/types.js'
 import {DatabaseService} from '../../core/services/database-service.js'
 import {NinoxClient} from '../../core/utils/ninox-client.js'
 

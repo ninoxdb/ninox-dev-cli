@@ -12,8 +12,8 @@ export class DatabaseService {
     this.databaseId = databaseId
   }
 
-  async downloadDatabaseBackgroundImage(dbId: string = this.databaseId as string) {
-    return this.ninoxClient.downloadDatabaseBackgroundImage(dbId)
+  async downloadDatabaseBackgroundImage(dbId: string = this.databaseId as string, imagePath: string) {
+    return this.ninoxClient.downloadDatabaseBackgroundImage(dbId, imagePath)
   }
 
   async getDatabase(id: string) {
@@ -24,8 +24,17 @@ export class DatabaseService {
     return this.ninoxClient.listDatabases() as Promise<DatabaseMetadata[]>
   }
 
-  public async uploadDatabase(database: DatabaseType, schema: DatabaseSchemaType) {
-    const isUploaded = await this.ninoxClient.uploadDatabaseBackgroundImage(database.id)
+  public async uploadDatabase(
+    database: DatabaseType,
+    schema: DatabaseSchemaType,
+    backgroundImagePath: string,
+    backgroundImageExists: boolean,
+  ) {
+    const isUploaded = await this.ninoxClient.uploadDatabaseBackgroundImage(
+      database.id,
+      backgroundImagePath,
+      backgroundImageExists,
+    )
     // If there was no background earlier, and now there is one, set the database background type to image
     // TODO: Later on, may be it is better to allow the developer to decide whether to set the background type to image or not, regardless of whether there is a background.jpg file
     if (isUploaded) {

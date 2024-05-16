@@ -19,20 +19,30 @@ import {FSUtil} from '../utils/fs.js'
 
 export class NinoxProjectService {
   databaseId?: string
+  fsUtil: FSUtil
   name?: string
-  constructor(databaseId?: string, name?: string) {
+  constructor(fsUtil: FSUtil, databaseId?: string, name?: string) {
+    this.fsUtil = fsUtil
     this.databaseId = databaseId
     this.name = name
   }
 
   public async createDatabaseFolderInFiles(dbId: string = this.databaseId as string) {
-    await FSUtil.createDatabaseFolderInFiles(dbId)
+    await this.fsUtil.createDatabaseFolderInFiles(dbId)
+  }
+
+  public getDbBackgroundImagePath(dbId: string) {
+    return this.fsUtil.getDbBackgroundImagePath(dbId)
   }
 
   public async initialiseProject(name: string = this.name as string): Promise<void> {
-    await FSUtil.createPackageJson(name)
-    await FSUtil.createConfigYaml()
-    await FSUtil.ensureRootDirectoryStructure()
+    await this.fsUtil.createPackageJson(name)
+    await this.fsUtil.createConfigYaml()
+    await this.fsUtil.ensureRootDirectoryStructure()
+  }
+
+  public async isDbBackgroundImageExists(dbId: string, imagePath?: string) {
+    return this.fsUtil.isDatabaseBackgroundFileExist(dbId, imagePath)
   }
 
   public parseData(
@@ -97,7 +107,7 @@ export class NinoxProjectService {
   public async readDatabaseConfig(
     dbId: string = this.databaseId as string,
   ): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
-    const dbConfigInYaml = await FSUtil.readDatabaseConfig(dbId)
+    const dbConfigInYaml = await this.fsUtil.readDatabaseConfig(dbId)
     const dbConfig = this.parseDatabaseConfigFileContentFromYaml(dbConfigInYaml)
     const parsedDBConfig = this.parseDatabaseAndSchemaFromFileContent(dbConfig)
     return parsedDBConfig
@@ -105,11 +115,11 @@ export class NinoxProjectService {
 
   // Write the database, schema and tables to their respective files
   public async writeToFiles(database: DatabaseType, schema: DatabaseSchemaBaseType, tables: TableFileType[]) {
-    await FSUtil.ensureRootDirectoryStructure()
+    await this.fsUtil.ensureRootDirectoryStructure()
     // Create a subfolder in the root directory/Objects with name Database_${id}
-    await FSUtil.createDatabaseFolderInObjects(database.id)
-    await FSUtil.writeFile(
-      FSUtil.getObjectPath(database.id, FSUtil.getObjectFileName('Database', database.settings.name)),
+    await this.fsUtil.createDatabaseFolderInObjects(database.id)
+    await this.fsUtil.writeFile(
+      this.fsUtil.getObjectPath(database.id, this.fsUtil.getObjectFileName('Database', database.settings.name)),
       yaml.dump(
         DatabaseFile.parse({
           database: {
@@ -122,10 +132,10 @@ export class NinoxProjectService {
     const fileWritePromises = []
     // table
     for (const tableFileData of tables) {
-      const fileWritePromise = FSUtil.writeFile(
-        FSUtil.getObjectPath(
+      const fileWritePromise = this.fsUtil.writeFile(
+        this.fsUtil.getObjectPath(
           database.id,
-          FSUtil.getObjectFileName(
+          this.fsUtil.getObjectFileName(
             tableFileData.table.kind === 'page' ? 'Page' : 'Table',
             tableFileData.table.caption as string,
           ),

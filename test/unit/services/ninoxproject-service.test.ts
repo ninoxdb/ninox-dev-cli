@@ -16,9 +16,10 @@ import {
 } from '../../common/test-utils.js'
 
 describe('NinoxProjectService', () => {
+  let fsUtil: FSUtil
   let ninoxProjectService: NinoxProjectService
   let sandbox: sinon.SinonSandbox & sinon.SinonStubbedInstance<typeof FSUtil>
-  const FSUtilStub = {
+  const FSUtilStubs = {
     createConfigYaml: sinon.stub(),
     createDatabaseFolderInFiles: sinon.stub(),
     createDatabaseFolderInObjects: sinon.stub(),
@@ -32,23 +33,24 @@ describe('NinoxProjectService', () => {
   beforeEach(() => {
     // Resetting environment for each test
     sandbox = sinon.createSandbox() as sinon.SinonSandbox & sinon.SinonStubbedInstance<typeof FSUtil>
-    ninoxProjectService = new NinoxProjectService('testDatabaseId', 'testProject')
+    fsUtil = new FSUtil()
+    ninoxProjectService = new NinoxProjectService(fsUtil, 'testDatabaseId', 'testProject')
 
     // Stubbing FSUtil methods
-    FSUtilStub.createDatabaseFolderInFiles = sandbox.stub(FSUtil, 'createDatabaseFolderInFiles').resolves()
-    FSUtilStub.createPackageJson = sandbox.stub(FSUtil, 'createPackageJson').resolves()
-    FSUtilStub.createConfigYaml = sandbox.stub(FSUtil, 'createConfigYaml').resolves()
-    FSUtilStub.ensureRootDirectoryStructure = sandbox.stub(FSUtil, 'ensureRootDirectoryStructure').resolves()
-    FSUtilStub.readDatabaseConfig = sandbox
-      .stub(FSUtil, 'readDatabaseConfig')
+    FSUtilStubs.createDatabaseFolderInFiles = sandbox.stub(fsUtil, 'createDatabaseFolderInFiles').resolves()
+    FSUtilStubs.createPackageJson = sandbox.stub(fsUtil, 'createPackageJson').resolves()
+    FSUtilStubs.createConfigYaml = sandbox.stub(fsUtil, 'createConfigYaml').resolves()
+    FSUtilStubs.ensureRootDirectoryStructure = sandbox.stub(fsUtil, 'ensureRootDirectoryStructure').resolves()
+    FSUtilStubs.readDatabaseConfig = sandbox
+      .stub(fsUtil, 'readDatabaseConfig')
       .resolves({database: `database:\n  id: 123`, tables: []})
-    FSUtilStub.writeFile = sandbox.stub(FSUtil, 'writeFile').resolves()
-    FSUtilStub.getObjectPath = sandbox
-      .stub(FSUtil, 'getObjectPath')
+    FSUtilStubs.writeFile = sandbox.stub(fsUtil, 'writeFile').resolves()
+    FSUtilStubs.getObjectPath = sandbox
+      .stub(fsUtil, 'getObjectPath')
       .callsFake((databaseId: string, objectName: string) =>
-        path.join(FSUtil.getDatabaseObjectsDirectoryPath(databaseId), `${objectName}.yaml`),
+        path.join(fsUtil.getDatabaseObjectsDirectoryPath(databaseId), `${objectName}.yaml`),
       )
-    FSUtilStub.createDatabaseFolderInObjects = sandbox.stub(FSUtil, 'createDatabaseFolderInObjects').resolves()
+    FSUtilStubs.createDatabaseFolderInObjects = sandbox.stub(fsUtil, 'createDatabaseFolderInObjects').resolves()
   })
 
   afterEach(() => {
@@ -59,16 +61,16 @@ describe('NinoxProjectService', () => {
   describe('createDatabaseFolderInFiles', () => {
     it('should call FSUtil.createDatabaseFolderInFiles with correct database ID', async () => {
       await ninoxProjectService.createDatabaseFolderInFiles()
-      sinon.assert.calledWith(FSUtilStub.createDatabaseFolderInFiles, 'testDatabaseId')
+      sinon.assert.calledWith(FSUtilStubs.createDatabaseFolderInFiles, 'testDatabaseId')
     })
   })
 
   describe('initialiseProject', () => {
     it('should call necessary FSUtil methods to initialize a project', async () => {
       await ninoxProjectService.initialiseProject()
-      sinon.assert.calledOnce(FSUtilStub.createPackageJson)
-      sinon.assert.calledOnce(FSUtilStub.createConfigYaml)
-      sinon.assert.calledOnce(FSUtilStub.ensureRootDirectoryStructure)
+      sinon.assert.calledOnce(FSUtilStubs.createPackageJson)
+      sinon.assert.calledOnce(FSUtilStubs.createConfigYaml)
+      sinon.assert.calledOnce(FSUtilStubs.ensureRootDirectoryStructure)
     })
   })
 
@@ -112,10 +114,10 @@ describe('NinoxProjectService', () => {
   describe('writeToFiles', () => {
     it('should ensure the root directory structure and write to files', async () => {
       await ninoxProjectService.writeToFiles(testDatabase, testSchemaInFile, testTablesInFile)
-      sinon.assert.calledOnce(FSUtilStub.ensureRootDirectoryStructure)
-      sinon.assert.calledOnce(FSUtilStub.createDatabaseFolderInObjects)
-      sinon.assert.calledWith(FSUtilStub.writeFile, sinon.match.string, sinon.match.string)
-      expect(FSUtilStub.writeFile.callCount).to.equal(testTablesInFile.length + 1)
+      sinon.assert.calledOnce(FSUtilStubs.ensureRootDirectoryStructure)
+      sinon.assert.calledOnce(FSUtilStubs.createDatabaseFolderInObjects)
+      sinon.assert.calledWith(FSUtilStubs.writeFile, sinon.match.string, sinon.match.string)
+      expect(FSUtilStubs.writeFile.callCount).to.equal(testTablesInFile.length + 1)
     })
   })
 })

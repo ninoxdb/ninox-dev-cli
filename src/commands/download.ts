@@ -4,6 +4,7 @@ import {BaseCommand} from '../core/base.js'
 import {EnvironmentConfig, ImportCommandOptions} from '../core/common/types.js'
 import {DatabaseService} from '../core/services/database-service.js'
 import {NinoxProjectService} from '../core/services/ninoxproject-service.js'
+import {FSUtil} from '../core/utils/fs.js'
 import {NinoxClient} from '../core/utils/ninox-client.js'
 
 export default class DownloadCommand extends BaseCommand {
@@ -26,7 +27,10 @@ export default class DownloadCommand extends BaseCommand {
     const {database, schema, tables} = this.ninoxProjectService.parseData({...dbRemainingData, id: opts.id}, schemaData)
     await this.ninoxProjectService.writeToFiles(database, schema, tables)
     await this.ninoxProjectService.createDatabaseFolderInFiles(opts.id)
-    await this.databaseService.downloadDatabaseBackgroundImage(opts.id)
+    await this.databaseService.downloadDatabaseBackgroundImage(
+      opts.id,
+      this.ninoxProjectService.getDbBackgroundImagePath(opts.id),
+    )
   }
 
   // eslint-disable-next-line perfectionist/sort-classes
@@ -36,7 +40,8 @@ export default class DownloadCommand extends BaseCommand {
       new NinoxClient(this.environment as EnvironmentConfig),
       this.environment.workspaceId,
     )
-    this.ninoxProjectService = new NinoxProjectService()
+    const fsUtil = new FSUtil()
+    this.ninoxProjectService = new NinoxProjectService(fsUtil)
   }
 
   public async run(): Promise<void> {

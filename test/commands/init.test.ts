@@ -5,13 +5,15 @@ import {FSUtil} from '../../src/core/utils/fs.js'
 
 describe('init', () => {
   const ninoxProjectName = 'ninox-project'
+  let fsUtil: FSUtil
   let stubReadEnvironmentConfig: sinon.SinonStub
   let fsExistsSyncStub: sinon.SinonStub
   let writeFileStub: sinon.SinonStub
   before(() => {
-    stubReadEnvironmentConfig = sinon.stub(FSUtil, 'mkdir').callsFake(() => Promise.resolve())
-    fsExistsSyncStub = sinon.stub(FSUtil, 'fileExists').callsFake(() => false)
-    writeFileStub = sinon.stub(FSUtil, 'writeFile').callsFake(() => Promise.resolve())
+    fsUtil = new FSUtil()
+    stubReadEnvironmentConfig = sinon.stub(fsUtil, 'mkdir').callsFake(() => Promise.resolve())
+    fsExistsSyncStub = sinon.stub(fsUtil, 'fileExists').callsFake(() => false)
+    writeFileStub = sinon.stub(fsUtil, 'writeFile').callsFake(() => Promise.resolve())
   })
 
   after(() => {

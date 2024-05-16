@@ -5,7 +5,6 @@ import fs from 'node:fs'
 import {DB_BACKGROUND_FILE_NAME} from '../common/constants.js'
 import {DatabaseMetadata, DatabaseSchemaType, DatabaseSettingsType} from '../common/schema-validators.js'
 import {NinoxCredentials} from '../common/types.js'
-import {FSUtil} from './fs.js'
 
 export class NinoxClient {
   apiKey: string
@@ -27,8 +26,7 @@ export class NinoxClient {
 
   // download the background image from /{accountId}/root/background.jpg
   // eslint-disable-next-line perfectionist/sort-classes
-  public downloadDatabaseBackgroundImage = async (databaseId: string) => {
-    const imagePath = FSUtil.getDbBackgroundImagePath(databaseId)
+  public downloadDatabaseBackgroundImage = async (databaseId: string, imagePath: string) => {
     const imageUrl = `/${this.workspaceId}/${databaseId}/files/${DB_BACKGROUND_FILE_NAME}`
     try {
       const response = await this.client({
@@ -83,12 +81,11 @@ export class NinoxClient {
       .catch((error) => handleAxiosError(error, 'Failed to Update Database settings.'))
   }
 
-  public uploadDatabaseBackgroundImage = async (databaseId: string) => {
-    if (!FSUtil.isDatabaseBackgroundFileExist(databaseId)) {
+  public uploadDatabaseBackgroundImage = async (databaseId: string, imagePath: string, imageFileExists: boolean) => {
+    if (!imageFileExists) {
       return false
     }
 
-    const imagePath = FSUtil.getDbBackgroundImagePath(databaseId)
     const imageUrl = `/${this.workspaceId}/${databaseId}/files/${DB_BACKGROUND_FILE_NAME}`
 
     // Create a new instance of FormData
