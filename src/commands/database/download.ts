@@ -8,33 +8,36 @@ import {FSUtil} from '../../core/utils/fs.js'
 import {NinoxClient} from '../../core/utils/ninox-client.js'
 
 export default class DownloadCommand extends BaseCommand {
-  static override description =
+  public static override description =
     'Download the settings and configuration (e.g Tables, Fields, Views and Reports) of a Ninox database to the local filesystem. The ENV argument comes before the command name.'
 
-  static override examples = ['<%= config.bin %> <%= command.args.env.default %> <%= command.id %> -i 1234']
-  static override flags = {
+  public static override examples = ['<%= config.bin %> <%= command.args.env.default %> <%= command.id %> -i 1234']
+  public static override flags = {
     id: Flags.string({char: 'i', description: 'Database ID to Download', required: true}),
   }
 
   protected databaseService!: DatabaseService
   protected ninoxProjectService!: NinoxProjectService
 
-  private async handle(opts: ImportCommandOptions): Promise<void> {
-    const dbData = await this.databaseService.getDatabase(opts.id)
+  private async handle(options: ImportCommandOptions): Promise<void> {
+    const databaseData = await this.databaseService.getDatabase(options.id)
 
-    const {schema: schemaData, ...dbRemainingData} = dbData
+    const {schema: schemaData, ...databaseRemainingData} = databaseData
 
-    const {database, schema, tables} = this.ninoxProjectService.parseData({...dbRemainingData, id: opts.id}, schemaData)
+    const {database, schema, tables} = this.ninoxProjectService.parseData(
+      {...databaseRemainingData, id: options.id},
+      schemaData,
+    )
     await this.ninoxProjectService.writeToFiles(database, schema, tables)
-    await this.ninoxProjectService.createDatabaseFolderInFiles(opts.id)
+    await this.ninoxProjectService.createDatabaseFolderInFiles(options.id)
     await this.databaseService.downloadDatabaseBackgroundImage(
-      opts.id,
-      this.ninoxProjectService.getDbBackgroundImagePath(opts.id),
+      options.id,
+      this.ninoxProjectService.getDbBackgroundImagePath(options.id),
     )
   }
 
   // eslint-disable-next-line perfectionist/sort-classes
-  async init(): Promise<void> {
+  protected async init(): Promise<void> {
     await super.init()
     this.databaseService = new DatabaseService(
       new NinoxClient(this.environment as EnvironmentConfig),

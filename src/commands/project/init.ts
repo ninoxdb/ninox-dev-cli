@@ -5,22 +5,22 @@ import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
 import {FSUtil} from '../../core/utils/fs.js'
 
 export default class InitCommand extends Command {
-  static override args = {
+  public static override args = {
     name: Args.string({description: 'Name of the Ninox project', required: true}),
   }
 
-  static override description = 'Initialize a new Ninox project in the current directory'
+  public static override description = 'Initialize a new Ninox project in the current directory'
 
-  static override examples = ['<%= config.bin %> <%= command.id %>']
+  public static override examples = ['<%= config.bin %> <%= command.id %>']
 
   protected ninoxProjectService!: NinoxProjectService
 
-  private async handle(opts: InitCommandOptions) {
-    this.ninoxProjectService.initialiseProject(opts.name)
+  private async handle(options: InitCommandOptions): Promise<void> {
+    return this.ninoxProjectService.initialiseProject(options.name)
   }
 
   // eslint-disable-next-line perfectionist/sort-classes
-  async init(): Promise<void> {
+  protected async init(): Promise<void> {
     await super.init()
     const fsUtil = new FSUtil()
     this.ninoxProjectService = new NinoxProjectService(fsUtil)

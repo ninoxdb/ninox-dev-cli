@@ -18,17 +18,17 @@ import {DBConfigsYaml} from '../common/types.js'
 import {FSUtil} from '../utils/fs.js'
 
 export class NinoxProjectService {
-  fsUtil: FSUtil
-  constructor(fsUtil: FSUtil) {
+  private fsUtil: FSUtil
+  public constructor(fsUtil: FSUtil) {
     this.fsUtil = fsUtil
   }
 
-  public async createDatabaseFolderInFiles(dbId: string) {
-    await this.fsUtil.createDatabaseFolderInFiles(dbId)
+  public async createDatabaseFolderInFiles(databaseId: string): Promise<void> {
+    await this.fsUtil.createDatabaseFolderInFiles(databaseId)
   }
 
-  public getDbBackgroundImagePath(dbId: string) {
-    return this.fsUtil.getDbBackgroundImagePath(dbId)
+  public getDbBackgroundImagePath(databaseId: string): string {
+    return this.fsUtil.getDbBackgroundImagePath(databaseId)
   }
 
   public async initialiseProject(name: string): Promise<void> {
@@ -37,15 +37,15 @@ export class NinoxProjectService {
     await this.fsUtil.ensureRootDirectoryStructure()
   }
 
-  public async isDbBackgroundImageExists(dbId: string, imagePath?: string) {
-    return this.fsUtil.isDatabaseBackgroundFileExist(dbId, imagePath)
+  public isDbBackgroundImageExists(databaseId: string, imagePath?: string): boolean {
+    return this.fsUtil.isDatabaseBackgroundFileExist(databaseId, imagePath)
   }
 
   public parseData(
-    db: unknown,
+    database: unknown,
     sc: unknown,
   ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]} {
-    const parsedDatabase = Database.safeParse(db)
+    const parsedDatabase = Database.safeParse(database)
     const parsedSchema = DatabaseSchema.safeParse(sc)
 
     if (!parsedDatabase.success || !parsedSchema.success)
@@ -70,14 +70,14 @@ export class NinoxProjectService {
     return {database: parsedDatabase.data, schema, tables}
   }
 
-  public parseDatabaseAndSchemaFromFileContent(dbConfig: DatabaseConfigFileContent): {
+  public parseDatabaseAndSchemaFromFileContent(databaseConfig: DatabaseConfigFileContent): {
     database: DatabaseType
     schema: DatabaseSchemaType
   } {
-    const databaseParseResult = DatabaseFile.safeParse(dbConfig.databaseLocal)
+    const databaseParseResult = DatabaseFile.safeParse(databaseConfig.databaseLocal)
     if (!databaseParseResult.success) {
       throw new Error(
-        `Database validation failed for database: ${dbConfig.databaseLocal?.database?.settings?.name} (${dbConfig.databaseLocal.database.id})`,
+        `Database validation failed for database: ${databaseConfig.databaseLocal?.database?.settings?.name} (${databaseConfig.databaseLocal.database.id})`,
       )
     }
 
@@ -85,7 +85,7 @@ export class NinoxProjectService {
       ...databaseParseResult.data.database.schema,
       types: {},
     }
-    for (const tableFileData of dbConfig.tablesLocal) {
+    for (const tableFileData of databaseConfig.tablesLocal) {
       const tableResult = TableFile.safeParse(tableFileData)
       if (!tableResult.success) {
         throw new Error('Table validation failed for table with id: ' + tableFileData.table._id)
@@ -100,15 +100,19 @@ export class NinoxProjectService {
     }
   }
 
-  public async readDatabaseConfig(dbId: string): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
-    const dbConfigInYaml = await this.fsUtil.readDatabaseConfig(dbId)
-    const dbConfig = this.parseDatabaseConfigFileContentFromYaml(dbConfigInYaml)
-    const parsedDBConfig = this.parseDatabaseAndSchemaFromFileContent(dbConfig)
+  public async readDatabaseConfig(databaseId: string): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
+    const databaseConfigInYaml = await this.fsUtil.readDatabaseConfig(databaseId)
+    const databaseConfig = this.parseDatabaseConfigFileContentFromYaml(databaseConfigInYaml)
+    const parsedDBConfig = this.parseDatabaseAndSchemaFromFileContent(databaseConfig)
     return parsedDBConfig
   }
 
   // Write the database, schema and tables to their respective files
-  public async writeToFiles(database: DatabaseType, schema: DatabaseSchemaBaseType, tables: TableFileType[]) {
+  public async writeToFiles(
+    database: DatabaseType,
+    schema: DatabaseSchemaBaseType,
+    tables: TableFileType[],
+  ): Promise<void> {
     await this.fsUtil.ensureRootDirectoryStructure()
     // Create a subfolder in the root directory/Objects with name Database_${id}
     await this.fsUtil.createDatabaseFolderInObjects(database.id)
@@ -142,8 +146,8 @@ export class NinoxProjectService {
     await Promise.all(fileWritePromises)
   }
 
-  private parseDatabaseConfigFileContentFromYaml(dbConfigYaml: DBConfigsYaml) {
-    const {database: databaseYaml, tables: tablesYaml} = dbConfigYaml
+  private parseDatabaseConfigFileContentFromYaml(databaseConfigYaml: DBConfigsYaml): DatabaseConfigFileContent {
+    const {database: databaseYaml, tables: tablesYaml} = databaseConfigYaml
     return {
       databaseLocal: yaml.load(databaseYaml) as DatabaseFileType,
       tablesLocal: tablesYaml.map((table) => yaml.load(table) as TableFileType),

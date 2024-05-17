@@ -11,7 +11,7 @@ import {
 } from '../../src/core/common/schema-validators.js'
 const require = createRequire(import.meta.url)
 
-export const loadJsonMock = (filename: string) =>
+export const loadJsonMock = (filename: string): unknown =>
   require(path.join(path.dirname(url.fileURLToPath(import.meta.url)), '..', 'mocks', filename))
 
 export const credentialsFilePath = path.join(import.meta.url, '..', '..', 'mocks', 'nx-project', 'config.yaml')

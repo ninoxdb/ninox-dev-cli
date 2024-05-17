@@ -8,27 +8,31 @@ import {FSUtil} from '../../core/utils/fs.js'
 import {NinoxClient} from '../../core/utils/ninox-client.js'
 
 export default class UploadCommand extends BaseCommand {
-  static override description =
+  public static override description =
     'Deploy the local database configuration to the Ninox cloud server. The ENV argument comes before the command name.'
 
-  static override examples = ['<%= config.bin %> <%= command.args.env.default %> <%= command.id %> -i 1234']
+  public static override examples = ['<%= config.bin %> <%= command.args.env.default %> <%= command.id %> -i 1234']
 
-  static override flags = {
+  public static override flags = {
     id: Flags.string({char: 'i', description: 'Database ID to Download', required: true}),
   }
 
   protected databaseService!: DatabaseService
   protected ninoxProjectService!: NinoxProjectService
 
-  private async handle(opts: DeployCommandOptions): Promise<void> {
-    const {database, schema} = await this.ninoxProjectService.readDatabaseConfig(opts.id)
-    const bgImagePath = this.ninoxProjectService.getDbBackgroundImagePath(opts.id)
-    const bgImageExists = await this.ninoxProjectService.isDbBackgroundImageExists(opts.id, bgImagePath)
-    await this.databaseService.uploadDatabase(database, schema, bgImagePath, bgImageExists)
+  private async handle(options: DeployCommandOptions): Promise<void> {
+    const {database, schema} = await this.ninoxProjectService.readDatabaseConfig(options.id)
+    const bgImagePath = this.ninoxProjectService.getDbBackgroundImagePath(options.id)
+    await this.databaseService.uploadDatabase(
+      database,
+      schema,
+      bgImagePath,
+      this.ninoxProjectService.isDbBackgroundImageExists(options.id, bgImagePath),
+    )
   }
 
   // eslint-disable-next-line perfectionist/sort-classes
-  async init(): Promise<void> {
+  protected async init(): Promise<void> {
     await super.init()
     this.databaseService = new DatabaseService(
       new NinoxClient(this.environment as EnvironmentConfig),

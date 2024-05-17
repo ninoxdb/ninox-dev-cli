@@ -5,15 +5,13 @@ import {FSUtil} from '../../../src/core/utils/fs.js'
 
 describe('project/init', () => {
   const ninoxProjectName = 'ninox-project'
-  let fsUtil: FSUtil
   let stubReadEnvironmentConfig: sinon.SinonStub
   let fsExistsSyncStub: sinon.SinonStub
   let writeFileStub: sinon.SinonStub
   before(() => {
-    fsUtil = new FSUtil()
-    stubReadEnvironmentConfig = sinon.stub(fsUtil, 'mkdir').callsFake(() => Promise.resolve())
-    fsExistsSyncStub = sinon.stub(fsUtil, 'fileExists').callsFake(() => false)
-    writeFileStub = sinon.stub(fsUtil, 'writeFile').callsFake(() => Promise.resolve())
+    stubReadEnvironmentConfig = sinon.stub(FSUtil.prototype, 'mkdir').callsFake(() => Promise.resolve())
+    fsExistsSyncStub = sinon.stub(FSUtil.prototype, 'fileExists').callsFake(() => false)
+    writeFileStub = sinon.stub(FSUtil.prototype, 'writeFile').callsFake(() => Promise.resolve())
   })
 
   after(() => {
@@ -25,7 +23,7 @@ describe('project/init', () => {
   test
     .stdout()
     .command(['project init', ninoxProjectName])
-    .it('init commmand: Should initialize the project and exit successfully', (ctx) => {
-      expect(ctx.stdout).to.contain(`Initialized Ninox project ${ninoxProjectName} successfully!`)
+    .it('init commmand: Should initialize the project and exit successfully', (context) => {
+      expect(context.stdout).to.contain(`Initialized Ninox project ${ninoxProjectName} successfully!`)
     })
 })

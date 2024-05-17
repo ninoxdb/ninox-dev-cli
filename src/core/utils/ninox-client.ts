@@ -3,16 +3,91 @@ import FormData from 'form-data'
 import fs from 'node:fs'
 
 import {DB_BACKGROUND_FILE_NAME} from '../common/constants.js'
-import {DatabaseMetadata, DatabaseSchemaType, DatabaseSettingsType} from '../common/schema-validators.js'
+import {
+  DatabaseMetadata,
+  DatabaseSchemaType,
+  DatabaseSettingsType,
+  GetDatabaseResponse,
+} from '../common/schema-validators.js'
 import {NinoxCredentials} from '../common/types.js'
 
 export class NinoxClient {
-  apiKey: string
-  client: AxiosInstance
-  domain: string
-  workspaceId: string
+  public getDatabase = async (id: string): Promise<GetDatabaseResponse> =>
+    this.client
+      .get(`/v1/teams/${this.workspaceId}/databases/${id}?human=T`)
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to fetch database'))
 
-  constructor(creds: NinoxCredentials) {
+  public listDatabases = async (): Promise<DatabaseMetadata[]> =>
+    this.client
+      .get(`/v1/teams/${this.workspaceId}/databases`)
+      .then((response) => response.data as DatabaseMetadata[])
+      .catch((error) => {
+        handleAxiosError(error, 'Failed to list databases')
+        return []
+      })
+
+  public updateDatabaseSettings = async (id: string, settings: DatabaseSettingsType): Promise<unknown> => {
+    const data = JSON.stringify(settings)
+    return this.client
+      .post(`/${this.workspaceId}/${id}/settings/update`, data, {
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      })
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to Update Database settings.'))
+  }
+
+  public uploadDatabaseBackgroundImage = async (
+    databaseId: string,
+    imagePath: string,
+    imageFileExists: boolean,
+  ): Promise<boolean> => {
+    if (!imageFileExists) {
+      return false
+    }
+
+    const imageUrl = `/${this.workspaceId}/${databaseId}/files/${DB_BACKGROUND_FILE_NAME}`
+
+    // Create a new instance of FormData
+    const formData = new FormData()
+
+    // Append the file to the form data. The 'file' is the key by which the server expects the file binary.
+    formData.append('file', fs.createReadStream(imagePath))
+
+    // Perform the PUT request with the form data
+    await this.client
+      .post(imageUrl, formData, {
+        headers: {
+          // FormData will generate the correct Content-Type boundary itself
+          ...formData.getHeaders(),
+        },
+      })
+      .catch(() => false)
+    return true
+  }
+
+  public uploadDatabaseSchemaToNinox = async (id: string, schema: DatabaseSchemaType): Promise<unknown> =>
+    this.client
+      .patch(`/v1/teams/${this.workspaceId}/databases/${id}/schema?human=T`, schema)
+      .then((response) => response.data)
+      .catch((error) =>
+        handleAxiosError(
+          error,
+          'Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.',
+        ),
+      )
+
+  private apiKey: string
+
+  private client: AxiosInstance
+
+  private domain: string
+
+  private workspaceId: string
+
+  public constructor(creds: NinoxCredentials) {
     this.apiKey = creds.apiKey
     this.domain = creds.domain
     this.workspaceId = creds.workspaceId
@@ -25,8 +100,7 @@ export class NinoxClient {
   }
 
   // download the background image from /{accountId}/root/background.jpg
-  // eslint-disable-next-line perfectionist/sort-classes
-  public downloadDatabaseBackgroundImage = async (databaseId: string, imagePath: string) => {
+  public async downloadDatabaseBackgroundImage(databaseId: string, imagePath: string): Promise<void> {
     const imageUrl = `/${this.workspaceId}/${databaseId}/files/${DB_BACKGROUND_FILE_NAME}`
     try {
       const response = await this.client({
@@ -56,74 +130,14 @@ export class NinoxClient {
       throw error
     }
   }
-
-  public getDatabase = async (id: string) =>
-    this.client
-      .get(`/v1/teams/${this.workspaceId}/databases/${id}?human=T`)
-      .then((response) => response.data)
-      .catch((error) => handleAxiosError(error, 'Failed to fetch database'))
-
-  public listDatabases = async () =>
-    this.client
-      .get(`/v1/teams/${this.workspaceId}/databases`)
-      .then((response) => response.data as DatabaseMetadata[])
-      .catch((error) => handleAxiosError(error, 'Failed to list databases'))
-
-  public updateDatabaseSettings = async (id: string, settings: DatabaseSettingsType) => {
-    const data = JSON.stringify(settings)
-    return this.client
-      .post(`/${this.workspaceId}/${id}/settings/update`, data, {
-        headers: {
-          'Content-Type': 'text/plain',
-        },
-      })
-      .then((response) => response.data)
-      .catch((error) => handleAxiosError(error, 'Failed to Update Database settings.'))
-  }
-
-  public uploadDatabaseBackgroundImage = async (databaseId: string, imagePath: string, imageFileExists: boolean) => {
-    if (!imageFileExists) {
-      return false
-    }
-
-    const imageUrl = `/${this.workspaceId}/${databaseId}/files/${DB_BACKGROUND_FILE_NAME}`
-
-    // Create a new instance of FormData
-    const formData = new FormData()
-
-    // Append the file to the form data. The 'file' is the key by which the server expects the file binary.
-    formData.append('file', fs.createReadStream(imagePath))
-
-    // Perform the PUT request with the form data
-    await this.client
-      .post(imageUrl, formData, {
-        headers: {
-          // FormData will generate the correct Content-Type boundary itself
-          ...formData.getHeaders(),
-        },
-      })
-      .catch(() => false)
-    return true
-  }
-
-  public uploadDatabaseSchemaToNinox = async (id: string, schema: DatabaseSchemaType) =>
-    this.client
-      .patch(`/v1/teams/${this.workspaceId}/databases/${id}/schema?human=T`, schema)
-      .then((response) => response.data)
-      .catch((error) =>
-        handleAxiosError(
-          error,
-          'Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.',
-        ),
-      )
 }
 
-function handleAxiosError(error: unknown, msg: string) {
+function handleAxiosError(error: unknown, message: string): void {
   if (error instanceof AxiosError) {
     const {message: errorMessage, response} = error
     const data = response?.data?.message ?? response?.data
-    const message = `${msg}\n${data ?? errorMessage}`
-    throw new Error(message)
+    const message_ = `${message}\n${data ?? errorMessage}`
+    throw new Error(message_)
   }
 
   throw error

@@ -4,22 +4,22 @@ import {DatabaseService} from '../../core/services/database-service.js'
 import {NinoxClient} from '../../core/utils/ninox-client.js'
 
 export default class ListCommand extends BaseCommand {
-  static override description =
+  public static override description =
     'List all the database names and ids in the Ninox cloud server. The ENV argument comes before the command name.'
 
-  static override examples = ['<%= config.bin %> <%= command.args.env.default %> <%= command.id %>']
+  public static override examples = ['<%= config.bin %> <%= command.args.env.default %> <%= command.id %>']
 
   protected databaseService!: DatabaseService
 
   private async handle(): Promise<void> {
     const dbs = await this.databaseService.listDatabases()
-    for (const db of dbs) {
-      this.log(db.name, db.id)
+    for (const database of dbs) {
+      this.log(database.name, database.id)
     }
   }
 
   // eslint-disable-next-line perfectionist/sort-classes
-  async init(): Promise<void> {
+  protected async init(): Promise<void> {
     await super.init()
     this.databaseService = new DatabaseService(
       new NinoxClient(this.environment as EnvironmentConfig),

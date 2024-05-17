@@ -16,7 +16,7 @@ import {
 } from '../../common/test-utils.js'
 
 describe('NinoxProjectService', () => {
-  const testDbId = 'testDatabaseId'
+  const testDatabaseId = 'testDatabaseId'
   const testProjectName = 'testProject'
   let fsUtil: FSUtil
   let ninoxProjectService: NinoxProjectService
@@ -62,7 +62,7 @@ describe('NinoxProjectService', () => {
 
   describe('createDatabaseFolderInFiles', () => {
     it('should call FSUtil.createDatabaseFolderInFiles with correct database ID', async () => {
-      await ninoxProjectService.createDatabaseFolderInFiles(testDbId)
+      await ninoxProjectService.createDatabaseFolderInFiles(testDatabaseId)
       sinon.assert.calledWith(FSUtilStubs.createDatabaseFolderInFiles, 'testDatabaseId')
     })
   })
@@ -107,7 +107,7 @@ describe('NinoxProjectService', () => {
         .stub(ninoxProjectService, 'parseDatabaseAndSchemaFromFileContent')
         .returns({database: testDatabase, schema: testSchema})
 
-      const result = await ninoxProjectService.readDatabaseConfig(testDbId)
+      const result = await ninoxProjectService.readDatabaseConfig(testDatabaseId)
       expect(result).to.have.property('database')
       expect(result).to.have.property('schema')
     })

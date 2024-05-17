@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prevent-abbreviations */
 import {Config, execute, run as oclifRun} from '@oclif/core'
 import debug from 'debug'
 import {resolve} from 'node:path'

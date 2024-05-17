@@ -3,18 +3,21 @@ import nock from 'nock'
 import sinon from 'sinon'
 
 import DownloadCommand from '../../../src/commands/database/download.js'
+import {GetDatabaseResponse} from '../../../src/core/common/schema-validators.js'
 import {loadJsonMock} from '../../common/test-utils.js'
 
 describe('database/download', () => {
   let stubReadEnvironmentConfig: sinon.SinonStub
-  const dbId = '4321'
+  const databaseId = '4321'
   before(() => {
-    const databaseJSONMock = loadJsonMock('download-database-info.json')
+    const databaseJSONMock = loadJsonMock('download-database-info.json') as GetDatabaseResponse
     nock('https://mocked.example.com')
-      .get(`/v1/teams/mocked-workspace/databases/${dbId}?human=T`)
+      .get(`/v1/teams/mocked-workspace/databases/${databaseId}?human=T`)
       .reply(200, databaseJSONMock)
 
-    nock('https://mocked.example.com').get(`/mocked-workspace/${dbId}/files/background.jpg`).reply(200, 'mocked-image')
+    nock('https://mocked.example.com')
+      .get(`/mocked-workspace/${databaseId}/files/background.jpg`)
+      .reply(200, 'mocked-image')
 
     stubReadEnvironmentConfig = sinon.stub(DownloadCommand.prototype, 'readEnvironmentConfig').callsFake(() => ({
       apiKey: 'mocked-api-key',
@@ -29,19 +32,22 @@ describe('database/download', () => {
 
   test
     .stdout()
-    .command(['database download', '--id', dbId])
-    .it('runs download', (ctx) => {
-      expect(ctx.stdout).to.contain(`Downloaded database ${dbId} successfully!`)
+    .command(['database download', '--id', databaseId])
+    .it('runs download', (context) => {
+      expect(context.stdout).to.contain(`Downloaded database ${databaseId} successfully!`)
     })
   test
     .stderr()
-    .command(['database download', dbId])
+    .command(['database download', databaseId])
     .catch((error) => {
-      expect(error.message).to.contain(`Unexpected argument: ${dbId}\nSee more help with --help`)
+      expect(error.message).to.contain(`Unexpected argument: ${databaseId}\nSee more help with --help`)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((error as any).oclif.exit).to.equal(2)
     })
-    .it(`Should throw exception when run download with argument instead of flag i.e download ${dbId}`, (ctx) => {
-      console.log(ctx.stderr)
-    })
+    .it(
+      `Should throw exception when run download with argument instead of flag i.e download ${databaseId}`,
+      (context) => {
+        console.log(context.stderr)
+      },
+    )
 })

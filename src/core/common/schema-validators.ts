@@ -160,7 +160,7 @@ export const Credentials = z.object({
   domain: z
     .string()
     .url()
-    .transform((el: string) => el.replace(/\/$/, '')),
+    .transform((element: string) => element.replace(/\/$/, '')),
   workspaceId: z.string(),
 })
 
@@ -181,3 +181,7 @@ export type DatabaseConfigFileContent = {
   tablesLocal: TableFileType[]
 }
 export type TableBaseType = z.infer<typeof TableBase>
+export type GetDatabaseResponse = {
+  schema: DatabaseSchemaType
+  settings: DatabaseSettingsType
+}

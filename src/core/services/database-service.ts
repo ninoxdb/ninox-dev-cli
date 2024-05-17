@@ -1,4 +1,4 @@
-import {DatabaseMetadata, DatabaseSchemaType, DatabaseType} from '../common/schema-validators.js'
+import {DatabaseMetadata, DatabaseSchemaType, DatabaseType, GetDatabaseResponse} from '../common/schema-validators.js'
 import {NinoxClient} from '../utils/ninox-client.js'
 
 export class DatabaseService {
@@ -6,22 +6,25 @@ export class DatabaseService {
   protected ninoxClient: NinoxClient
   protected workspaceId: string
 
-  constructor(ninoxClient: NinoxClient, workspaceId: string, databaseId?: string) {
+  public constructor(ninoxClient: NinoxClient, workspaceId: string, databaseId?: string) {
     this.ninoxClient = ninoxClient
     this.workspaceId = workspaceId
     this.databaseId = databaseId
   }
 
-  async downloadDatabaseBackgroundImage(dbId: string = this.databaseId as string, imagePath: string) {
-    return this.ninoxClient.downloadDatabaseBackgroundImage(dbId, imagePath)
+  public async downloadDatabaseBackgroundImage(
+    databaseId: string = this.databaseId as string,
+    imagePath: string,
+  ): Promise<void> {
+    return this.ninoxClient.downloadDatabaseBackgroundImage(databaseId, imagePath)
   }
 
-  async getDatabase(id: string) {
+  public async getDatabase(id: string): Promise<GetDatabaseResponse> {
     return this.ninoxClient.getDatabase(id)
   }
 
-  async listDatabases() {
-    return this.ninoxClient.listDatabases() as Promise<DatabaseMetadata[]>
+  public async listDatabases(): Promise<DatabaseMetadata[]> {
+    return this.ninoxClient.listDatabases()
   }
 
   public async uploadDatabase(
@@ -29,7 +32,7 @@ export class DatabaseService {
     schema: DatabaseSchemaType,
     backgroundImagePath: string,
     backgroundImageExists: boolean,
-  ) {
+  ): Promise<void> {
     const isUploaded = await this.ninoxClient.uploadDatabaseBackgroundImage(
       database.id,
       backgroundImagePath,

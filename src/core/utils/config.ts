@@ -15,13 +15,13 @@ export function readConfig(): Config {
   return yaml.load(fs.readFileSync(configFile, 'utf8')) as Config
 }
 
-export function getEnvironment(env: string): EnvironmentConfig {
+export function getEnvironment(environment: string): EnvironmentConfig {
   const config = readConfig()
-  if (!config.environments[env]) {
+  if (!config.environments[environment]) {
     throw new Error(
-      `Environment "${env}" not found in config\nUsage: ninox <environment> <command>\ne.g: ninox dev list`,
+      `Environment "${environment}" not found in config\nUsage: ninox <environment> <command>\ne.g: ninox dev list`,
     )
   }
 
-  return config.environments[env]
+  return config.environments[environment]
 }
