@@ -4,6 +4,7 @@ import path from 'node:path'
 
 import {CREDENTIALS_FILE_NAME} from '../common/constants.js'
 import {Config, EnvironmentConfig} from '../common/types.js'
+import {configSchema} from './config-validator.js'
 
 const configFile = path.join(process.cwd(), CREDENTIALS_FILE_NAME)
 
@@ -17,9 +18,17 @@ export function readConfig(): Config {
 
 export function getEnvironment(environment: string): EnvironmentConfig {
   const config = readConfig()
+
+  // Validate the configuration
+  const result = configSchema.safeParse(config)
+
+  if (!result.success) {
+    throw new Error(`Invalid configuration file: ${result.error}`)
+  }
+
   if (!config.environments[environment]) {
     throw new Error(
-      `Environment "${environment}" not found in config\nUsage: ninox <environment> <command>\ne.g: ninox dev list`,
+      `Environment "${environment}" not found in config\nUsage: ninox <environment> <command>\ne.g: ninox dev database list`,
     )
   }
 

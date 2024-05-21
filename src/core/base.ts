@@ -35,7 +35,6 @@ export abstract class BaseCommand extends Command {
         if (error instanceof Error) this.error(error.message)
       }
 
-      // TODO: runtime validate environment after reading from file
       if (!environment.apiKey || !environment.domain || !environment.workspaceId) {
         this.error('Missing environment configuration. Please check your configuration file.')
       }
