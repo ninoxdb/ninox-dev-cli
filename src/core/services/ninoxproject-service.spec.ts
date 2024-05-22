@@ -3,21 +3,23 @@ import path from 'node:path'
 import sinon from 'sinon'
 import {z} from 'zod'
 
-import {Database, DatabaseSchema, TableBase, TableFile} from '../../../src/core/common/schema-validators.js'
+import {
+  Database,
+  DatabaseSchema,
+  DatabaseSchemaBaseType,
+  DatabaseSchemaInFileType,
+  DatabaseSchemaType,
+  TableBase,
+  TableBaseType,
+  TableFile,
+  TableFileType,
+} from '../../../src/core/common/schema-validators.js'
 import {NinoxProjectService} from '../../../src/core/services/ninoxproject-service.js'
 import {FSUtil} from '../../../src/core/utils/fs.js'
-import {
-  testDatabase,
-  testSchema,
-  testSchemaInFile,
-  testTable,
-  testTableInFile,
-  testTablesInFile,
-} from '../../common/test-utils.js'
 
 describe('NinoxProjectService', () => {
-  const testDatabaseId = 'testDatabaseId'
-  const testProjectName = 'testProject'
+  const databaseId = '1234'
+  const projectName = 'testProject'
   let fsUtil: FSUtil
   let ninoxProjectService: NinoxProjectService
   let sandbox: sinon.SinonSandbox & sinon.SinonStubbedInstance<typeof FSUtil>
@@ -31,6 +33,59 @@ describe('NinoxProjectService', () => {
     readDatabaseConfig: sinon.stub(),
     writeFile: sinon.stub(),
   }
+  const testSchemaBase: DatabaseSchemaBaseType = {
+    afterOpen: 'alert(---Guten Morgen---)',
+    afterOpenBehavior: 'restoreNavigation',
+    compatibility: 'latest',
+    dateFix: 'enabled',
+    fileSync: 'full',
+    globalCode: '0',
+    hideCalendar: false,
+    hideDatabase: false,
+    hideNavigation: false,
+    hideSearch: false,
+    knownDatabases: [],
+    nextTypeId: 2,
+    seq: 92,
+    version: 33,
+  }
+
+  const testSchemaInFile: DatabaseSchemaInFileType = {
+    ...testSchemaBase,
+    _database: '4321',
+  }
+
+  const testSchema: DatabaseSchemaType = {
+    ...testSchemaBase,
+    types: {},
+  }
+
+  const testTable: TableBaseType = {
+    afterCreate: '(var x := 1; ((x+( = A));(A := x)))',
+    afterUpdate: '(var x := 1; ((x+( = A));(A := x)))',
+    caption: 'Table112~!   @#$%^&*`@#$%^&*()$%^&*(',
+    captions: {},
+    fields: {},
+    globalSearch: true,
+    hidden: false,
+    kind: 'table',
+    nextFieldId: 5,
+    order: 0,
+    uis: {},
+    uuid: 'mAQsbi4gWS3eLKa2',
+  }
+
+  const testTableInFile: TableFileType = {
+    table: {
+      _database: '4321',
+      _id: 'A',
+      ...testTable,
+    },
+  }
+
+  const testTablesInFile: TableFileType[] = [testTableInFile]
+
+  const testDatabase = {id: 'db1', settings: {color: 'color1', icon: 'icon1', name: 'TestDB'}}
 
   beforeEach(() => {
     // Resetting environment for each test
@@ -62,14 +117,14 @@ describe('NinoxProjectService', () => {
 
   describe('createDatabaseFolderInFiles', () => {
     it('should call FSUtil.createDatabaseFolderInFiles with correct database ID', async () => {
-      await ninoxProjectService.createDatabaseFolderInFiles(testDatabaseId)
-      sinon.assert.calledWith(FSUtilStubs.createDatabaseFolderInFiles, 'testDatabaseId')
+      await ninoxProjectService.createDatabaseFolderInFiles(databaseId)
+      sinon.assert.calledWith(FSUtilStubs.createDatabaseFolderInFiles, databaseId)
     })
   })
 
   describe('initialiseProject', () => {
     it('should call necessary FSUtil methods to initialize a project', async () => {
-      await ninoxProjectService.initialiseProject(testProjectName)
+      await ninoxProjectService.initialiseProject(projectName)
       sinon.assert.calledOnce(FSUtilStubs.createPackageJson)
       sinon.assert.calledOnce(FSUtilStubs.createConfigYaml)
       sinon.assert.calledOnce(FSUtilStubs.ensureRootDirectoryStructure)
@@ -107,7 +162,7 @@ describe('NinoxProjectService', () => {
         .stub(ninoxProjectService, 'parseDatabaseAndSchemaFromFileContent')
         .returns({database: testDatabase, schema: testSchema})
 
-      const result = await ninoxProjectService.readDatabaseConfig(testDatabaseId)
+      const result = await ninoxProjectService.readDatabaseConfig(databaseId)
       expect(result).to.have.property('database')
       expect(result).to.have.property('schema')
     })

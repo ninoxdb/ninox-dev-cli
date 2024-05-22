@@ -74,7 +74,7 @@
     "readme": "oclif readme",
     "prepack": "oclif manifest && oclif readme",
     "test": "mocha --forbid-only \"test/commands/**/*.test.ts\"",
-    "test:unit": "mocha --forbid-only \"test/unit/**/*.spec.ts\"",
+    "test:unit": "mocha --forbid-only \"src/**/*.spec.ts\"",
     "version": "oclif readme && git add README.md"
   },
   "types": "dist/index.d.ts"
