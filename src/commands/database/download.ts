@@ -9,7 +9,7 @@ import {NinoxClient} from '../../core/utils/ninox-client.js'
 
 export default class DownloadCommand extends BaseCommand {
   public static override description =
-    'Download the settings and configuration (e.g Tables, Fields, Views and Reports) of a Ninox database to the local filesystem. The ENV argument comes before the command name.'
+    'Download the settings and configuration (i.e Tables, Fields, Views and Reports) of a Ninox database to the local filesystem. The ENV argument comes before the command name e.g ninox <ENV> database download -i 1234.'
 
   public static override examples = ['<%= config.bin %> <%= command.args.env.default %> <%= command.id %> -i 1234']
   public static override flags = {

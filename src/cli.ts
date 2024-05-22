@@ -33,8 +33,7 @@ export function create({bin, channel, development, run: runLocal, version}: Crea
 
       // Extract the environment argument and then pass the rest to oclif
       const [environment, topic, command, ...restArgs] = args
-      const _args =
-        needsEnvironment(topic) || needsEnvironment(command) ? [topic, command, ...restArgs, environment] : args
+      const _args = needsEnvironment(topic) ? [topic, command, ...restArgs, environment] : args
 
       // Example of how run is used in a test https://github.com/salesforcecli/cli/pull/171/files#diff-1deee0a575599b2df117c280da319f7938aaf6fdb0c04bcdbde769dbf464be69R46
       if (development) return execute({args: _args, development, dir: import.meta.url})
@@ -43,6 +42,6 @@ export function create({bin, channel, development, run: runLocal, version}: Crea
   }
 }
 
-function needsEnvironment(command: string): boolean {
-  return ['database', 'download', 'list', 'list3', 'upload'].includes(command)
+function needsEnvironment(topic: string): boolean {
+  return ['database'].includes(topic)
 }

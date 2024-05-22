@@ -19,7 +19,7 @@ $ npm install -g ninox
 $ ninox COMMAND
 running command...
 $ ninox (--version)
-ninox/0.1.0 darwin-arm64 node-v20.12.2
+ninox/0.1.0 darwin-arm64 node-v16.19.0
 $ ninox --help [COMMAND]
 USAGE
   $ ninox COMMAND
@@ -35,7 +35,7 @@ USAGE
 
 ## `ninox database download`
 
-Download the settings and configuration (e.g Tables, Fields, Views and Reports) of a Ninox database to the local filesystem. The ENV argument comes before the command name.
+Download the settings and configuration (i.e Tables, Fields, Views and Reports) of a Ninox database to the local filesystem. The ENV argument comes before the command name e.g ninox <ENV> database download -i 1234.
 
 ```
 USAGE
@@ -45,8 +45,8 @@ FLAGS
   -i, --id=<value>  (required) Database ID to Download
 
 DESCRIPTION
-  Download the settings and configuration (e.g Tables, Fields, Views and Reports) of a Ninox database to the local
-  filesystem. The ENV argument comes before the command name.
+  Download the settings and configuration (i.e Tables, Fields, Views and Reports) of a Ninox database to the local
+  filesystem. The ENV argument comes before the command name e.g ninox <ENV> database download -i 1234.
 
 EXAMPLES
   $ ninox DEV database download -i 1234
