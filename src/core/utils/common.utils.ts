@@ -1,5 +1,6 @@
-import {FsUtil} from '@src/core/utils/fs.utils.js'
 import {container} from 'tsyringe'
+
+import {FsUtil} from './fs.utils.js'
 
 const fsUtil = container.resolve<FsUtil>(FsUtil)
 

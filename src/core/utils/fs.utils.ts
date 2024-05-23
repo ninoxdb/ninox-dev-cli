@@ -1,12 +1,11 @@
 import fs from 'node:fs'
 import fsAsync from 'node:fs/promises'
-import {autoInjectable, inject} from 'tsyringe'
+import {autoInjectable} from 'tsyringe'
 
 @autoInjectable()
 export class FsUtil {
-  public constructor(@inject('BasePath') private readonly basePath: string) {
-    this.basePath = this.basePath ?? process.cwd()
-  }
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  public constructor() {}
 
   public fileExists(filePath: string): boolean {
     return fs.existsSync(filePath)

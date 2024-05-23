@@ -17,8 +17,8 @@ export default class InitCommand extends Command {
   private initProjectService!: InitProjectService
 
   protected async init(): Promise<void> {
-    await super.init()
     container.register('BasePath', {useValue: process.cwd()})
+    await super.init()
     this.initProjectService = container.resolve(InitProjectService)
   }
 

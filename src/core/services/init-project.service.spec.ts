@@ -20,7 +20,6 @@ describe('InitProjectService', () => {
 
     container.register(FsUtil, {useValue: fsUtilMock})
     container.register('BasePath', {useValue: basePath})
-
     initProjectService = container.resolve(InitProjectService)
   })
 

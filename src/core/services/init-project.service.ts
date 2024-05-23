@@ -1,4 +1,3 @@
-import {ensureRootDirectoryStructure} from '@src/core/utils/common.utils.js'
 import * as yaml from 'js-yaml'
 import {autoInjectable, inject} from 'tsyringe'
 
@@ -26,10 +25,7 @@ export class InitProjectService {
   public async initialiseProject(name: string): Promise<void> {
     await this.createPackageJson(name)
     await this.createConfigYaml()
-    await ensureRootDirectoryStructure(
-      [PathsUtils.filesPath(this.basePath), PathsUtils.objectsPath(this.basePath)],
-      true,
-    )
+    await this.ensureRootDirectoryStructure()
   }
 
   private buildPackageJsonContent(name: string, description: string): string {
@@ -53,5 +49,12 @@ export class InitProjectService {
 
     const packageJsonContent = this.buildPackageJsonContent(name, description)
     await this.fsUtil.writeFile(packageJsonFilePath, packageJsonContent)
+  }
+
+  private async ensureRootDirectoryStructure(): Promise<void> {
+    await Promise.all([
+      this.fsUtil.mkdir(PathsUtils.objectsPath(this.basePath), {recursive: true}),
+      this.fsUtil.mkdir(PathsUtils.filesPath(this.basePath), {recursive: true}),
+    ])
   }
 }
