@@ -3,12 +3,20 @@
     "declaration": true,
     "module": "Node16",
     "outDir": "dist",
-    "rootDir": "src",
     "strict": true,
     "target": "es2022",
-    "moduleResolution": "node16"
+    "moduleResolution": "node16",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "paths": {
+      "@src/*": ["src/*"],
+      "@tests/*": ["tests/*"]
+    },
+    "baseUrl": "./",
+    "rootDir": "src"
   },
-  "include": ["./src/**/*"],
+  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules"],
   "ts-node": {
     "esm": true
   }

@@ -37,3 +37,6 @@ export const HELP_PARAM = ['--help', '-h']
 export const DEFAULT_NAME = 'ninox-project'
 export const DEFAULT_DESCRIPTION = 'Ninox project'
 export const DEFAULT_VERSION = '1.0.0'
+export const SRC_PATH = 'src'
+export const OBJECTS_PATH = 'Objects'
+export const FILES_PATH = 'Files'
