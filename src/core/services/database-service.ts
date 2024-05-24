@@ -47,7 +47,7 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
       database,
       schema,
       bgImagePath,
-      this.ninoxProjectService.isDbBackgroundImageExists(id, bgImagePath),
+      this.ninoxProjectService.isDbBackgroundImageExist(id, bgImagePath),
     )
   }
 

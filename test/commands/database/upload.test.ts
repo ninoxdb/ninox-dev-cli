@@ -4,7 +4,7 @@ import sinon from 'sinon'
 
 import UploadCommand from '../../../src/commands/database/upload.js'
 import {DB_BACKGROUND_FILE_NAME} from '../../../src/core/common/constants.js'
-import {FSUtil} from '../../../src/core/utils/fs.js'
+import {NinoxProjectService} from '../../../src/core/services/ninoxproject-service.js'
 import {filesPath, mockNinoxEnvironment, objectsPath} from '../../common/test-utils.js'
 
 describe('database/upload', () => {
@@ -26,9 +26,11 @@ describe('database/upload', () => {
       .reply(200)
       .patch(`/v1/teams/${mockNinoxEnvironment.workspaceId}/databases/${databaseId}/schema?human=T`)
       .reply(200)
-    credentialsPathStub = sinon.stub(FSUtil.prototype, 'getCredentialsPath').get(() => '/mocked/path/to/credentials')
-    filesPathStub = sinon.stub(FSUtil.prototype, 'getFilesPath').get(() => filesPath)
-    objectsPathStub = sinon.stub(FSUtil.prototype, 'getObjectsPath').get(() => objectsPath)
+    credentialsPathStub = sinon
+      .stub(NinoxProjectService.prototype, 'getCredentialsPath')
+      .get(() => '/mocked/path/to/credentials')
+    filesPathStub = sinon.stub(NinoxProjectService.prototype, 'getFilesPath').get(() => filesPath)
+    objectsPathStub = sinon.stub(NinoxProjectService.prototype, 'getObjectsPath').get(() => objectsPath)
 
     stubReadEnvironmentConfig = sinon
       .stub(UploadCommand.prototype, 'readEnvironmentConfig')

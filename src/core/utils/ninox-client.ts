@@ -12,17 +12,11 @@ import {
 import {NinoxCredentials} from '../common/types.js'
 
 export class NinoxClient {
-  private apiKey: string
-
   private client: AxiosInstance
-
-  private domain: string
 
   private workspaceId: string
 
   public constructor(creds: NinoxCredentials) {
-    this.apiKey = creds.apiKey
-    this.domain = creds.domain
     this.workspaceId = creds.workspaceId
     this.client = axios.create({
       baseURL: creds.domain,

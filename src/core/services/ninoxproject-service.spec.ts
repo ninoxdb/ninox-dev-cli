@@ -1,5 +1,4 @@
 import {expect} from 'chai'
-import path from 'node:path'
 import sinon from 'sinon'
 import {z} from 'zod'
 
@@ -24,14 +23,18 @@ describe('NinoxProjectService', () => {
   let ninoxProjectService: NinoxProjectService
   let sandbox: sinon.SinonSandbox & sinon.SinonStubbedInstance<typeof FSUtil>
   const FSUtilStubs = {
+    fileExists: sinon.stub(),
+    mkdir: sinon.stub(),
+    writeFile: sinon.stub(),
+  }
+  const NinoxProjectServiceStubs = {
     createConfigYaml: sinon.stub(),
     createDatabaseFolderInFiles: sinon.stub(),
     createDatabaseFolderInObjects: sinon.stub(),
     createPackageJson: sinon.stub(),
     ensureRootDirectoryStructure: sinon.stub(),
-    getObjectPath: sinon.stub(),
+    readDBConfig: sinon.stub(),
     readDatabaseConfigFromFiles: sinon.stub(),
-    writeFile: sinon.stub(),
   }
   const testSchemaBase: DatabaseSchemaBaseType = {
     afterOpen: 'alert(---Guten Morgen---)',
@@ -93,21 +96,25 @@ describe('NinoxProjectService', () => {
     fsUtil = new FSUtil()
     ninoxProjectService = new NinoxProjectService(fsUtil)
 
-    // Stubbing FSUtil methods
-    FSUtilStubs.createDatabaseFolderInFiles = sandbox.stub(fsUtil, 'createDatabaseFolderInFiles').resolves()
-    FSUtilStubs.createPackageJson = sandbox.stub(fsUtil, 'createPackageJson').resolves()
-    FSUtilStubs.createConfigYaml = sandbox.stub(fsUtil, 'createConfigYaml').resolves()
-    FSUtilStubs.ensureRootDirectoryStructure = sandbox.stub(fsUtil, 'ensureRootDirectoryStructure').resolves()
-    FSUtilStubs.readDatabaseConfigFromFiles = sandbox
-      .stub(fsUtil, 'readDatabaseConfigFromFiles')
+    // TODO: check which methods are  necessary to stub from the NinoxProjectService, otherwise make them private
+    NinoxProjectServiceStubs.readDBConfig = sandbox
+      .stub(ninoxProjectService, 'readDBConfig')
       .resolves({database: `database:\n  id: 123`, tables: []})
+    NinoxProjectServiceStubs.createPackageJson = sandbox.stub(ninoxProjectService, 'createPackageJson')
+    NinoxProjectServiceStubs.createConfigYaml = sandbox.stub(ninoxProjectService, 'createConfigYaml')
+    NinoxProjectServiceStubs.ensureRootDirectoryStructure = sandbox.stub(
+      ninoxProjectService,
+      'ensureRootDirectoryStructure',
+    )
+    NinoxProjectServiceStubs.createDatabaseFolderInObjects = sandbox.stub(
+      ninoxProjectService,
+      'createDatabaseFolderInObjects',
+    )
+
+    // Stubbing FSUtil methods
     FSUtilStubs.writeFile = sandbox.stub(fsUtil, 'writeFile').resolves()
-    FSUtilStubs.getObjectPath = sandbox
-      .stub(fsUtil, 'getObjectPath')
-      .callsFake((databaseId: string, objectName: string) =>
-        path.join(fsUtil.getDatabaseObjectsDirectoryPath(databaseId), `${objectName}.yaml`),
-      )
-    FSUtilStubs.createDatabaseFolderInObjects = sandbox.stub(fsUtil, 'createDatabaseFolderInObjects').resolves()
+    FSUtilStubs.mkdir = sandbox.stub(fsUtil, 'mkdir').resolves()
+    FSUtilStubs.fileExists = sandbox.stub(fsUtil, 'fileExists').returns(true)
   })
 
   afterEach(() => {
@@ -118,16 +125,23 @@ describe('NinoxProjectService', () => {
   describe('createDatabaseFolderInFiles', () => {
     it('should call FSUtil.createDatabaseFolderInFiles with correct database ID', async () => {
       await ninoxProjectService.createDatabaseFolderInFiles(databaseId)
-      sinon.assert.calledWith(FSUtilStubs.createDatabaseFolderInFiles, databaseId)
+      // sinon.assert.calledWith(FSUtilStubs.createDatabaseFolderInFiles, databaseId)
+      sinon.assert.calledWith(FSUtilStubs.mkdir, ninoxProjectService.getDatabaseFilesDirectoryPath(databaseId))
     })
   })
 
   describe('initialiseProject', () => {
+    before(() => {
+      FSUtilStubs.fileExists.returns(false)
+    })
     it('should call necessary FSUtil methods to initialize a project', async () => {
       await ninoxProjectService.initialiseProject(projectName)
-      sinon.assert.calledOnce(FSUtilStubs.createPackageJson)
-      sinon.assert.calledOnce(FSUtilStubs.createConfigYaml)
-      sinon.assert.calledOnce(FSUtilStubs.ensureRootDirectoryStructure)
+      sinon.assert.calledOnce(NinoxProjectServiceStubs.createPackageJson)
+      sinon.assert.calledOnce(NinoxProjectServiceStubs.createConfigYaml)
+      sinon.assert.calledOnce(NinoxProjectServiceStubs.ensureRootDirectoryStructure)
+    })
+    after(() => {
+      FSUtilStubs.fileExists.returns(true)
     })
   })
 
@@ -171,9 +185,8 @@ describe('NinoxProjectService', () => {
   describe('writeDatabaseToFiles', () => {
     it('should ensure the root directory structure and write to files', async () => {
       await ninoxProjectService.writeDatabaseToFiles(testDatabase, testSchemaInFile, testTablesInFile)
-      sinon.assert.calledOnce(FSUtilStubs.ensureRootDirectoryStructure)
-      sinon.assert.calledOnce(FSUtilStubs.createDatabaseFolderInObjects)
-      sinon.assert.calledWith(FSUtilStubs.writeFile, sinon.match.string, sinon.match.string)
+      sinon.assert.calledOnce(NinoxProjectServiceStubs.ensureRootDirectoryStructure)
+      sinon.assert.calledOnce(NinoxProjectServiceStubs.createDatabaseFolderInObjects)
       expect(FSUtilStubs.writeFile.callCount).to.equal(testTablesInFile.length + 1)
     })
   })

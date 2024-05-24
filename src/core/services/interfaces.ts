@@ -10,7 +10,7 @@ export interface IProjectService {
   createDatabaseFolderInFiles(databaseId: string): Promise<void>
   getDbBackgroundImagePath(databaseId: string): string
   initialiseProject(name: string): Promise<void>
-  isDbBackgroundImageExists(databaseId: string, imagePath?: string): boolean
+  isDbBackgroundImageExist(databaseId: string, imagePath?: string): boolean
   parseDatabaseConfigs(
     database: unknown,
     sc: unknown,

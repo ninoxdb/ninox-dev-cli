@@ -58,7 +58,7 @@ describe('DatabaseService', () => {
         schema: schemaMock,
       })
       ninoxProjectServiceStub.getDbBackgroundImagePath.returns(mockBgImagePath)
-      ninoxProjectServiceStub.isDbBackgroundImageExists.returns(true)
+      ninoxProjectServiceStub.isDbBackgroundImageExist.returns(true)
       ninoxClientStub.uploadDatabaseBackgroundImage.resolves()
       ninoxClientStub.updateDatabaseSettings.resolves()
       ninoxClientStub.uploadDatabaseSchemaToNinox.resolves()
@@ -67,7 +67,7 @@ describe('DatabaseService', () => {
 
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.readDatabaseConfigFromFiles, databaseId)
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.getDbBackgroundImagePath, databaseId)
-      sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.isDbBackgroundImageExists, databaseId, mockBgImagePath)
+      sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.isDbBackgroundImageExist, databaseId, mockBgImagePath)
       sinon.assert.calledOnceWithExactly(
         ninoxClientStub.uploadDatabaseBackgroundImage,
         databaseId,
