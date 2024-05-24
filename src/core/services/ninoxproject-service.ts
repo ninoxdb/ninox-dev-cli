@@ -2,6 +2,7 @@ import * as yaml from 'js-yaml'
 import fs from 'node:fs'
 import * as fsAsync from 'node:fs/promises'
 import path from 'node:path'
+import {inject, injectable} from 'tsyringe'
 
 import {
   CREDENTIALS_FILE_NAME,
@@ -29,16 +30,16 @@ import {DBConfigsYaml} from '../common/types.js'
 import {FSUtil} from '../utils/fs.js'
 import {IProjectService} from './interfaces.js'
 
+@injectable()
 export class NinoxProjectService implements IProjectService {
+  private basePath: string
   private credentialsFilePath: string
   private filesPath: string
   private fsUtil: FSUtil
   private objectsPath: string
-  public constructor(
-    fsUtil: FSUtil,
-    private basePath: string = process.cwd(),
-  ) {
+  public constructor(@inject(FSUtil) fsUtil: FSUtil) {
     this.fsUtil = fsUtil
+    this.basePath = process.cwd()
     this.credentialsFilePath = path.join(this.basePath, CREDENTIALS_FILE_NAME)
     this.filesPath = path.join(this.basePath, 'src', 'Files')
     this.objectsPath = path.join(this.basePath, 'src', 'Objects')

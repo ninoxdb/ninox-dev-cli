@@ -1,7 +1,10 @@
+import {inject, injectable} from 'tsyringe'
+
 import {DatabaseMetadata, DatabaseSchemaType, DatabaseType} from '../common/schema-validators.js'
 import {NinoxClient} from '../utils/ninox-client.js'
 import {INinoxObjectService, IProjectService} from './interfaces.js'
 
+@injectable()
 export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   protected databaseId?: string
   protected ninoxClient: NinoxClient
@@ -9,15 +12,13 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   protected workspaceId: string
 
   public constructor(
-    ninoxProjectService: IProjectService,
-    ninoxClient: NinoxClient,
-    workspaceId: string,
-    databaseId?: string,
+    @inject('NinoxProjectService') ninoxProjectService: IProjectService,
+    @inject(NinoxClient) ninoxClient: NinoxClient,
+    @inject('EnvironmentConfig') workspaceId: string,
   ) {
     this.ninoxProjectService = ninoxProjectService
     this.ninoxClient = ninoxClient
     this.workspaceId = workspaceId
-    this.databaseId = databaseId
   }
 
   public async download(id: string): Promise<void> {

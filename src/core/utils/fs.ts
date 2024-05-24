@@ -1,10 +1,12 @@
 import fs from 'node:fs'
 import * as fsAsync from 'node:fs/promises'
 import path from 'node:path'
+import {singleton} from 'tsyringe'
 
 import {CREDENTIALS_FILE_NAME} from '../common/constants.js'
 
-export class FSUtil {
+@singleton()
+class FSUtil {
   // TODO: if required inject fs and fsAsync to make it testable
 
   public fileExists(filePath: string): boolean {
@@ -32,3 +34,4 @@ export class FSUtil {
     return name.replaceAll(/\W+/gi, '_').toLowerCase()
   }
 }
+export {FSUtil}

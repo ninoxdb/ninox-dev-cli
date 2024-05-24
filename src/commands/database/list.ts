@@ -1,11 +1,10 @@
+import 'reflect-metadata'
+import {container} from 'tsyringe'
+
 import {BaseCommand} from '../../core/base.js'
 import {DatabaseMetadata} from '../../core/common/schema-validators.js'
-import {EnvironmentConfig} from '../../core/common/types.js'
 import {DatabaseService} from '../../core/services/database-service.js'
 import {INinoxObjectService} from '../../core/services/interfaces.js'
-import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
-import {FSUtil} from '../../core/utils/fs.js'
-import {NinoxClient} from '../../core/utils/ninox-client.js'
 
 export default class ListCommand extends BaseCommand {
   public static override description =
@@ -17,11 +16,7 @@ export default class ListCommand extends BaseCommand {
 
   protected async init(): Promise<void> {
     await super.init()
-    this.databaseService = new DatabaseService(
-      new NinoxProjectService(new FSUtil()),
-      new NinoxClient(this.environment as EnvironmentConfig),
-      this.environment.workspaceId,
-    )
+    this.databaseService = container.resolve(DatabaseService)
   }
 
   public async run(): Promise<void> {

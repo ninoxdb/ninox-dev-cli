@@ -1,6 +1,7 @@
 import axios, {AxiosError, AxiosInstance} from 'axios'
 import FormData from 'form-data'
 import fs from 'node:fs'
+import {inject, injectable} from 'tsyringe'
 
 import {DB_BACKGROUND_FILE_NAME} from '../common/constants.js'
 import {
@@ -11,12 +12,13 @@ import {
 } from '../common/schema-validators.js'
 import {NinoxCredentials} from '../common/types.js'
 
+@injectable()
 export class NinoxClient {
   private client: AxiosInstance
 
   private workspaceId: string
 
-  public constructor(creds: NinoxCredentials) {
+  public constructor(@inject('EnvironmentConfig') creds: NinoxCredentials) {
     this.workspaceId = creds.workspaceId
     this.client = axios.create({
       baseURL: creds.domain,

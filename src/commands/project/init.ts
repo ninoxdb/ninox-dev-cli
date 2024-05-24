@@ -1,4 +1,6 @@
 import {Args, Command} from '@oclif/core'
+import 'reflect-metadata'
+import {container} from 'tsyringe'
 
 import {IProjectService} from '../../core/services/interfaces.js'
 import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
@@ -17,8 +19,11 @@ export default class InitCommand extends Command {
 
   protected async init(): Promise<void> {
     await super.init()
-    const fsUtil = new FSUtil()
-    this.ninoxProjectService = new NinoxProjectService(fsUtil)
+    container.registerSingleton(FSUtil)
+    container.register<IProjectService>('NinoxProjectService', {
+      useClass: NinoxProjectService,
+    })
+    this.ninoxProjectService = container.resolve(NinoxProjectService)
   }
 
   public async run(): Promise<void> {
