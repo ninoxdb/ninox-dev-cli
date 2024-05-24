@@ -1,5 +1,6 @@
 import {Args, Command} from '@oclif/core'
 
+import {IProjectService} from '../../core/services/interfaces.js'
 import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
 import {FSUtil} from '../../core/utils/fs.js'
 
@@ -12,7 +13,7 @@ export default class InitCommand extends Command {
 
   public static override examples = ['<%= config.bin %> <%= command.id %>']
 
-  protected ninoxProjectService!: NinoxProjectService
+  protected ninoxProjectService!: IProjectService
 
   protected async init(): Promise<void> {
     await super.init()

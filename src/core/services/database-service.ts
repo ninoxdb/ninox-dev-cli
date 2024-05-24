@@ -1,16 +1,15 @@
 import {DatabaseMetadata, DatabaseSchemaType, DatabaseType} from '../common/schema-validators.js'
 import {NinoxClient} from '../utils/ninox-client.js'
-import {INinoxObjectService} from './interfaces.js'
-import {NinoxProjectService} from './ninoxproject-service.js'
+import {INinoxObjectService, IProjectService} from './interfaces.js'
 
 export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   protected databaseId?: string
   protected ninoxClient: NinoxClient
-  protected ninoxProjectService: NinoxProjectService
+  protected ninoxProjectService: IProjectService
   protected workspaceId: string
 
   public constructor(
-    ninoxProjectService: NinoxProjectService,
+    ninoxProjectService: IProjectService,
     ninoxClient: NinoxClient,
     workspaceId: string,
     databaseId?: string,
@@ -26,8 +25,11 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
 
     const {schema: schemaData, ...databaseRemainingData} = databaseData
 
-    const {database, schema, tables} = this.ninoxProjectService.parseData({id, ...databaseRemainingData}, schemaData)
-    await this.ninoxProjectService.writeToFiles(database, schema, tables)
+    const {database, schema, tables} = this.ninoxProjectService.parseDatabaseConfigs(
+      {id, ...databaseRemainingData},
+      schemaData,
+    )
+    await this.ninoxProjectService.writeDatabaseToFiles(database, schema, tables)
     await this.ninoxProjectService.createDatabaseFolderInFiles(id)
     await this.ninoxClient.downloadDatabaseBackgroundImage(id, this.ninoxProjectService.getDbBackgroundImagePath(id))
     // download views
@@ -39,7 +41,7 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   }
 
   public async upload(id: string): Promise<void> {
-    const {database, schema} = await this.ninoxProjectService.readDatabaseConfig(id)
+    const {database, schema} = await this.ninoxProjectService.readDatabaseConfigFromFiles(id)
     const bgImagePath = this.ninoxProjectService.getDbBackgroundImagePath(id)
     await this.uploadDatabase(
       database,

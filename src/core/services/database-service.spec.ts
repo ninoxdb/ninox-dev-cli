@@ -53,7 +53,7 @@ describe('DatabaseService', () => {
   describe('upload', () => {
     it('should call the necessary methods to upload data', async () => {
       const mockBgImagePath = 'path/to/bg/image'
-      ninoxProjectServiceStub.readDatabaseConfig.resolves({
+      ninoxProjectServiceStub.readDatabaseConfigFromFiles.resolves({
         database: {id: databaseId, settings: settingsMock},
         schema: schemaMock,
       })
@@ -65,7 +65,7 @@ describe('DatabaseService', () => {
 
       await databaseService.upload(databaseId)
 
-      sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.readDatabaseConfig, databaseId)
+      sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.readDatabaseConfigFromFiles, databaseId)
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.getDbBackgroundImagePath, databaseId)
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.isDbBackgroundImageExists, databaseId, mockBgImagePath)
       sinon.assert.calledOnceWithExactly(
@@ -83,12 +83,12 @@ describe('DatabaseService', () => {
       const mockBgImagePath = 'path/to/bg/image'
 
       ninoxClientStub.getDatabase.resolves(databaseJSONMock)
-      ninoxProjectServiceStub.parseData.returns({
+      ninoxProjectServiceStub.parseDatabaseConfigs.returns({
         database: databaseInfoMock,
         schema: schemaMock,
         tables: tablesMock,
       })
-      ninoxProjectServiceStub.writeToFiles.resolves()
+      ninoxProjectServiceStub.writeDatabaseToFiles.resolves()
       ninoxProjectServiceStub.createDatabaseFolderInFiles.resolves()
       ninoxProjectServiceStub.getDbBackgroundImagePath.returns(mockBgImagePath)
       ninoxClientStub.downloadDatabaseBackgroundImage.resolves()
@@ -97,11 +97,16 @@ describe('DatabaseService', () => {
 
       sinon.assert.calledOnceWithExactly(ninoxClientStub.getDatabase, databaseId)
       sinon.assert.calledOnceWithExactly(
-        ninoxProjectServiceStub.parseData,
+        ninoxProjectServiceStub.parseDatabaseConfigs,
         {id: databaseId, settings: databaseJSONMock.settings},
         databaseJSONMock.schema,
       )
-      sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.writeToFiles, databaseInfoMock, schemaMock, tablesMock)
+      sinon.assert.calledOnceWithExactly(
+        ninoxProjectServiceStub.writeDatabaseToFiles,
+        databaseInfoMock,
+        schemaMock,
+        tablesMock,
+      )
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.createDatabaseFolderInFiles, databaseId)
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.getDbBackgroundImagePath, databaseId)
       sinon.assert.calledOnceWithExactly(ninoxClientStub.downloadDatabaseBackgroundImage, databaseId, mockBgImagePath)

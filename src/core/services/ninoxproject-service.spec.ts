@@ -30,7 +30,7 @@ describe('NinoxProjectService', () => {
     createPackageJson: sinon.stub(),
     ensureRootDirectoryStructure: sinon.stub(),
     getObjectPath: sinon.stub(),
-    readDatabaseConfig: sinon.stub(),
+    readDatabaseConfigFromFiles: sinon.stub(),
     writeFile: sinon.stub(),
   }
   const testSchemaBase: DatabaseSchemaBaseType = {
@@ -98,8 +98,8 @@ describe('NinoxProjectService', () => {
     FSUtilStubs.createPackageJson = sandbox.stub(fsUtil, 'createPackageJson').resolves()
     FSUtilStubs.createConfigYaml = sandbox.stub(fsUtil, 'createConfigYaml').resolves()
     FSUtilStubs.ensureRootDirectoryStructure = sandbox.stub(fsUtil, 'ensureRootDirectoryStructure').resolves()
-    FSUtilStubs.readDatabaseConfig = sandbox
-      .stub(fsUtil, 'readDatabaseConfig')
+    FSUtilStubs.readDatabaseConfigFromFiles = sandbox
+      .stub(fsUtil, 'readDatabaseConfigFromFiles')
       .resolves({database: `database:\n  id: 123`, tables: []})
     FSUtilStubs.writeFile = sandbox.stub(fsUtil, 'writeFile').resolves()
     FSUtilStubs.getObjectPath = sandbox
@@ -131,12 +131,12 @@ describe('NinoxProjectService', () => {
     })
   })
 
-  describe('parseData', () => {
+  describe('parseDatabaseConfigs', () => {
     it('should throw an error if database or schema parsing fails', () => {
       sandbox.stub(Database, 'safeParse').returns({error: new z.ZodError([]), success: false})
       sandbox.stub(DatabaseSchema, 'safeParse').returns({error: new z.ZodError([]), success: false})
 
-      expect(() => ninoxProjectService.parseData({}, {})).to.throw(
+      expect(() => ninoxProjectService.parseDatabaseConfigs({}, {})).to.throw(
         'Validation errors: Database or Schema validation failed',
       )
     })
@@ -149,28 +149,28 @@ describe('NinoxProjectService', () => {
       sandbox.stub(TableBase, 'safeParse').returns({data: testTable, success: true})
       sandbox.stub(TableFile, 'parse').returns(testTableInFile)
 
-      const result = ninoxProjectService.parseData({id: 'db1'}, {types: {table1: {}}})
+      const result = ninoxProjectService.parseDatabaseConfigs({id: 'db1'}, {types: {table1: {}}})
       expect(result).to.have.property('database')
       expect(result).to.have.property('schema')
       expect(result).to.have.property('tables')
     })
   })
 
-  describe('readDatabaseConfig', () => {
+  describe('readDatabaseConfigFromFiles', () => {
     it('should return parsed database configuration', async () => {
       sandbox
-        .stub(ninoxProjectService, 'parseDatabaseAndSchemaFromFileContent')
+        .stub(ninoxProjectService, 'parseDatabaseConfigsbaseAndSchemaFromFileContent')
         .returns({database: testDatabase, schema: testSchema})
 
-      const result = await ninoxProjectService.readDatabaseConfig(databaseId)
+      const result = await ninoxProjectService.readDatabaseConfigFromFiles(databaseId)
       expect(result).to.have.property('database')
       expect(result).to.have.property('schema')
     })
   })
 
-  describe('writeToFiles', () => {
+  describe('writeDatabaseToFiles', () => {
     it('should ensure the root directory structure and write to files', async () => {
-      await ninoxProjectService.writeToFiles(testDatabase, testSchemaInFile, testTablesInFile)
+      await ninoxProjectService.writeDatabaseToFiles(testDatabase, testSchemaInFile, testTablesInFile)
       sinon.assert.calledOnce(FSUtilStubs.ensureRootDirectoryStructure)
       sinon.assert.calledOnce(FSUtilStubs.createDatabaseFolderInObjects)
       sinon.assert.calledWith(FSUtilStubs.writeFile, sinon.match.string, sinon.match.string)

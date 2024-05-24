@@ -16,8 +16,9 @@ import {
 } from '../common/schema-validators.js'
 import {DBConfigsYaml} from '../common/types.js'
 import {FSUtil} from '../utils/fs.js'
+import {IProjectService} from './interfaces.js'
 
-export class NinoxProjectService {
+export class NinoxProjectService implements IProjectService {
   private fsUtil: FSUtil
   public constructor(fsUtil: FSUtil) {
     this.fsUtil = fsUtil
@@ -41,7 +42,7 @@ export class NinoxProjectService {
     return this.fsUtil.isDatabaseBackgroundFileExist(databaseId, imagePath)
   }
 
-  public parseData(
+  public parseDatabaseConfigs(
     database: unknown,
     sc: unknown,
   ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]} {
@@ -70,7 +71,7 @@ export class NinoxProjectService {
     return {database: parsedDatabase.data, schema, tables}
   }
 
-  public parseDatabaseAndSchemaFromFileContent(databaseConfig: DatabaseConfigFileContent): {
+  public parseDatabaseConfigsbaseAndSchemaFromFileContent(databaseConfig: DatabaseConfigFileContent): {
     database: DatabaseType
     schema: DatabaseSchemaType
   } {
@@ -100,15 +101,17 @@ export class NinoxProjectService {
     }
   }
 
-  public async readDatabaseConfig(databaseId: string): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
-    const databaseConfigInYaml = await this.fsUtil.readDatabaseConfig(databaseId)
-    const databaseConfig = this.parseDatabaseConfigFileContentFromYaml(databaseConfigInYaml)
-    const parsedDBConfig = this.parseDatabaseAndSchemaFromFileContent(databaseConfig)
+  public async readDatabaseConfigFromFiles(
+    databaseId: string,
+  ): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
+    const databaseConfigInYaml = await this.fsUtil.readDatabaseConfigFromFiles(databaseId)
+    const databaseConfig = this.parseDatabaseConfigsbaseConfigFileContentFromYaml(databaseConfigInYaml)
+    const parsedDBConfig = this.parseDatabaseConfigsbaseAndSchemaFromFileContent(databaseConfig)
     return parsedDBConfig
   }
 
   // Write the database, schema and tables to their respective files
-  public async writeToFiles(
+  public async writeDatabaseToFiles(
     database: DatabaseType,
     schema: DatabaseSchemaBaseType,
     tables: TableFileType[],
@@ -146,7 +149,9 @@ export class NinoxProjectService {
     await Promise.all(fileWritePromises)
   }
 
-  private parseDatabaseConfigFileContentFromYaml(databaseConfigYaml: DBConfigsYaml): DatabaseConfigFileContent {
+  private parseDatabaseConfigsbaseConfigFileContentFromYaml(
+    databaseConfigYaml: DBConfigsYaml,
+  ): DatabaseConfigFileContent {
     const {database: databaseYaml, tables: tablesYaml} = databaseConfigYaml
     return {
       databaseLocal: yaml.load(databaseYaml) as DatabaseFileType,

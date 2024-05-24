@@ -146,7 +146,7 @@ export class FSUtil {
     return fs.readFileSync(this.credentialsFilePath, 'utf8')
   }
 
-  public async readDatabaseConfig(databaseId: string): Promise<DBConfigsYaml> {
+  public async readDatabaseConfigFromFiles(databaseId: string): Promise<DBConfigsYaml> {
     return this.readDBConfigFromFolder(this.getDatabaseObjectsDirectoryPath(databaseId))
   }
 
