@@ -2,8 +2,10 @@ import {expect} from 'chai'
 import sinon from 'sinon'
 
 import {GetDatabaseResponse} from '../common/schema-validators.js'
+import {FSUtil} from '../utils/fs.js'
 import {NinoxClient} from '../utils/ninox-client.js'
 import {DatabaseService} from './database-service.js'
+import {NinoxProjectService} from './ninoxproject-service.js'
 
 describe('DatabaseService', () => {
   let ninoxClientStub: sinon.SinonStubbedInstance<NinoxClient>
@@ -34,7 +36,12 @@ describe('DatabaseService', () => {
 
   beforeEach(() => {
     ninoxClientStub = sinon.createStubInstance(NinoxClient)
-    databaseService = new DatabaseService(ninoxClientStub, 'workspaceId', databaseId)
+    databaseService = new DatabaseService(
+      new NinoxProjectService(new FSUtil()),
+      ninoxClientStub,
+      'workspaceId',
+      databaseId,
+    )
   })
 
   afterEach(() => {
@@ -60,7 +67,7 @@ describe('DatabaseService', () => {
   describe('listDatabases', () => {
     it('should call ninoxClient.listDatabases', async () => {
       ninoxClientStub.listDatabases.resolves([{id: databaseId, name: 'Database'}]) // mock response
-      const result = await databaseService.listDatabases()
+      const result = await databaseService.list()
       expect(ninoxClientStub.listDatabases.calledOnce).to.be.true
       expect(result).to.eql([{id: databaseId, name: 'Database'}])
     })

@@ -1,6 +1,5 @@
 import {Args, Command} from '@oclif/core'
 
-import {InitCommandOptions} from '../../core/common/types.js'
 import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
 import {FSUtil} from '../../core/utils/fs.js'
 
@@ -15,11 +14,6 @@ export default class InitCommand extends Command {
 
   protected ninoxProjectService!: NinoxProjectService
 
-  private async handle(options: InitCommandOptions): Promise<void> {
-    return this.ninoxProjectService.initialiseProject(options.name)
-  }
-
-  // eslint-disable-next-line perfectionist/sort-classes
   protected async init(): Promise<void> {
     await super.init()
     const fsUtil = new FSUtil()
@@ -28,7 +22,7 @@ export default class InitCommand extends Command {
 
   public async run(): Promise<void> {
     const {args} = await this.parse(InitCommand)
-    await this.handle(args)
+    await this.ninoxProjectService.initialiseProject(args.name)
     this.debug(`success src/commands/init.ts`)
     this.log(`Initialized Ninox project ${args.name} successfully!`)
   }

@@ -1,15 +1,36 @@
 import {DatabaseMetadata, DatabaseSchemaType, DatabaseType, GetDatabaseResponse} from '../common/schema-validators.js'
 import {NinoxClient} from '../utils/ninox-client.js'
+import {NinoxProjectService} from './ninoxproject-service.js'
 
 export class DatabaseService {
   protected databaseId?: string
   protected ninoxClient: NinoxClient
+  protected ninoxProjectService: NinoxProjectService
   protected workspaceId: string
 
-  public constructor(ninoxClient: NinoxClient, workspaceId: string, databaseId?: string) {
+  public constructor(
+    ninoxProjectService: NinoxProjectService,
+    ninoxClient: NinoxClient,
+    workspaceId: string,
+    databaseId?: string,
+  ) {
+    this.ninoxProjectService = ninoxProjectService
     this.ninoxClient = ninoxClient
     this.workspaceId = workspaceId
     this.databaseId = databaseId
+  }
+
+  public async download(id: string): Promise<void> {
+    const databaseData = await this.getDatabase(id)
+
+    const {schema: schemaData, ...databaseRemainingData} = databaseData
+
+    const {database, schema, tables} = this.ninoxProjectService.parseData({...databaseRemainingData, id}, schemaData)
+    await this.ninoxProjectService.writeToFiles(database, schema, tables)
+    await this.ninoxProjectService.createDatabaseFolderInFiles(id)
+    await this.downloadDatabaseBackgroundImage(id, this.ninoxProjectService.getDbBackgroundImagePath(id))
+    // download view
+    // download report
   }
 
   public async downloadDatabaseBackgroundImage(
@@ -23,8 +44,19 @@ export class DatabaseService {
     return this.ninoxClient.getDatabase(id)
   }
 
-  public async listDatabases(): Promise<DatabaseMetadata[]> {
+  public async list(): Promise<DatabaseMetadata[]> {
     return this.ninoxClient.listDatabases()
+  }
+
+  public async upload(id: string): Promise<void> {
+    const {database, schema} = await this.ninoxProjectService.readDatabaseConfig(id)
+    const bgImagePath = this.ninoxProjectService.getDbBackgroundImagePath(id)
+    await this.uploadDatabase(
+      database,
+      schema,
+      bgImagePath,
+      this.ninoxProjectService.isDbBackgroundImageExists(id, bgImagePath),
+    )
   }
 
   public async uploadDatabase(
