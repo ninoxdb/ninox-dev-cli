@@ -108,13 +108,6 @@ describe('DatabaseService', () => {
     })
   })
 
-  describe('downloadDatabaseBackgroundImage', () => {
-    it('should call ninoxClient.downloadDatabaseBackgroundImage with correct parameters', async () => {
-      await databaseService.downloadDatabaseBackgroundImage(databaseId, 'imagePath')
-      expect(ninoxClientStub.downloadDatabaseBackgroundImage.calledOnceWith(databaseId, 'imagePath')).to.be.true
-    })
-  })
-
   describe('getDatabase', () => {
     it('should call ninoxClient.getDatabase with correct id', async () => {
       ninoxClientStub.getDatabase.resolves(databaseJSONMock) // mock response
