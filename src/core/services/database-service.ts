@@ -1,9 +1,9 @@
-import {DatabaseMetadata, DatabaseSchemaType, DatabaseType, GetDatabaseResponse} from '../common/schema-validators.js'
+import {DatabaseMetadata, DatabaseSchemaType, DatabaseType} from '../common/schema-validators.js'
 import {NinoxClient} from '../utils/ninox-client.js'
 import {INinoxObjectService} from './interfaces.js'
 import {NinoxProjectService} from './ninoxproject-service.js'
 
-export class DatabaseService implements INinoxObjectService {
+export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   protected databaseId?: string
   protected ninoxClient: NinoxClient
   protected ninoxProjectService: NinoxProjectService
@@ -22,7 +22,7 @@ export class DatabaseService implements INinoxObjectService {
   }
 
   public async download(id: string): Promise<void> {
-    const databaseData = await this.getDatabase(id)
+    const databaseData = await this.ninoxClient.getDatabase(id)
 
     const {schema: schemaData, ...databaseRemainingData} = databaseData
 
@@ -32,10 +32,6 @@ export class DatabaseService implements INinoxObjectService {
     await this.ninoxClient.downloadDatabaseBackgroundImage(id, this.ninoxProjectService.getDbBackgroundImagePath(id))
     // download views
     // download reports
-  }
-
-  public async getDatabase(id: string): Promise<GetDatabaseResponse> {
-    return this.ninoxClient.getDatabase(id)
   }
 
   public async list(): Promise<DatabaseMetadata[]> {

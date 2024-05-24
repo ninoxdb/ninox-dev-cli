@@ -108,15 +108,6 @@ describe('DatabaseService', () => {
     })
   })
 
-  describe('getDatabase', () => {
-    it('should call ninoxClient.getDatabase with correct id', async () => {
-      ninoxClientStub.getDatabase.resolves(databaseJSONMock) // mock response
-      const result = await databaseService.getDatabase(databaseId)
-      expect(ninoxClientStub.getDatabase.calledOnceWith(databaseId)).to.be.true
-      expect(result).to.eql(databaseJSONMock)
-    })
-  })
-
   describe('listDatabases', () => {
     it('should call ninoxClient.listDatabases', async () => {
       ninoxClientStub.listDatabases.resolves([{id: databaseId, name: 'Database'}]) // mock response
