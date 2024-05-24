@@ -1,3 +1,5 @@
+import {DatabaseSettingsType} from './schema-validators.js'
+
 export interface NinoxCredentials {
   apiKey: string
   domain: string
@@ -21,4 +23,9 @@ export interface EnvironmentConfig {
 
 export interface Config {
   environments: Record<string, EnvironmentConfig>
+}
+
+export type DatabaseInfo = {
+  id: string
+  settings: DatabaseSettingsType
 }

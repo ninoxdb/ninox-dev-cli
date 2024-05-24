@@ -25,12 +25,12 @@ export class DatabaseService {
 
     const {schema: schemaData, ...databaseRemainingData} = databaseData
 
-    const {database, schema, tables} = this.ninoxProjectService.parseData({...databaseRemainingData, id}, schemaData)
+    const {database, schema, tables} = this.ninoxProjectService.parseData({id, ...databaseRemainingData}, schemaData)
     await this.ninoxProjectService.writeToFiles(database, schema, tables)
     await this.ninoxProjectService.createDatabaseFolderInFiles(id)
     await this.downloadDatabaseBackgroundImage(id, this.ninoxProjectService.getDbBackgroundImagePath(id))
-    // download view
-    // download report
+    // download views
+    // download reports
   }
 
   public async downloadDatabaseBackgroundImage(
