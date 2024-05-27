@@ -1,0 +1,72 @@
+table:
+  afterCreate: (var x := 1; ((x+( = A));(A := x)))
+  afterUpdate: (var x := 1; ((x+( = A));(A := x)))
+  caption: Table112~!   @#$%^&*`@#$%^&*()$%^&*(
+  captions: {}
+  fields:
+    A:
+      base: string
+      caption: Text
+      captions: {}
+      required: false
+      order: 0
+      formWidth: 0.5
+      uuid: MLrSITSPLyQ6uFH0
+      globalSearch: true
+      hasIndex: false
+      tooltips: {}
+      stringAutocorrect: true
+      stringMultiline: false
+      height: 1
+    C:
+      base: string
+      caption: Birthday
+      captions: {}
+      required: false
+      order: 2
+      formWidth: 0.5
+      uuid: AfDXt44lZgkFr6Pf
+      globalSearch: true
+      hasIndex: false
+      tooltips: {}
+      stringDefault: "1121212"
+      stringAutocorrect: true
+      stringMultiline: false
+      height: 1
+    D:
+      base: string
+      caption: Father Name
+      captions: {}
+      required: false
+      order: 3
+      formWidth: 0.5
+      uuid: QXVv63sYdAN0Hd1T
+      globalSearch: true
+      hasIndex: false
+      tooltips: {}
+      stringAutocorrect: true
+      stringMultiline: false
+      height: 1
+    B:
+      base: string
+      caption: First Name
+      captions: {}
+      required: false
+      order: 1
+      formWidth: 0.5
+      uuid: slUYVDrWFM6yJagv
+      globalSearch: true
+      hasIndex: false
+      tooltips: {}
+      stringAutocorrect: true
+      stringMultiline: false
+      height: 1
+  globalSearch: true
+  hidden: false
+  kind: table
+  nextFieldId: 5
+  order: 0
+  uis: {}
+  uuid: mAQsbi4gWS3eLKa2
+  _database: "4321"
+  _id: A

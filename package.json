@@ -1,51 +1,81 @@
 {
-  "name": "ninox-cli",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
-  "private": true,
-  "license": "UNLICENSED",
-  "scripts": {
-    "prebuild": "rimraf dist",
-    "format": "npx --no-install prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "npx --no-install eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test:unit": "NODE_ENV=test npx --no-install jest --verbose --config jest-unit.config.ts",
-    "test:integration": "NODE_ENV=test npx --no-install jest --forceExit --config jest-intgration.config.ts",
-    "test:watch": "npx --no-install jest --watch",
-    "test:cov": "npx --no-install jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "prepare": "npx --no-install husky install"
+  "name": "ninox",
+  "description": "Ninox Dev CLI",
+  "version": "0.1.0",
+  "author": "Muhammad Saqib Arfeen<saqib.arfeen@ninox.com>",
+  "bin": {
+    "ninox": "./bin/run.js"
   },
+  "bugs": "https://github.com/ninoxdb/ninox-dev-cli/issues",
   "dependencies": {
+    "@oclif/core": "^3",
+    "@oclif/plugin-help": "^6",
+    "@oclif/plugin-plugins": "^5",
+    "@salesforce/kit": "^3.1.1",
+    "axios": "^1.6.8",
+    "debug": "^4.3.4",
+    "form-data": "^4.0.0",
+    "js-yaml": "^4.1.0",
+    "zod": "^3.23.6"
   },
   "devDependencies": {
-    "@commitlint/cli": "^18.4.4",
-    "@commitlint/config-conventional": "^18.4.4",
-    "@faker-js/faker": "^8.3.1",
-    "@types/jest": "^29.5.2",
-    "@types/node": "^20.3.1",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "commitlint-config-jira-jquery": "^1.0.6",
-    "commitlint-plugin-shr-jira": "^1.0.6",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-prettier": "^5.0.0",
-    "eslint-plugin-unicorn": "^50.0.1",
-    "faker": "^6.6.6",
-    "husky": "^8.0.3",
-    "jest": "^29.5.0",
-    "prettier": "^3.0.0",
-    "source-map-support": "^0.5.21",
-    "supertest": "^6.3.3",
-    "ts-jest": "^29.1.0",
-    "ts-loader": "^9.4.3",
-    "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.1.3"
+    "@oclif/prettier-config": "^0.2.1",
+    "@oclif/test": "^3",
+    "@types/chai": "^4",
+    "@types/debug": "^4.1.12",
+    "@types/js-yaml": "^4.0.9",
+    "@types/mocha": "^10",
+    "@types/node": "^18",
+    "chai": "^4",
+    "eslint": "^8",
+    "eslint-config-oclif": "^5",
+    "eslint-config-oclif-typescript": "^3",
+    "eslint-config-prettier": "^9",
+    "eslint-plugin-prettier": "^5.1.3",
+    "mocha": "^10",
+    "nock": "^13.5.4",
+    "oclif": "^4",
+    "shx": "^0.3.3",
+    "sinon": "^17.0.2",
+    "ts-node": "^10",
+    "typescript": "^5"
   },
   "engines": {
-    "node": "=20.11.0",
-    "npm": "=10.4.0"
-  }
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "/bin",
+    "/dist",
+    "/oclif.manifest.json"
+  ],
+  "homepage": "https://github.com/ninoxdb/ninox-dev-cli",
+  "keywords": [
+    "oclif"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "type": "module",
+  "oclif": {
+    "bin": "ninox",
+    "dirname": "ninox",
+    "commands": "./dist/commands",
+    "topicSeparator": " ",
+    "topics": {}
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ninoxdb/ninox-dev-cli.git"
+  },
+  "scripts": {
+    "build": "shx rm -rf dist && tsc -b",
+    "lint": "eslint . --ext .ts",
+    "postpack": "shx rm -f oclif.manifest.json",
+    "posttest": "npm run lint",
+    "readme": "oclif readme",
+    "prepack": "oclif manifest && oclif readme",
+    "test": "mocha --forbid-only \"test/commands/**/*.test.ts\"",
+    "test:unit": "mocha --forbid-only \"src/**/*.spec.ts\"",
+    "version": "oclif readme && git add README.md"
+  },
+  "types": "dist/index.d.ts"
 }
