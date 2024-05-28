@@ -27,6 +27,7 @@ export default class UploadCommand extends BaseCommand {
       new NinoxProjectService(fsUtil),
       new NinoxClient(this.environment as EnvironmentConfig),
       this.environment.workspaceId,
+      this.debug,
     )
   }
 

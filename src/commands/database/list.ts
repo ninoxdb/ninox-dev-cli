@@ -21,6 +21,7 @@ export default class ListCommand extends BaseCommand {
       new NinoxProjectService(new FSUtil()),
       new NinoxClient(this.environment as EnvironmentConfig),
       this.environment.workspaceId,
+      () => {},
     )
   }
 

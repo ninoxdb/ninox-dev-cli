@@ -3,34 +3,36 @@ import {NinoxClient} from '../utils/ninox-client.js'
 import {INinoxObjectService, IProjectService} from './interfaces.js'
 
 export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
-  protected databaseId?: string
   protected ninoxClient: NinoxClient
   protected ninoxProjectService: IProjectService
   protected workspaceId: string
+  private debug: (message: string) => void
 
   public constructor(
     ninoxProjectService: IProjectService,
     ninoxClient: NinoxClient,
     workspaceId: string,
-    databaseId?: string,
+    debugLogger: (message: string) => void,
   ) {
     this.ninoxProjectService = ninoxProjectService
     this.ninoxClient = ninoxClient
     this.workspaceId = workspaceId
-    this.databaseId = databaseId
+    this.debug = debugLogger
   }
 
   public async download(id: string): Promise<void> {
+    this.debug(`Downloading database schema ${id}...`)
     const databaseData = await this.ninoxClient.getDatabase(id)
-
     const {schema: schemaData, ...databaseRemainingData} = databaseData
-
+    this.debug(`Database ${databaseData.settings.name} downloaded. Parsing schema...`)
     const {database, schema, tables} = this.ninoxProjectService.parseDatabaseConfigs(
       {id, ...databaseRemainingData},
       schemaData,
     )
+    this.debug(`Writing Database ${database.settings.name} to files...`)
     await this.ninoxProjectService.writeDatabaseToFiles(database, schema, tables)
     await this.ninoxProjectService.createDatabaseFolderInFiles(id)
+    this.debug(`Downloading background image for Database ${database.settings.name}...`)
     await this.ninoxClient.downloadDatabaseBackgroundImage(id, this.ninoxProjectService.getDbBackgroundImagePath(id))
     // download views
     // download reports
