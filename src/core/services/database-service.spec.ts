@@ -43,7 +43,7 @@ describe('DatabaseService', () => {
   beforeEach(() => {
     ninoxClientStub = sinon.createStubInstance(NinoxClient)
     ninoxProjectServiceStub = sinon.createStubInstance(NinoxProjectService)
-    databaseService = new DatabaseService(ninoxProjectServiceStub, ninoxClientStub, 'workspaceId', databaseId)
+    databaseService = new DatabaseService(ninoxProjectServiceStub, ninoxClientStub, 'workspaceId', () => {})
   })
 
   afterEach(() => {

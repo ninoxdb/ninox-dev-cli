@@ -29,28 +29,30 @@ export class NinoxClient {
   // download the background image from /{accountId}/root/background.jpg
   public async downloadDatabaseBackgroundImage(databaseId: string, imagePath: string): Promise<void> {
     const imageUrl = `/${this.workspaceId}/${databaseId}/files/${DB_BACKGROUND_FILE_NAME}`
+    // Create a write stream to save the file
+    let writer: fs.WriteStream
     try {
       const response = await this.client({
         method: 'GET',
         responseType: 'stream',
         url: imageUrl,
       })
-
-      // Create a write stream to save the file
-      const writer = fs.createWriteStream(imagePath)
-
+      writer = fs.createWriteStream(imagePath)
       // Pipe the response data to the file
       response.data.pipe(writer)
 
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         writer.on('finish', resolve)
         writer.on('error', (error) => {
           console.log('Error downloading image', error)
+          writer.end()
+          reject(error)
         })
       })
     } catch (error) {
       // ignore 404 as the background image is optional
       if (error instanceof AxiosError && error?.response?.status === axios.HttpStatusCode.NotFound) {
+        error?.request?.abort()
         return
       }
 
