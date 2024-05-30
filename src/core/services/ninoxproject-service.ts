@@ -24,8 +24,10 @@ import {
   TableBase,
   TableFile,
   TableFileType,
+  ViewSchemaFile,
+  ViewTypeFile,
 } from '../common/schema-validators.js'
-import {DBConfigsYaml} from '../common/types.js'
+import {DBConfigsYaml, View} from '../common/types.js'
 import {FSUtil} from '../utils/fs.js'
 import {IProjectService} from './interfaces.js'
 
@@ -148,32 +150,47 @@ export class NinoxProjectService implements IProjectService {
   }
 
   public parseDatabaseConfigs(
-    database: unknown,
-    sc: unknown,
-  ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]} {
-    const parsedDatabase = Database.safeParse(database)
-    const parsedSchema = DatabaseSchema.safeParse(sc)
+    database_: unknown,
+    schema_: unknown,
+    views_: View[],
+  ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]; views: ViewTypeFile[]} {
+    const parsedDatabase = this.parseDatabaseMetadata(database_)
 
-    if (!parsedDatabase.success || !parsedSchema.success)
-      throw new Error('Validation errors: Database or Schema validation failed')
+    const parsedSchema = this.parseDatabaseSchema(schema_)
 
-    const schema = DatabaseSchemaBase.parse(parsedSchema.data)
-    const inputTypes = parsedSchema.data.types
+    const schemaWithoutTypes = this.parseDatabaseSchemaWithoutTypes(parsedSchema)
+    const {types} = parsedSchema
 
-    const tables = Object.entries(inputTypes).map(([key, value]) => {
+    const tables = Object.entries(types).map(([key, value]) => {
       const parsedTable = TableBase.safeParse(value)
-      if (!parsedTable.success)
-        throw new Error(`Validation errors: Table validation failed ${parsedSchema.data.types[key]?.caption}`)
+      if (!parsedTable.success) throw new Error(`Validation errors: Table validation failed ${types[key]?.caption}`)
       return TableFile.parse({
         table: {
           ...parsedTable.data,
-          _database: parsedDatabase.data.id,
+          _database: parsedDatabase.id,
           _id: key,
         },
       })
     })
 
-    return {database: parsedDatabase.data, schema, tables}
+    // parse views
+    const views = views_
+      .map((view: View) => {
+        const parsedView = ViewSchemaFile.safeParse({
+          view: {...view, _database: parsedDatabase.id, _table: types[view.type]?.caption ?? view.type},
+        })
+        if (!parsedView.success) {
+          throw new Error('Validation errors: View validation failed')
+        }
+
+        return parsedView.data
+      })
+      // filter out orphan views
+      .filter((view) => types[view.view.config.type])
+
+    // parse reports
+
+    return {database: parsedDatabase, schema: schemaWithoutTypes, tables, views}
   }
 
   public parseDatabaseConfigsbaseAndSchemaFromFileContent(databaseConfig: DatabaseConfigFileContent): {
@@ -247,6 +264,7 @@ export class NinoxProjectService implements IProjectService {
     database: DatabaseType,
     schema: DatabaseSchemaBaseType,
     tables: TableFileType[],
+    views: ViewTypeFile[],
   ): Promise<void> {
     await this.ensureRootDirectoryStructure()
     // Create a subfolder in the root directory/Objects with name Database_${id}
@@ -279,6 +297,20 @@ export class NinoxProjectService implements IProjectService {
     }
 
     await Promise.all(fileWritePromises)
+    // group views by table
+    // eslint-disable-next-line unicorn/no-array-reduce
+    const viewsByTable = views.reduce(
+      (accumulator, view) => {
+        if (!accumulator[view.view._table]) {
+          accumulator[view.view._table] = []
+        }
+
+        accumulator[view.view._table].push(view)
+        return accumulator
+      },
+      {} as Record<string, ViewTypeFile[]>,
+    )
+    return this.writeViewsToFiles(database.id, viewsByTable)
   }
 
   private parseDatabaseConfigsbaseConfigFileContentFromYaml(
@@ -289,5 +321,59 @@ export class NinoxProjectService implements IProjectService {
       databaseLocal: yaml.load(databaseYaml) as DatabaseFileType,
       tablesLocal: tablesYaml.map((table) => yaml.load(table) as TableFileType),
     } satisfies DatabaseConfigFileContent
+  }
+
+  private parseDatabaseMetadata(database: unknown): DatabaseType {
+    const parsedDatabase = Database.safeParse(database)
+    if (!parsedDatabase.success) {
+      throw new Error('Validation errors: Database validation failed')
+    }
+
+    return parsedDatabase.data
+  }
+
+  private parseDatabaseSchema(schema: unknown): DatabaseSchemaType {
+    const parsedSchema = DatabaseSchema.safeParse(schema)
+    if (!parsedSchema.success) {
+      throw new Error('Validation errors: Schema validation failed')
+    }
+
+    return parsedSchema.data
+  }
+
+  private parseDatabaseSchemaWithoutTypes(schema: unknown): DatabaseSchemaBaseType {
+    const parsedSchema = DatabaseSchemaBase.safeParse(schema)
+    if (!parsedSchema.success) {
+      throw new Error('Validation errors: Schema validation failed')
+    }
+
+    return parsedSchema.data
+  }
+
+  private async writeViewsToFiles(databaseId: string, viewsByTable: Record<string, ViewTypeFile[]>): Promise<void> {
+    const directoryCreationPromises = Object.entries(viewsByTable).map(async ([tableName, views]) => {
+      // Create a directory for views named: Table_${tableName}
+      const pathPrefix = path.join(
+        this.getDatabaseObjectsDirectoryPath(databaseId),
+        this.fsUtil.getObjectFileName('Views', tableName),
+      )
+
+      // Create the directory
+      await this.fsUtil.mkdir(pathPrefix)
+
+      // Create an array of promises for writing files in this directory
+      const fileWritingPromises = views.map((view) =>
+        this.fsUtil.writeFile(
+          path.join(pathPrefix, `${this.fsUtil.getObjectFileName('Views', view.view.caption)}.yaml`),
+          yaml.dump(view),
+        ),
+      )
+
+      // Wait for all file writing promises in this directory to resolve
+      return Promise.all(fileWritingPromises)
+    })
+
+    // Wait for all directory creation and file writing promises to resolve
+    await Promise.all(directoryCreationPromises.flat())
   }
 }

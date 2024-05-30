@@ -9,7 +9,7 @@ import {
   DatabaseSettingsType,
   GetDatabaseResponse,
 } from '../common/schema-validators.js'
-import {NinoxCredentials} from '../common/types.js'
+import {NinoxCredentials, View, ViewMetadata} from '../common/types.js'
 
 export class NinoxClient {
   private client: AxiosInstance
@@ -67,6 +67,13 @@ export class NinoxClient {
       .catch((error) => handleAxiosError(error, 'Failed to fetch database'))
   }
 
+  public async getDatabaseView(databaseId: string, viewId: string): Promise<View> {
+    return this.client
+      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/views/${viewId}`)
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to fetch database views'))
+  }
+
   public async listDatabases(): Promise<DatabaseMetadata[]> {
     return this.client
       .get(`/v1/teams/${this.workspaceId}/databases`)
@@ -75,6 +82,13 @@ export class NinoxClient {
         handleAxiosError(error, 'Failed to list databases')
         return []
       })
+  }
+
+  public async listDatabaseViews(databaseId: string): Promise<ViewMetadata[]> {
+    return this.client
+      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/views`)
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to list database views'))
   }
 
   public async updateDatabaseSettings(id: string, settings: DatabaseSettingsType): Promise<unknown> {

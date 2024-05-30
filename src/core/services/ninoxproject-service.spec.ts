@@ -149,8 +149,8 @@ describe('NinoxProjectService', () => {
     it('should throw an error if database or schema parsing fails', () => {
       sandbox.stub(Database, 'safeParse').returns({error: new z.ZodError([]), success: false})
       sandbox.stub(DatabaseSchema, 'safeParse').returns({error: new z.ZodError([]), success: false})
-
-      expect(() => ninoxProjectService.parseDatabaseConfigs({}, {})).to.throw(
+      // TODO: add mock views
+      expect(() => ninoxProjectService.parseDatabaseConfigs({}, {}, [])).to.throw(
         'Validation errors: Database or Schema validation failed',
       )
     })
@@ -162,8 +162,8 @@ describe('NinoxProjectService', () => {
       sandbox.stub(DatabaseSchema, 'safeParse').returns({data: testSchema, success: true})
       sandbox.stub(TableBase, 'safeParse').returns({data: testTable, success: true})
       sandbox.stub(TableFile, 'parse').returns(testTableInFile)
-
-      const result = ninoxProjectService.parseDatabaseConfigs({id: 'db1'}, {types: {table1: {}}})
+      // TODO: add mock views
+      const result = ninoxProjectService.parseDatabaseConfigs({id: 'db1'}, {types: {table1: {}}}, [])
       expect(result).to.have.property('database')
       expect(result).to.have.property('schema')
       expect(result).to.have.property('tables')
@@ -181,10 +181,10 @@ describe('NinoxProjectService', () => {
       expect(result).to.have.property('schema')
     })
   })
-
+  // TODO: add mock views
   describe('writeDatabaseToFiles', () => {
     it('should ensure the root directory structure and write to files', async () => {
-      await ninoxProjectService.writeDatabaseToFiles(testDatabase, testSchemaInFile, testTablesInFile)
+      await ninoxProjectService.writeDatabaseToFiles(testDatabase, testSchemaInFile, testTablesInFile,[])
       sinon.assert.calledOnce(NinoxProjectServiceStubs.ensureRootDirectoryStructure)
       sinon.assert.calledOnce(NinoxProjectServiceStubs.createDatabaseFolderInObjects)
       expect(FSUtilStubs.writeFile.callCount).to.equal(testTablesInFile.length + 1)

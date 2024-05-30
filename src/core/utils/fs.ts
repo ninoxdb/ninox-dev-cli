@@ -19,16 +19,17 @@ export class FSUtil {
     return fs.existsSync(path.join(process.cwd(), CREDENTIALS_FILE_NAME))
   }
 
-  public async mkdir(directoryPath: string, options: fs.MakeDirectoryOptions): Promise<void> {
+  // eslint-disable-next-line unicorn/no-object-as-default-parameter
+  public async mkdir(directoryPath: string, options: fs.MakeDirectoryOptions = {recursive: true}): Promise<void> {
     await fsAsync.mkdir(directoryPath, options)
+  }
+
+  public normalizeFileName(name: string): string {
+    // Replace sequences of non-alphanumeric characters (except underscores) with a single underscore
+    return name.replaceAll(/\W+/gi, '_').toLowerCase()
   }
 
   public async writeFile(filePath: string, data: string): Promise<void> {
     await fsAsync.writeFile(filePath, data, 'utf8')
-  }
-
-  private normalizeFileName(name: string): string {
-    // Replace sequences of non-alphanumeric characters (except underscores) with a single underscore
-    return name.replaceAll(/\W+/gi, '_').toLowerCase()
   }
 }

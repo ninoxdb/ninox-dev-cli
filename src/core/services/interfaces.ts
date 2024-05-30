@@ -1,4 +1,11 @@
-import {DatabaseSchemaBaseType, DatabaseSchemaType, DatabaseType, TableFileType} from '../common/schema-validators.js'
+import {
+  DatabaseSchemaBaseType,
+  DatabaseSchemaType,
+  DatabaseType,
+  TableFileType,
+  ViewTypeFile,
+} from '../common/schema-validators.js'
+import {View} from '../common/types.js'
 
 export interface INinoxObjectService<T> {
   download(id: string): Promise<void>
@@ -14,7 +21,13 @@ export interface IProjectService {
   parseDatabaseConfigs(
     database: unknown,
     sc: unknown,
-  ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]}
+    views: View[],
+  ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]; views: ViewTypeFile[]}
   readDatabaseConfigFromFiles(databaseId: string): Promise<{database: DatabaseType; schema: DatabaseSchemaType}>
-  writeDatabaseToFiles(database: DatabaseType, schema: DatabaseSchemaBaseType, tables: TableFileType[]): Promise<void>
+  writeDatabaseToFiles(
+    database: DatabaseType,
+    schema: DatabaseSchemaBaseType,
+    tables: TableFileType[],
+    views: ViewTypeFile[],
+  ): Promise<void>
 }

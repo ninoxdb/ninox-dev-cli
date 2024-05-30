@@ -83,10 +83,12 @@ describe('DatabaseService', () => {
       const mockBgImagePath = 'path/to/bg/image'
 
       ninoxClientStub.getDatabase.resolves(databaseJSONMock)
+      // TODO: mock views
       ninoxProjectServiceStub.parseDatabaseConfigs.returns({
         database: databaseInfoMock,
         schema: schemaMock,
         tables: tablesMock,
+        views: [],
       })
       ninoxProjectServiceStub.writeDatabaseToFiles.resolves()
       ninoxProjectServiceStub.createDatabaseFolderInFiles.resolves()
@@ -100,12 +102,14 @@ describe('DatabaseService', () => {
         ninoxProjectServiceStub.parseDatabaseConfigs,
         {id: databaseId, settings: databaseJSONMock.settings},
         databaseJSONMock.schema,
+        [],
       )
       sinon.assert.calledOnceWithExactly(
         ninoxProjectServiceStub.writeDatabaseToFiles,
         databaseInfoMock,
         schemaMock,
         tablesMock,
+        [],
       )
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.createDatabaseFolderInFiles, databaseId)
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.getDbBackgroundImagePath, databaseId)

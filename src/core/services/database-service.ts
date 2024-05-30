@@ -1,4 +1,5 @@
 import {DatabaseMetadata, DatabaseSchemaType, DatabaseType} from '../common/schema-validators.js'
+import {View} from '../common/types.js'
 import {NinoxClient} from '../utils/ninox-client.js'
 import {INinoxObjectService, IProjectService} from './interfaces.js'
 
@@ -22,19 +23,25 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
 
   public async download(id: string): Promise<void> {
     this.debug(`Downloading database schema ${id}...`)
-    const databaseData = await this.ninoxClient.getDatabase(id)
-    const {schema: schemaData, ...databaseRemainingData} = databaseData
-    this.debug(`Database ${databaseData.settings.name} downloaded. Parsing schema...`)
-    const {database, schema, tables} = this.ninoxProjectService.parseDatabaseConfigs(
-      {id, ...databaseRemainingData},
-      schemaData,
+    const {database: databaseJSON, schema: schemaJSON} = await this.getDatabaseMetadataAndSchema(id)
+    this.debug(`Database ${databaseJSON.settings.name} downloaded. Parsing schema...`)
+
+    this.debug('Downloading views...')
+    // download views
+    const viewsJSON = await this.downloadDatabaseViews(id)
+
+    // download reports
+
+    const {database, schema, tables, views} = this.ninoxProjectService.parseDatabaseConfigs(
+      databaseJSON,
+      schemaJSON,
+      viewsJSON,
     )
     this.debug(`Writing Database ${database.settings.name} to files...`)
-    await this.ninoxProjectService.writeDatabaseToFiles(database, schema, tables)
+    await this.ninoxProjectService.writeDatabaseToFiles(database, schema, tables, views)
     await this.ninoxProjectService.createDatabaseFolderInFiles(id)
     this.debug(`Downloading background image for Database ${database.settings.name}...`)
     await this.ninoxClient.downloadDatabaseBackgroundImage(id, this.ninoxProjectService.getDbBackgroundImagePath(id))
-    // download views
     // download reports
   }
 
@@ -73,5 +80,19 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
 
     await this.ninoxClient.updateDatabaseSettings(database.id, database.settings)
     await this.ninoxClient.uploadDatabaseSchemaToNinox(database.id, schema)
+  }
+
+  private async downloadDatabaseViews(databaseId: string): Promise<View[]> {
+    const viewsList = await this.ninoxClient.listDatabaseViews(databaseId)
+    const views = viewsList.map((view) => this.ninoxClient.getDatabaseView(databaseId, view.id))
+    return Promise.all(views)
+  }
+
+  private async getDatabaseMetadataAndSchema(
+    id: string,
+  ): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
+    const databaseData = await this.ninoxClient.getDatabase(id)
+    const {schema, ...databaseSettings} = databaseData
+    return {database: {id, ...databaseSettings}, schema} as {database: DatabaseType; schema: DatabaseSchemaType}
   }
 }

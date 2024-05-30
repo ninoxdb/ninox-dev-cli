@@ -185,3 +185,39 @@ export type GetDatabaseResponse = {
   schema: DatabaseSchemaType
   settings: DatabaseSettingsType
 }
+
+const ConfigColumnSchema = z.object({
+  caption: z.string().optional(),
+  expression: z.string(),
+  filter: z.string().optional(),
+  width: z.number().optional(),
+})
+
+const ConfigSchema = z.object({
+  cols: z.array(ConfigColumnSchema).optional(),
+  descending: z.boolean().optional(),
+  group: z.number().optional(),
+  sort: z.number().optional(),
+  type: z.string(),
+})
+
+export const ViewTypeSchema = z.object({
+  caption: z.string(),
+  config: ConfigSchema,
+  id: z.string(),
+  kanbanDisableCreate: z.boolean().optional(),
+  mode: z.string().optional(),
+  order: z.number(),
+  seq: z.number(),
+  type: z.string(),
+})
+
+export const ViewSchemaFile = z.object({
+  view: ViewTypeSchema.extend({
+    _database: z.string(),
+    _table: z.string(),
+  }),
+})
+
+export type ViewType = z.infer<typeof ViewTypeSchema>
+export type ViewTypeFile = z.infer<typeof ViewSchemaFile>
