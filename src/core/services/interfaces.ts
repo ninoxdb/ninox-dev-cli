@@ -3,9 +3,10 @@ import {
   DatabaseSchemaType,
   DatabaseType,
   TableFileType,
+  ViewType,
   ViewTypeFile,
 } from '../common/schema-validators.js'
-import {View} from '../common/types.js'
+import {DBConfigsYaml, View} from '../common/types.js'
 
 export interface INinoxObjectService<T> {
   download(id: string): Promise<void>
@@ -23,6 +24,10 @@ export interface IProjectService {
     sc: unknown,
     views: View[],
   ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]; views: ViewTypeFile[]}
+  parseLocalObjectsToNinoxObjects(
+    dBConfigsYaml: DBConfigsYaml,
+  ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[]]
+  readDBConfig(databaseId: string): Promise<DBConfigsYaml>
   readDatabaseConfigFromFiles(databaseId: string): Promise<{database: DatabaseType; schema: DatabaseSchemaType}>
   writeDatabaseToFiles(
     database: DatabaseType,

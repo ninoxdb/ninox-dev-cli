@@ -13,6 +13,7 @@ export interface Credentials {
 export interface DBConfigsYaml {
   database: string
   tables: string[]
+  views: string[]
 }
 
 export interface EnvironmentConfig {
@@ -53,7 +54,7 @@ type ViewColumn = {
   agg: string | undefined
   aggType: ((agg: string, type: unknown) => unknown) | undefined
   caption: string | undefined
-  conditionalStyling: any
+  conditionalStyling: unknown
   directFid: string | undefined
   expression: string
   filter: string | undefined

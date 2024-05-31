@@ -6,7 +6,7 @@ import {CREDENTIALS_FILE_NAME} from '../common/constants.js'
 
 export class FSUtil {
   // TODO: if required inject fs and fsAsync to make it testable
-
+  // Then many methods here can be removed, since they only wrap the fs methods e.g fileExists, mkdir, writeFile
   public fileExists(filePath: string): boolean {
     return fs.existsSync(filePath)
   }

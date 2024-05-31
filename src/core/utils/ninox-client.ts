@@ -8,6 +8,7 @@ import {
   DatabaseSchemaType,
   DatabaseSettingsType,
   GetDatabaseResponse,
+  ViewType,
 } from '../common/schema-validators.js'
 import {NinoxCredentials, View, ViewMetadata} from '../common/types.js'
 
@@ -142,6 +143,17 @@ export class NinoxClient {
           'Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.',
         ),
       )
+  }
+
+  public async uploadDatabaseView(databaseId: string, view: ViewType): Promise<unknown> {
+    return this.client
+      .post(`/${this.workspaceId}/${databaseId}/json/views/update`, JSON.stringify(view), {
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      })
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to upload database view'))
   }
 }
 

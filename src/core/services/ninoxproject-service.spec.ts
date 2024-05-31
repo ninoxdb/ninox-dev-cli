@@ -99,7 +99,7 @@ describe('NinoxProjectService', () => {
     // TODO: check which methods are  necessary to stub from the NinoxProjectService, otherwise make them private
     NinoxProjectServiceStubs.readDBConfig = sandbox
       .stub(ninoxProjectService, 'readDBConfig')
-      .resolves({database: `database:\n  id: 123`, tables: []})
+      .resolves({database: `database:\n  id: 123`, tables: [], views: []})
     NinoxProjectServiceStubs.createPackageJson = sandbox.stub(ninoxProjectService, 'createPackageJson')
     NinoxProjectServiceStubs.createConfigYaml = sandbox.stub(ninoxProjectService, 'createConfigYaml')
     NinoxProjectServiceStubs.ensureRootDirectoryStructure = sandbox.stub(
@@ -151,7 +151,7 @@ describe('NinoxProjectService', () => {
       sandbox.stub(DatabaseSchema, 'safeParse').returns({error: new z.ZodError([]), success: false})
       // TODO: add mock views
       expect(() => ninoxProjectService.parseDatabaseConfigs({}, {}, [])).to.throw(
-        'Validation errors: Database or Schema validation failed',
+        'Validation errors: Database validation failed',
       )
     })
 
@@ -184,7 +184,7 @@ describe('NinoxProjectService', () => {
   // TODO: add mock views
   describe('writeDatabaseToFiles', () => {
     it('should ensure the root directory structure and write to files', async () => {
-      await ninoxProjectService.writeDatabaseToFiles(testDatabase, testSchemaInFile, testTablesInFile,[])
+      await ninoxProjectService.writeDatabaseToFiles(testDatabase, testSchemaInFile, testTablesInFile, [])
       sinon.assert.calledOnce(NinoxProjectServiceStubs.ensureRootDirectoryStructure)
       sinon.assert.calledOnce(NinoxProjectServiceStubs.createDatabaseFolderInObjects)
       expect(FSUtilStubs.writeFile.callCount).to.equal(testTablesInFile.length + 1)

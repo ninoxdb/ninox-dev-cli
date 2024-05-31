@@ -25,7 +25,9 @@ import {
   TableFile,
   TableFileType,
   ViewSchemaFile,
+  ViewType,
   ViewTypeFile,
+  ViewTypeSchema,
 } from '../common/schema-validators.js'
 import {DBConfigsYaml, View} from '../common/types.js'
 import {FSUtil} from '../utils/fs.js'
@@ -189,7 +191,6 @@ export class NinoxProjectService implements IProjectService {
       .filter((view) => types[view.view.config.type])
 
     // parse reports
-
     return {database: parsedDatabase, schema: schemaWithoutTypes, tables, views}
   }
 
@@ -223,6 +224,49 @@ export class NinoxProjectService implements IProjectService {
     }
   }
 
+  /**
+   *
+   * @param dBConfigsYaml database, tables, views in yaml string format
+   * @returns 1. Parse file content to local objects 2. Parse local objects to Ninox objects 3. Return Ninox objects
+   */
+  public parseLocalObjectsToNinoxObjects(
+    dBConfigsYaml: DBConfigsYaml,
+  ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[]] {
+    // const databaseConfig = this.parseDatabaseConfigsbaseConfigFileContentFromYaml(dBConfigsYaml)
+    const {database: databaseFileContent, tables, views: viewsFileContent} = dBConfigsYaml
+    const databaseLocal = yaml.load(databaseFileContent) as DatabaseFileType
+    const tablesLocal = tables.map((table) => yaml.load(table) as TableFileType)
+    const viewsLocal = viewsFileContent.map((view) => yaml.load(view) as ViewTypeFile)
+    const {database: databaseJSON} = databaseLocal
+    const {schema: schemaLocalJSON} = databaseJSON
+
+    const tablesJSON = tablesLocal.map((table) => table.table)
+
+    const schemaJSON: DatabaseSchemaType = {
+      ...schemaLocalJSON,
+      types: {},
+    }
+    // attach the tables to the schema
+    for (const table of tablesJSON) {
+      schemaJSON.types[table._id] = table
+    }
+
+    const database = Database.parse(databaseJSON)
+    const schema = DatabaseSchema.parse(schemaJSON)
+
+    const views = viewsLocal.map((viewLocal) => {
+      const {view} = viewLocal
+      const parsedView = ViewTypeSchema.safeParse(view)
+      if (!parsedView.success) {
+        throw new Error('Validation errors: View validation failed')
+      }
+
+      return parsedView.data
+    })
+
+    return [database, schema, views]
+  }
+
   public async readDatabaseConfigFromFiles(
     databaseId: string,
   ): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
@@ -232,26 +276,22 @@ export class NinoxProjectService implements IProjectService {
     return parsedDBConfig
   }
 
-  public async readDBConfig(databaseFolderPath: string): Promise<DBConfigsYaml> {
+  public async readDBConfig(databaseId: string): Promise<DBConfigsYaml> {
+    const databaseFolderPath = this.getDatabaseObjectsDirectoryPath(databaseId)
     if (!this.fsUtil.fileExists(databaseFolderPath)) {
       throw new Error(`Database folder not found: ${databaseFolderPath}`)
     }
 
-    const files = await fsAsync.readdir(databaseFolderPath)
-    const databaseFile = files.find((file) => file.startsWith('Database_'))
-    if (!databaseFile) {
-      throw new Error('Database file not found')
-    }
+    const databaseFolderObjectFiles = await fsAsync.readdir(databaseFolderPath)
+    const database = await this.readDatabaseFile(databaseFolderObjectFiles, databaseFolderPath)
 
-    const database = await fsAsync.readFile(path.join(databaseFolderPath, databaseFile), 'utf8')
-    const tableFiles = files.filter((file) => file.startsWith('Table_') || file.startsWith('Page_'))
+    const tables = await this.readTableFiles(databaseFolderObjectFiles, databaseFolderPath)
 
-    const tables = await Promise.all(
-      tableFiles.map((table) => fsAsync.readFile(path.join(databaseFolderPath, table), 'utf8')),
-    )
+    const views = await this.readViewsFromFiles(databaseFolderObjectFiles, databaseFolderPath)
     return {
       database,
       tables,
+      views,
     } satisfies DBConfigsYaml
   }
 
@@ -348,6 +388,40 @@ export class NinoxProjectService implements IProjectService {
     }
 
     return parsedSchema.data
+  }
+
+  private async readDatabaseFile(databaseFolderObjectFiles: string[], databaseFolderPath: string): Promise<string> {
+    const databaseFile = databaseFolderObjectFiles.find((file) => file.startsWith('Database_'))
+    if (!databaseFile) {
+      throw new Error('Database file not found')
+    }
+
+    return fsAsync.readFile(path.join(databaseFolderPath, databaseFile), 'utf8')
+  }
+
+  private async readTableFiles(databaseFolderObjectFiles: string[], databaseFolderPath: string): Promise<string[]> {
+    const tableFiles = databaseFolderObjectFiles.filter((file) => file.startsWith('Table_') || file.startsWith('Page_'))
+
+    const tables = await Promise.all(
+      tableFiles.map((table) => fsAsync.readFile(path.join(databaseFolderPath, table), 'utf8')),
+    )
+    return tables
+  }
+
+  private async readViewsFromFiles(databaseFolderObjectFiles: string[], databaseFolderPath: string): Promise<string[]> {
+    // const viewFiles = databaseFolderObjectFiles.filter((file) => file.startsWith('View_'))
+    // const views = []
+    const viewFolders = databaseFolderObjectFiles.filter((file) => file.startsWith('Views_')) // file.startsWith('Table_') && !file.endsWith('.yaml'))
+
+    const viewData = await Promise.all(
+      viewFolders.map(async (folder) => {
+        const viewFiles = await fsAsync.readdir(path.join(databaseFolderPath, folder))
+        return Promise.all(
+          viewFiles.map((view) => fsAsync.readFile(path.join(databaseFolderPath, folder, view), 'utf8')),
+        )
+      }),
+    )
+    return viewData.flat()
   }
 
   private async writeViewsToFiles(databaseId: string, viewsByTable: Record<string, ViewTypeFile[]>): Promise<void> {

@@ -14,10 +14,10 @@ describe('database/download', () => {
     nock('https://mocked.example.com')
       .get(`/v1/teams/mocked-workspace/databases/${databaseId}?human=T`)
       .reply(200, databaseJSONMock)
-
-    nock('https://mocked.example.com')
       .get(`/mocked-workspace/${databaseId}/files/background.jpg`)
       .reply(200, 'mocked-image')
+      .get(`/v1/teams/mocked-workspace/databases/${databaseId}/views`)
+      .reply(200, [])
 
     stubReadEnvironmentConfig = sinon.stub(DownloadCommand.prototype, 'readEnvironmentConfig').callsFake(() => ({
       apiKey: 'mocked-api-key',
