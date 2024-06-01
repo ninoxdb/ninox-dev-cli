@@ -11,8 +11,8 @@ export class FSUtil {
     return fs.existsSync(filePath)
   }
 
-  public getObjectFileName(objectType: string, objectId: string): string {
-    return `${objectType}_${this.normalizeFileName(objectId)}`
+  public formatObjectFilename(objectType: string, objectId: string): string {
+    return `${objectType}_${this.toTitleCase(this.normalizeFileName(objectId))}`
   }
 
   public isProjectInitialized(): boolean {
@@ -27,6 +27,12 @@ export class FSUtil {
   public normalizeFileName(name: string): string {
     // Replace sequences of non-alphanumeric characters (except underscores) with a single underscore
     return name.replaceAll(/\W+/gi, '_').toLowerCase()
+  }
+
+  public toTitleCase(string_: string): string {
+    return string_.replaceAll(/\w\S*/g, function (txt) {
+      return txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase()
+    })
   }
 
   public async writeFile(filePath: string, data: string): Promise<void> {

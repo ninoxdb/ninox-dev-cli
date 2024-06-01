@@ -305,12 +305,18 @@ export class NinoxProjectService implements IProjectService {
     schema: DatabaseSchemaBaseType,
     tables: TableFileType[],
     views: ViewTypeFile[],
+    reports: any[],
   ): Promise<void> {
     await this.ensureRootDirectoryStructure()
     // Create a subfolder in the root directory/Objects with name Database_${id}
-    await this.createDatabaseFolderInObjects()
+    const databaseObjectsRoot = await this.createDatabaseFolderInObjects()
+    const tableFolders: Record<string, string> = {}
+    const databaseFilePath = path.join(
+      databaseObjectsRoot,
+      `${this.fsUtil.formatObjectFilename('database', database.settings.name)}.yaml`,
+    )
     await this.fsUtil.writeFile(
-      this.getObjectPath(this.fsUtil.getObjectFileName('database', database.settings.name)),
+      databaseFilePath,
       yaml.dump(
         DatabaseFile.parse({
           database: {
@@ -321,35 +327,43 @@ export class NinoxProjectService implements IProjectService {
       ),
     )
     const fileWritePromises = []
+    // const tableFolderCreationPromises = []
     // table
     for (const tableFileData of tables) {
-      const fileWritePromise = this.fsUtil.writeFile(
-        this.getObjectPath(
-          this.fsUtil.getObjectFileName(
-            tableFileData.table.kind === 'page' ? 'Page' : 'Table',
-            tableFileData.table.caption as string,
-          ),
-        ),
-        yaml.dump(tableFileData),
+      const tableFolderName = this.fsUtil.formatObjectFilename(
+        tableFileData.table.kind ?? 'table',
+        tableFileData.table.caption as string,
       )
-      fileWritePromises.push(fileWritePromise)
+      const tableFolderPath = path.join(databaseObjectsRoot, tableFolderName)
+      tableFolders[tableFileData.table._id] = tableFolderPath
+
+      // create table folder
+      // tableFolderCreationPromises.push(this.fsUtil.mkdir(tableFolderPath))
+      fileWritePromises.push(
+        this.fsUtil.mkdir(tableFolderPath).then(() => {
+          // write table file
+          this.fsUtil.writeFile(path.join(tableFolderPath, `${tableFolderName}.yaml`), yaml.dump(tableFileData))
+        }),
+      )
     }
 
+    // await Promise.all(tableFolderCreationPromises)
     await Promise.all(fileWritePromises)
     // group views by table
-    // eslint-disable-next-line unicorn/no-array-reduce
-    const viewsByTable = views.reduce(
-      (accumulator, view) => {
-        if (!accumulator[view.view._table]) {
-          accumulator[view.view._table] = []
-        }
+    const viewsByTable: Record<string, ViewTypeFile[]> = {}
+    for (const view of views) {
+      if (!viewsByTable[view.view._table]) {
+        viewsByTable[view.view._table] = []
+      }
 
-        accumulator[view.view._table].push(view)
-        return accumulator
-      },
-      {} as Record<string, ViewTypeFile[]>,
-    )
-    return this.writeViewsToFiles(database.id, viewsByTable)
+      viewsByTable[view.view._table].push(view)
+    }
+
+    await this.writeViewsToFiles(database.id, viewsByTable, tableFolders)
+
+    // reports
+    // make folder for reports
+    await this.writeReportsToFiles(database.id, reports, tableFolders)
   }
 
   private parseDatabaseConfigsbaseConfigFileContentFromYaml(
@@ -423,21 +437,51 @@ export class NinoxProjectService implements IProjectService {
     return viewData.flat()
   }
 
-  private async writeViewsToFiles(databaseId: string, viewsByTable: Record<string, ViewTypeFile[]>): Promise<void> {
+  private async writeReportsToFiles(
+    databaseId: string,
+    reports: any[],
+    tableFolders: Record<string, string>,
+  ): Promise<void> {
+    // const reportsPath = path.join(this.getDatabaseObjectsDirectoryPath(databaseId), 'Reports')
+    // await this.fsUtil.mkdir(reportsPath)
+    const reportPromises = reports.map((report) => {
+      const pathPrefix = tableFolders[report.tid ?? report.type]
+      if (!pathPrefix) {
+        return Promise.resolve()
+      }
+
+      const reportFileName = `${this.fsUtil.formatObjectFilename('report', report.caption)}.yaml`
+      return this.fsUtil.writeFile(path.join(pathPrefix, reportFileName), yaml.dump(report))
+    })
+    await Promise.all(reportPromises)
+  }
+
+  private async writeViewsToFiles(
+    databaseId: string,
+    viewsByTable: Record<string, ViewTypeFile[]>,
+    tableFolders: Record<string, string>,
+  ): Promise<void> {
     const directoryCreationPromises = Object.entries(viewsByTable).map(async ([tableName, views]) => {
       // Create a directory for views named: Table_${tableName}
-      const pathPrefix = path.join(this.databaseObjectsPath, this.fsUtil.getObjectFileName('Views', tableName))
+      // const pathPrefix = path.join(
+      //   this.getDatabaseObjectsDirectoryPath(databaseId),
+      //   this.fsUtil.formatObjectFilename('Views', tableName),
+      // )
 
       // Create the directory
-      await this.fsUtil.mkdir(pathPrefix)
+      // await this.fsUtil.mkdir(pathPrefix)
 
       // Create an array of promises for writing files in this directory
-      const fileWritingPromises = views.map((view) =>
-        this.fsUtil.writeFile(
-          path.join(pathPrefix, `${this.fsUtil.getObjectFileName('Views', view.view.caption)}.yaml`),
-          yaml.dump(view),
-        ),
-      )
+      // assume that the table folder exists if defined
+      const fileWritingPromises = views.map((view) => {
+        const pathPrefix = tableFolders[view.view.type]
+        if (!pathPrefix) {
+          return Promise.resolve()
+        }
+
+        const viewFileName = `${this.fsUtil.formatObjectFilename('view', view.view.caption)}.yaml`
+        return this.fsUtil.writeFile(path.join(pathPrefix, viewFileName), yaml.dump(view))
+      })
 
       // Wait for all file writing promises in this directory to resolve
       return Promise.all(fileWritingPromises)

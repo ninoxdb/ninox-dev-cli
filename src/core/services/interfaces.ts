@@ -36,5 +36,6 @@ export interface IProjectService {
     schema: DatabaseSchemaBaseType,
     tables: TableFileType[],
     views: ViewTypeFile[],
+    reports: any[],
   ): Promise<void>
 }

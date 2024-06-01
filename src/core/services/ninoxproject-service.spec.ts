@@ -184,7 +184,7 @@ describe('NinoxProjectService', () => {
   // TODO: add mock views
   describe('writeDatabaseToFiles', () => {
     it('should ensure the root directory structure and write to files', async () => {
-      await ninoxProjectService.writeDatabaseToFiles(testDatabase, testSchemaInFile, testTablesInFile, [])
+      await ninoxProjectService.writeDatabaseToFiles(testDatabase, testSchemaInFile, testTablesInFile, [],[])
       sinon.assert.calledOnce(NinoxProjectServiceStubs.ensureRootDirectoryStructure)
       sinon.assert.calledOnce(NinoxProjectServiceStubs.createDatabaseFolderInObjects)
       expect(FSUtilStubs.writeFile.callCount).to.equal(testTablesInFile.length + 1)

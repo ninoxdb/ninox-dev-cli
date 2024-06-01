@@ -30,16 +30,18 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     this.debug(`Database ${databaseJSON.settings.name} downloaded. Parsing schema...`)
 
     this.debug('Downloading views...')
-    const viewsJSON = await this.downloadDatabaseViews(databaseId)
+    const viewsJSON = await this.getDatabaseViews(databaseId)
 
     // TODO: download reports
+    const reports = await this.getDatabaseReports(databaseId)
+
     const {database, schema, tables, views} = ninoxProjectService.parseDatabaseConfigs(
       databaseJSON,
       schemaJSON,
       viewsJSON,
     )
     this.debug(`Writing Database ${database.settings.name} to files...`)
-    await ninoxProjectService.writeDatabaseToFiles(database, schema, tables, views)
+    await ninoxProjectService.writeDatabaseToFiles(database, schema, tables, views, reports)
     await ninoxProjectService.createDatabaseFolderInFiles(databaseId)
     this.debug(`Downloading background image for Database ${database.settings.name}...`)
     await ninoxClient.downloadDatabaseBackgroundImage(
@@ -93,17 +95,24 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     await Promise.all(views.map((view) => this.ninoxClient.uploadDatabaseView(database.id, view)))
   }
 
-  private async downloadDatabaseViews(databaseId: string): Promise<View[]> {
-    const viewsList = await this.ninoxClient.listDatabaseViews(databaseId)
-    const views = viewsList.map((view) => this.ninoxClient.getDatabaseView(databaseId, view.id))
-    return Promise.all(views)
-  }
-
   private async getDatabaseMetadataAndSchema(
     id: string,
   ): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
     const databaseData = await this.ninoxClient.getDatabase(id)
     const {schema, ...databaseSettings} = databaseData
     return {database: {id, ...databaseSettings}, schema} as {database: DatabaseType; schema: DatabaseSchemaType}
+  }
+
+  private async getDatabaseReports(id: string): Promise<any[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const reports = (await this.ninoxClient.listDatabaseReports(id)) as any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return Promise.all(reports.map((report: any) => this.ninoxClient.getDatabaseReport(id, report.id)))
+  }
+
+  private async getDatabaseViews(databaseId: string): Promise<View[]> {
+    const viewsList = await this.ninoxClient.listDatabaseViews(databaseId)
+    const views = viewsList.map((view) => this.ninoxClient.getDatabaseView(databaseId, view.id))
+    return Promise.all(views)
   }
 }

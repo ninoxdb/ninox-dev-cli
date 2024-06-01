@@ -68,11 +68,25 @@ export class NinoxClient {
       .catch((error) => handleAxiosError(error, 'Failed to fetch database'))
   }
 
+  public async getDatabaseReport(databaseId: string, reportId: string): Promise<void> {
+    return this.client
+      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports/${reportId}`)
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to fetch database report'))
+  }
+
   public async getDatabaseView(databaseId: string, viewId: string): Promise<View> {
     return this.client
       .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/views/${viewId}`)
       .then((response) => response.data)
       .catch((error) => handleAxiosError(error, 'Failed to fetch database views'))
+  }
+
+  public async listDatabaseReports(databaseId: string): Promise<void> {
+    return this.client
+      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports`)
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to list database reports'))
   }
 
   public async listDatabases(): Promise<DatabaseMetadata[]> {

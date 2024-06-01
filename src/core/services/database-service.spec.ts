@@ -121,6 +121,7 @@ describe('DatabaseService', () => {
         schemaMock,
         tablesMock,
         [],
+        [],
       )
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.createDatabaseFolderInFiles, databaseId)
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.getDbBackgroundImagePath, databaseId)
