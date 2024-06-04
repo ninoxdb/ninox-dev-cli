@@ -6,6 +6,13 @@ import {CREDENTIALS_FILE_NAME} from '../common/constants.js'
 
 export class FSUtil {
   // TODO: if required inject fs and fsAsync to make it testable
+  public async checkFileExists(file: string): Promise<boolean> {
+    return fs.promises
+      .access(file, fs.constants.F_OK)
+      .then(() => true)
+      .catch(() => false)
+  }
+
   // Then many methods here can be removed, since they only wrap the fs methods e.g fileExists, mkdir, writeFile
   public fileExists(filePath: string): boolean {
     return fs.existsSync(filePath)
@@ -27,6 +34,10 @@ export class FSUtil {
   public normalizeFileName(name: string): string {
     // Replace sequences of non-alphanumeric characters (except underscores) with a single underscore
     return name.replaceAll(/\W+/gi, '_').toLowerCase()
+  }
+
+  public async readFile(filePath: string): Promise<string> {
+    return fs.promises.readFile(filePath, 'utf8')
   }
 
   public toTitleCase(string_: string): string {

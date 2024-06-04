@@ -118,6 +118,13 @@ export class NinoxClient {
       )
   }
 
+  public async updateDatabaseReportsInNinox(databaseId: string, reports: any[]): Promise<unknown> {
+    return this.client
+      .post(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports`, reports)
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to update database reports'))
+  }
+
   public async updateDatabaseSettingsInNinox(id: string, settings: DatabaseSettingsType): Promise<unknown> {
     const data = JSON.stringify(settings)
     return this.client
@@ -139,6 +146,15 @@ export class NinoxClient {
       })
       .then((response) => response.data)
       .catch((error) => handleAxiosError(error, 'Failed to upload database view'))
+  }
+
+  // I can update all views in a Database with a single request
+  // POST /databases/:dbid/views and views as array of ViewType
+  public async updateDatabaseViewsInNinox(databaseId: string, views: ViewType[]): Promise<unknown> {
+    return this.client
+      .post(`/v1/teams/${this.workspaceId}/databases/${databaseId}/views`, views)
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to update database views'))
   }
 
   public async uploadDatabaseBackgroundImage(

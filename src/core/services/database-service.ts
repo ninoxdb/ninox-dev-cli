@@ -32,7 +32,6 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     this.debug('Downloading views...')
     const viewsJSON = await this.getDatabaseViews(databaseId)
 
-    // TODO: download reports
     const reports = await this.getDatabaseReports(databaseId)
 
     const {database, schema, tables, views} = ninoxProjectService.parseDatabaseConfigs(
@@ -60,19 +59,32 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   }
 
   public async upload(): Promise<void> {
-    const {databaseId, ninoxProjectService} = this
-    const {database: databaseLocal, tables, views: viewsLocal} = await ninoxProjectService.readDBConfig(databaseId)
-
-    this.debug(`Uploading database ${databaseLocal}..${tables.length}...${viewsLocal.length} views found.`)
-    const [database, schema, views] = ninoxProjectService.parseLocalObjectsToNinoxObjects({
+    const {ninoxProjectService} = this
+    const {
       database: databaseLocal,
+      reports: reportsLocal,
+      tables,
+      views: viewsLocal,
+    } = await ninoxProjectService.readDBConfig()
+
+    this.debug(
+      `Uploading database tables: ${tables.length} views: ${viewsLocal.length} reports: ${reportsLocal.length} found.`,
+    )
+    const [database, schema, views, reports] = ninoxProjectService.parseLocalObjectsToNinoxObjects({
+      database: databaseLocal,
+      reports: reportsLocal,
       tables,
       views: viewsLocal,
     })
-    await this.uploadDatabase(database, schema, views)
+    await this.uploadDatabase(database, schema, views, reports)
   }
 
-  public async uploadDatabase(database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[]): Promise<void> {
+  public async uploadDatabase(
+    database: DatabaseType,
+    schema: DatabaseSchemaType,
+    views: ViewType[],
+    reports: any[],
+  ): Promise<void> {
     // TODO: make sure that folder exists before downloading
     const isUploaded = await this.ninoxClient.uploadDatabaseBackgroundImage(
       this.databaseId,
@@ -88,7 +100,9 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
 
     await this.ninoxClient.patchDatabaseSchemaInNinox(database.id, schema)
     await this.ninoxClient.updateDatabaseSettingsInNinox(database.id, database.settings)
-    await Promise.all(views.map((view) => this.ninoxClient.updateDatabaseViewInNinox(database.id, view)))
+    await this.ninoxClient.updateDatabaseViewsInNinox(database.id, views)
+    await this.ninoxClient.updateDatabaseReportsInNinox(database.id, reports)
+    // await Promise.all(views.map((view) => this.ninoxClient.updateDatabaseViewInNinox(database.id, view)))
   }
 
   private async getDatabaseMetadataAndSchema(

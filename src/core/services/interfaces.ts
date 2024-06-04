@@ -28,8 +28,8 @@ export interface IProjectService {
   ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]; views: ViewTypeFile[]}
   parseLocalObjectsToNinoxObjects(
     dBConfigsYaml: DBConfigsYaml,
-  ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[]]
-  readDBConfig(databaseId: string): Promise<DBConfigsYaml>
+  ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: any[]]
+  readDBConfig(): Promise<DBConfigsYaml>
   readDatabaseConfigFromFiles(databaseId: string): Promise<{database: DatabaseType; schema: DatabaseSchemaType}>
   writeDatabaseToFiles(
     database: DatabaseType,

@@ -29,13 +29,14 @@ import {
   ViewTypeFile,
   ViewTypeSchema,
 } from '../common/schema-validators.js'
-import {DBConfigsYaml, View} from '../common/types.js'
+import {DBConfigsYaml, TableFolderContent, View} from '../common/types.js'
 import {FSUtil} from '../utils/fs.js'
 import {IProjectService} from './interfaces.js'
 
 export class NinoxProjectService implements IProjectService {
   private credentialsFilePath: string
   private databaseFilesPath: string
+  private databaseId: string
   private databaseObjectsPath: string
   private dbBackgroundImagePath: string
   private filesBasePath: string
@@ -53,6 +54,7 @@ export class NinoxProjectService implements IProjectService {
     this.databaseObjectsPath = path.join(this.objectsBasePath, `Database_${databaseId}`)
     this.databaseFilesPath = path.join(this.filesBasePath, `Database_${databaseId}`)
     this.dbBackgroundImagePath = path.join(this.databaseFilesPath, DB_BACKGROUND_FILE_NAME)
+    this.databaseId = databaseId
   }
 
   public async createConfigYaml(): Promise<void> {
@@ -281,25 +283,46 @@ export class NinoxProjectService implements IProjectService {
   }
 
   public async readDBConfig(): Promise<DBConfigsYaml> {
-    const {databaseObjectsPath, fsUtil} = this
+    const {databaseId, databaseObjectsPath, fsUtil} = this
     if (!fsUtil.fileExists(databaseObjectsPath)) {
       throw new Error(`Database folder not found: ${databaseObjectsPath}`)
     }
 
-    const databaseFolderObjectFiles = await fsAsync.readdir(databaseObjectsPath)
-    const database = await this.readDatabaseFile(databaseFolderObjectFiles, databaseObjectsPath)
+    const databaseFolderObjects = await fsAsync.readdir(databaseObjectsPath)
+    const databaseFile = databaseFolderObjects.find((file) => file.startsWith(`database_${databaseId}`))
+    const database = await this.readDatabaseFile(databaseFile as string)
 
-    const tables = await this.readTableFiles(databaseFolderObjectFiles, databaseObjectsPath)
+    // Filter table files
+    const tableFolders = databaseFolderObjects.filter((file) => file.startsWith('table_') || file.startsWith('page_'))
 
-    const views = await this.readViewsFromFiles(databaseFolderObjectFiles, databaseObjectsPath)
+    // Helper function to process a single folder
+
+    // Create an array of promises to process each folder concurrently
+    const processPromises = tableFolders.map((folderPath) =>
+      this.processTableFolder(path.join(databaseObjectsPath, folderPath)),
+    )
+
+    // Await all the folder processing promises
+    const tableFoldersContent = await Promise.all(processPromises)
+    const tableFiles: string[] = []
+    const viewFiles: string[] = []
+    const reportFiles: string[] = []
+    for (const folderContent of tableFoldersContent) {
+      tableFiles.push(folderContent.table)
+      viewFiles.push(...folderContent.views)
+      reportFiles.push(...folderContent.reports)
+    }
+
     return {
       database,
-      tables,
-      views,
+      reports: reportFiles,
+      tables: tableFiles,
+      views: viewFiles,
     } satisfies DBConfigsYaml
   }
 
   // Write the database, schema and tables to their respective files
+  // eslint-disable-next-line max-params
   public async writeDatabaseToFiles(
     database: DatabaseType,
     schema: DatabaseSchemaBaseType,
@@ -373,38 +396,51 @@ export class NinoxProjectService implements IProjectService {
     return parsedSchema.data
   }
 
-  private async readDatabaseFile(databaseFolderObjectFiles: string[], databaseFolderPath: string): Promise<string> {
-    const databaseFile = databaseFolderObjectFiles.find((file) => file.startsWith('Database_'))
+  private async processTableFolder(folderPath: string): Promise<TableFolderContent> {
+    const {fsUtil} = this
+    const files = await fs.promises.readdir(folderPath)
+
+    const tableFileName = files.find((file) => file.startsWith('table_') || file.startsWith('page_'))
+    if (!tableFileName) {
+      throw new Error(`Table file not found ${folderPath}`)
+    }
+
+    const tableFilePath = path.join(folderPath, tableFileName)
+    let tableFileContent = ''
+    if (await fsUtil.checkFileExists(tableFilePath)) {
+      tableFileContent = await fsUtil.readFile(tableFilePath)
+    }
+
+    const viewFilesPromises = files
+      .filter((file) => file.startsWith('view_'))
+      .map(async (file) => {
+        const content = await fsUtil.readFile(path.join(folderPath, file))
+        return content
+      })
+
+    const reportFilesPromises = files
+      .filter((file) => file.startsWith('report_'))
+      .map(async (file) => {
+        const content = await fsUtil.readFile(path.join(folderPath, file))
+        return content
+      })
+
+    const viewContents = await Promise.all(viewFilesPromises)
+    const reportContents = await Promise.all(reportFilesPromises)
+
+    return {
+      reports: reportContents,
+      table: tableFileContent,
+      views: viewContents,
+    }
+  }
+
+  private async readDatabaseFile(databaseFile: string): Promise<string> {
     if (!databaseFile) {
       throw new Error('Database file not found')
     }
 
-    return fsAsync.readFile(path.join(databaseFolderPath, databaseFile), 'utf8')
-  }
-
-  private async readTableFiles(databaseFolderObjectFiles: string[], databaseFolderPath: string): Promise<string[]> {
-    const tableFiles = databaseFolderObjectFiles.filter((file) => file.startsWith('Table_') || file.startsWith('Page_'))
-
-    const tables = await Promise.all(
-      tableFiles.map((table) => fsAsync.readFile(path.join(databaseFolderPath, table), 'utf8')),
-    )
-    return tables
-  }
-
-  private async readViewsFromFiles(databaseFolderObjectFiles: string[], databaseFolderPath: string): Promise<string[]> {
-    // const viewFiles = databaseFolderObjectFiles.filter((file) => file.startsWith('View_'))
-    // const views = []
-    const viewFolders = databaseFolderObjectFiles.filter((file) => file.startsWith('Views_')) // file.startsWith('Table_') && !file.endsWith('.yaml'))
-
-    const viewData = await Promise.all(
-      viewFolders.map(async (folder) => {
-        const viewFiles = await fsAsync.readdir(path.join(databaseFolderPath, folder))
-        return Promise.all(
-          viewFiles.map((view) => fsAsync.readFile(path.join(databaseFolderPath, folder, view), 'utf8')),
-        )
-      }),
-    )
-    return viewData.flat()
+    return fsAsync.readFile(path.join(this.databaseObjectsPath, databaseFile), 'utf8')
   }
 
   private async writeDatabaseFile(database: DatabaseType, schema: DatabaseSchemaBaseType): Promise<void> {
