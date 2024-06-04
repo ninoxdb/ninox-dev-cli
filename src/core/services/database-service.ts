@@ -1,4 +1,4 @@
-import {DatabaseMetadata, DatabaseSchemaType, DatabaseType, ViewType} from '../common/schema-validators.js'
+import {DatabaseMetadata, DatabaseSchemaType, DatabaseType, Report, ViewType} from '../common/schema-validators.js'
 import {View} from '../common/types.js'
 import {NinoxClient} from '../utils/ninox-client.js'
 import {INinoxObjectService, IProjectService} from './interfaces.js'
@@ -32,12 +32,13 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     this.debug('Downloading views...')
     const viewsJSON = await this.getDatabaseViews(databaseId)
 
-    const reports = await this.getDatabaseReports(databaseId)
+    const reportsJSON = await this.getDatabaseReports(databaseId)
 
-    const {database, schema, tables, views} = ninoxProjectService.parseDatabaseConfigs(
+    const {database, reports, schema, tables, views} = ninoxProjectService.parseDatabaseConfigs(
       databaseJSON,
       schemaJSON,
       viewsJSON,
+      reportsJSON,
     )
     this.debug(`Writing Database ${database.settings.name} to files...`)
     await ninoxProjectService.writeDatabaseToFiles(database, schema, tables, views, reports)
@@ -83,7 +84,7 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     database: DatabaseType,
     schema: DatabaseSchemaType,
     views: ViewType[],
-    reports: any[],
+    reports: Report[],
   ): Promise<void> {
     // TODO: make sure that folder exists before downloading
     const isUploaded = await this.ninoxClient.uploadDatabaseBackgroundImage(
@@ -113,11 +114,10 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     return {database: {id, ...databaseSettings}, schema} as {database: DatabaseType; schema: DatabaseSchemaType}
   }
 
-  private async getDatabaseReports(id: string): Promise<any[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const reports = (await this.ninoxClient.listDatabaseReports(id)) as any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return Promise.all(reports.map((report: any) => this.ninoxClient.getDatabaseReport(id, report.id)))
+  private async getDatabaseReports(id: string): Promise<Report[]> {
+    // TODO: check how to download all Reports at once
+    const reports = await this.ninoxClient.listDatabaseReports(id)
+    return Promise.all(reports.map((report) => this.ninoxClient.getDatabaseReport(id, report.id)))
   }
 
   private async getDatabaseViews(databaseId: string): Promise<View[]> {

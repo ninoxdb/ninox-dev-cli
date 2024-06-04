@@ -219,5 +219,95 @@ export const ViewSchemaFile = z.object({
   }),
 })
 
+const minimalReportSchema = z.object({
+  caption: z.string(),
+  id: z.string(),
+  nids: z.array(z.string()).optional(),
+  seq: z.number().optional(),
+  tid: z.string(),
+})
+
+const normalReportObjectSchema = z.object({
+  backgroundColor: z.string().optional(),
+  base: z.enum(['text', 'rev', 'image', 'imagefield', 'html']),
+  borderColor: z.string().optional(),
+  borderRadius: z.number().optional(),
+  borderStyle: z.string().optional(),
+  borderWidth: z.number().optional(),
+  file: z.unknown().optional(),
+  fontFamily: z.string().optional(),
+  fontSize: z.number().optional(),
+  fontStyle: z.enum(['italic']).optional(),
+  fontWeight: z.enum(['bold']).optional(),
+  h: z.number().optional(),
+  isAutoHeight: z.boolean().optional(),
+  lineHeight: z.number().optional(),
+  paddingB: z.number().optional(),
+  paddingL: z.number().optional(),
+  paddingR: z.number().optional(),
+  paddingT: z.number().optional(),
+  position: z.enum(['head', 'foot', 'page']),
+  text: z.string().optional(),
+  textAlign: z.enum(['left', 'center', 'right', 'justify']).optional(),
+  textColor: z.string().optional(),
+  textDecoration: z.enum(['underline']).optional(),
+  verticalAlign: z.enum(['middle', 'bottom']).optional(),
+  w: z.number().optional(),
+  x: z.number().optional(),
+  y: z.number().optional(),
+})
+
+const normalReportSchema = minimalReportSchema.merge(
+  z.object({
+    fontFamily: z.string(),
+    fontSize: z.number(),
+    footHeight: z.number(),
+    headHeight: z.number(),
+    marginB: z.number(),
+    marginL: z.number(),
+    marginR: z.number(),
+    marginT: z.number(),
+    objects: z.array(normalReportObjectSchema).optional(),
+    paperHeight: z.number(),
+    paperWidth: z.number(),
+    printAttachments: z.boolean(),
+  }),
+)
+
+const carboneReportSchema = minimalReportSchema.merge(
+  z.object({
+    customDataExp: z.string(),
+    customDataSource: z.boolean(),
+    recurcionLevel: z.number(),
+    reportType: z.literal('carbone'),
+    // other fields not specified in ninox-core
+    testPrint: z.boolean().optional(),
+    // eslint-disable-next-line perfectionist/sort-objects
+    pdfPassword: z.string().optional(),
+    setPassword: z.boolean().optional(),
+    // seq: z.number().optional(),
+  }),
+)
+
+export const reportSchema = z.union([normalReportSchema, carboneReportSchema])
+
+const normalReportFileSchema = z.object({
+  report: normalReportSchema.extend({
+    _database: z.string(),
+  }),
+})
+
+const carboneReportFileSchema = z.object({
+  report: carboneReportSchema.extend({
+    _database: z.string(),
+  }),
+})
+
+export const reportFileSchema = z.union([normalReportFileSchema, carboneReportFileSchema])
+
+export type NormalReport = z.infer<typeof normalReportSchema>
+export type CarboneReport = z.infer<typeof carboneReportSchema>
+export type Report = CarboneReport | NormalReport
+export type ReportTypeFile = z.infer<typeof reportFileSchema>
 export type ViewType = z.infer<typeof ViewTypeSchema>
 export type ViewTypeFile = z.infer<typeof ViewSchemaFile>

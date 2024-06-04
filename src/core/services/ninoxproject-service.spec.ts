@@ -89,17 +89,18 @@ describe('NinoxProjectService', () => {
   const testTablesInFile: TableFileType[] = [testTableInFile]
 
   const testDatabase = {id: 'db1', settings: {color: 'color1', icon: 'icon1', name: 'TestDB'}}
+  // TODO: add mock views and reports
 
   beforeEach(() => {
     // Resetting environment for each test
     sandbox = sinon.createSandbox() as sinon.SinonSandbox & sinon.SinonStubbedInstance<typeof FSUtil>
     fsUtil = new FSUtil()
-    ninoxProjectService = new NinoxProjectService(fsUtil, databaseId)
+    ninoxProjectService = new NinoxProjectService(fsUtil, databaseId, () => {})
 
     // TODO: check which methods are  necessary to stub from the NinoxProjectService, otherwise make them private
     NinoxProjectServiceStubs.readDBConfig = sandbox
       .stub(ninoxProjectService, 'readDBConfig')
-      .resolves({database: `database:\n  id: 123`, tables: [], views: []})
+      .resolves({database: `database:\n  id: 123`, reports: [], tables: [], views: []})
     NinoxProjectServiceStubs.createPackageJson = sandbox.stub(ninoxProjectService, 'createPackageJson')
     NinoxProjectServiceStubs.createConfigYaml = sandbox.stub(ninoxProjectService, 'createConfigYaml')
     NinoxProjectServiceStubs.ensureRootDirectoryStructure = sandbox.stub(
@@ -149,8 +150,7 @@ describe('NinoxProjectService', () => {
     it('should throw an error if database or schema parsing fails', () => {
       sandbox.stub(Database, 'safeParse').returns({error: new z.ZodError([]), success: false})
       sandbox.stub(DatabaseSchema, 'safeParse').returns({error: new z.ZodError([]), success: false})
-      // TODO: add mock views
-      expect(() => ninoxProjectService.parseDatabaseConfigs({}, {}, [])).to.throw(
+      expect(() => ninoxProjectService.parseDatabaseConfigs({}, {}, [], [])).to.throw(
         'Validation errors: Database validation failed',
       )
     })
@@ -162,8 +162,7 @@ describe('NinoxProjectService', () => {
       sandbox.stub(DatabaseSchema, 'safeParse').returns({data: testSchema, success: true})
       sandbox.stub(TableBase, 'safeParse').returns({data: testTable, success: true})
       sandbox.stub(TableFile, 'parse').returns(testTableInFile)
-      // TODO: add mock views
-      const result = ninoxProjectService.parseDatabaseConfigs({id: 'db1'}, {types: {table1: {}}}, [])
+      const result = ninoxProjectService.parseDatabaseConfigs({id: 'db1'}, {types: {table1: {}}}, [], [])
       expect(result).to.have.property('database')
       expect(result).to.have.property('schema')
       expect(result).to.have.property('tables')
@@ -181,7 +180,7 @@ describe('NinoxProjectService', () => {
       expect(result).to.have.property('schema')
     })
   })
-  // TODO: add mock views
+
   describe('writeDatabaseToFiles', () => {
     it('should ensure the root directory structure and write to files', async () => {
       await ninoxProjectService.writeDatabaseToFiles(testDatabase, testSchemaInFile, testTablesInFile, [], [])

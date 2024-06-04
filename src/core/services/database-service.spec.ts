@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import sinon from 'sinon'
 
-import {DatabaseSchemaType, GetDatabaseResponse, TableFileType, ViewType} from '../common/schema-validators.js'
+import {DatabaseSchemaType, GetDatabaseResponse, Report, TableFileType, ViewType} from '../common/schema-validators.js'
 import {NinoxClient} from '../utils/ninox-client.js'
 import {DatabaseService} from './database-service.js'
 import {NinoxProjectService} from './ninoxproject-service.js'
@@ -55,13 +55,14 @@ describe('DatabaseService', () => {
       const mockBgImagePath = 'path/to/bg/image'
       ninoxProjectServiceStub.readDBConfig.resolves({
         database: '',
+        reports: [],
         tables: [],
         views: [],
       })
       ninoxProjectServiceStub.getDbBackgroundImagePath.returns(mockBgImagePath)
       ninoxProjectServiceStub.isDbBackgroundImageExist.returns(true)
 
-      ninoxProjectServiceStub.parseLocalObjectsToNinoxObjects.returns([databaseInfoMock, schemaMock, []])
+      ninoxProjectServiceStub.parseLocalObjectsToNinoxObjects.returns([databaseInfoMock, schemaMock, [], []])
 
       ninoxClientStub.uploadDatabaseBackgroundImage.resolves()
       ninoxClientStub.updateDatabaseSettingsInNinox.resolves()
@@ -73,6 +74,7 @@ describe('DatabaseService', () => {
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.readDBConfig)
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.parseLocalObjectsToNinoxObjects, {
         database: '',
+        reports: [],
         tables: [],
         views: [],
       })
@@ -94,9 +96,11 @@ describe('DatabaseService', () => {
 
       ninoxClientStub.getDatabase.resolves(databaseJSONMock)
       ninoxClientStub.listDatabaseViews.resolves([])
+      ninoxClientStub.listDatabaseReports.resolves([])
       // TODO: mock views
       ninoxProjectServiceStub.parseDatabaseConfigs.returns({
         database: databaseInfoMock,
+        reports: [],
         schema: schemaMock,
         tables: tablesMock,
         views: [],
@@ -113,6 +117,7 @@ describe('DatabaseService', () => {
         ninoxProjectServiceStub.parseDatabaseConfigs,
         {id: databaseId, settings: databaseJSONMock.settings},
         databaseJSONMock.schema,
+        [],
         [],
       )
       sinon.assert.calledOnceWithExactly(
@@ -144,12 +149,13 @@ describe('DatabaseService', () => {
       const {schema, settings} = database
       const databaseForUpload = {id: databaseId, ...database, settings: {...settings}}
       const views: ViewType[] = []
+      const reports: Report[] = []
 
       ninoxClientStub.uploadDatabaseBackgroundImage.resolves(true) // mock that image is uploaded
       ninoxClientStub.updateDatabaseSettingsInNinox.resolves()
       ninoxClientStub.patchDatabaseSchemaInNinox.resolves()
 
-      await databaseService.uploadDatabase(databaseForUpload, schema, views)
+      await databaseService.uploadDatabase(databaseForUpload, schema, views, reports)
 
       expect(ninoxClientStub.uploadDatabaseBackgroundImage.calledOnceWith(databaseId)).to.be.true
       expect(databaseForUpload.settings.bgType).to.equal('image')

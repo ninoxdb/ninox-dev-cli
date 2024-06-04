@@ -8,6 +8,7 @@ import {
   DatabaseSchemaType,
   DatabaseSettingsType,
   GetDatabaseResponse,
+  Report,
   ViewType,
 } from '../common/schema-validators.js'
 import {NinoxCredentials, View, ViewMetadata} from '../common/types.js'
@@ -68,7 +69,7 @@ export class NinoxClient {
       .catch((error) => handleAxiosError(error, 'Failed to fetch database'))
   }
 
-  public async getDatabaseReport(databaseId: string, reportId: string): Promise<void> {
+  public async getDatabaseReport(databaseId: string, reportId: string): Promise<Report> {
     return this.client
       .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports/${reportId}`)
       .then((response) => response.data)
@@ -82,7 +83,7 @@ export class NinoxClient {
       .catch((error) => handleAxiosError(error, 'Failed to fetch database views'))
   }
 
-  public async listDatabaseReports(databaseId: string): Promise<void> {
+  public async listDatabaseReports(databaseId: string): Promise<Report[]> {
     return this.client
       .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports`)
       .then((response) => response.data)
@@ -118,7 +119,7 @@ export class NinoxClient {
       )
   }
 
-  public async updateDatabaseReportsInNinox(databaseId: string, reports: any[]): Promise<unknown> {
+  public async updateDatabaseReportsInNinox(databaseId: string, reports: Report[]): Promise<unknown> {
     return this.client
       .post(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports`, reports)
       .then((response) => response.data)

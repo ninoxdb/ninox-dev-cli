@@ -21,6 +21,8 @@ import {
   DatabaseSchemaBaseType,
   DatabaseSchemaType,
   DatabaseType,
+  Report,
+  ReportTypeFile,
   TableBase,
   TableFile,
   TableFileType,
@@ -28,6 +30,8 @@ import {
   ViewType,
   ViewTypeFile,
   ViewTypeSchema,
+  reportFileSchema,
+  reportSchema,
 } from '../common/schema-validators.js'
 import {DBConfigsYaml, TableFolderContent, View} from '../common/types.js'
 import {FSUtil} from '../utils/fs.js'
@@ -39,22 +43,26 @@ export class NinoxProjectService implements IProjectService {
   private databaseId: string
   private databaseObjectsPath: string
   private dbBackgroundImagePath: string
+  private debug: (message: string) => void
   private filesBasePath: string
   private fsUtil: FSUtil
   private objectsBasePath: string
+
   public constructor(
     fsUtil: FSUtil,
     databaseId: string,
+    debugLogger: (message: string) => void,
     private basePath: string = process.cwd(),
   ) {
     this.fsUtil = fsUtil
     this.credentialsFilePath = path.join(this.basePath, CREDENTIALS_FILE_NAME)
     this.filesBasePath = path.join(this.basePath, 'src', 'Files')
     this.objectsBasePath = path.join(this.basePath, 'src', 'Objects')
-    this.databaseObjectsPath = path.join(this.objectsBasePath, `Database_${databaseId}`)
-    this.databaseFilesPath = path.join(this.filesBasePath, `Database_${databaseId}`)
-    this.dbBackgroundImagePath = path.join(this.databaseFilesPath, DB_BACKGROUND_FILE_NAME)
+    this.databaseObjectsPath = path.join(this.objectsBasePath, `database_${databaseId}`)
+    this.databaseFilesPath = path.join(this.filesBasePath, `database_${databaseId}`)
+    this.dbBackgroundImagePath = path.join(this.getDatabaseFilesPath(), DB_BACKGROUND_FILE_NAME)
     this.databaseId = databaseId
+    this.debug = debugLogger
   }
 
   public async createConfigYaml(): Promise<void> {
@@ -67,7 +75,7 @@ export class NinoxProjectService implements IProjectService {
 
   // create folder src/Files/Database_${databaseid}
   public async createDatabaseFolderInFiles(): Promise<void> {
-    return this.fsUtil.mkdir(this.databaseObjectsPath, {
+    return this.fsUtil.mkdir(this.getDatabaseFilesPath(), {
       recursive: true,
     })
   }
@@ -112,7 +120,6 @@ export class NinoxProjectService implements IProjectService {
     return this.credentialsFilePath
   }
 
-  // TODO: make private
   public getDatabaseFilesPath(): string {
     return this.databaseFilesPath
   }
@@ -163,7 +170,14 @@ export class NinoxProjectService implements IProjectService {
     database_: unknown,
     schema_: unknown,
     views_: View[],
-  ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]; views: ViewTypeFile[]} {
+    reports_: Report[],
+  ): {
+    database: DatabaseType
+    reports: ReportTypeFile[]
+    schema: DatabaseSchemaBaseType
+    tables: TableFileType[]
+    views: ViewTypeFile[]
+  } {
     const parsedDatabase = this.parseDatabaseMetadata(database_)
 
     const parsedSchema = this.parseDatabaseSchema(schema_)
@@ -199,7 +213,20 @@ export class NinoxProjectService implements IProjectService {
       .filter((view) => types[view.view.config.type])
 
     // parse reports
-    return {database: parsedDatabase, schema: schemaWithoutTypes, tables, views}
+    const reports = reports_
+      .map((report) => {
+        const parsedReport = reportFileSchema.safeParse({report: {...report, _database: parsedDatabase.id}})
+        if (!parsedReport.success) {
+          this.debug(`Validation errors: Report validation failed ${report.caption}`)
+          return
+        }
+
+        return parsedReport.data
+      })
+      .filter(Boolean) as ReportTypeFile[]
+
+    // parse reports
+    return {database: parsedDatabase, reports, schema: schemaWithoutTypes, tables, views}
   }
 
   public parseDatabaseConfigsbaseAndSchemaFromFileContent(databaseConfig: DatabaseConfigFileContent): {
@@ -239,12 +266,13 @@ export class NinoxProjectService implements IProjectService {
    */
   public parseLocalObjectsToNinoxObjects(
     dBConfigsYaml: DBConfigsYaml,
-  ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[]] {
+  ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: Report[]] {
     // const databaseConfig = this.parseDatabaseConfigsbaseConfigFileContentFromYaml(dBConfigsYaml)
-    const {database: databaseFileContent, tables, views: viewsFileContent} = dBConfigsYaml
+    const {database: databaseFileContent, reports: reportsFileContent, tables, views: viewsFileContent} = dBConfigsYaml
     const databaseLocal = yaml.load(databaseFileContent) as DatabaseFileType
     const tablesLocal = tables.map((table) => yaml.load(table) as TableFileType)
     const viewsLocal = viewsFileContent.map((view) => yaml.load(view) as ViewTypeFile)
+    const reportsLocal = reportsFileContent.map((report) => yaml.load(report) as ReportTypeFile)
     const {database: databaseJSON} = databaseLocal
     const {schema: schemaLocalJSON} = databaseJSON
 
@@ -272,7 +300,17 @@ export class NinoxProjectService implements IProjectService {
       return parsedView.data
     })
 
-    return [database, schema, views]
+    const reports = reportsLocal.map((reportLocal) => {
+      const {report} = reportLocal
+      const parsedReport = reportSchema.safeParse(report)
+      if (!parsedReport.success) {
+        throw new Error('Validation errors: Report validation failed')
+      }
+
+      return parsedReport.data
+    })
+
+    return [database, schema, views, reports]
   }
 
   public async readDatabaseConfigFromFiles(): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
@@ -283,13 +321,14 @@ export class NinoxProjectService implements IProjectService {
   }
 
   public async readDBConfig(): Promise<DBConfigsYaml> {
-    const {databaseId, databaseObjectsPath, fsUtil} = this
+    const {fsUtil} = this
+    const databaseObjectsPath = this.getDatabaseObjectsPath()
     if (!fsUtil.fileExists(databaseObjectsPath)) {
       throw new Error(`Database folder not found: ${databaseObjectsPath}`)
     }
 
     const databaseFolderObjects = await fsAsync.readdir(databaseObjectsPath)
-    const databaseFile = databaseFolderObjects.find((file) => file.startsWith(`database_${databaseId}`))
+    const databaseFile = databaseFolderObjects.find((file) => file.startsWith(`database_`))
     const database = await this.readDatabaseFile(databaseFile as string)
 
     // Filter table files
@@ -328,7 +367,7 @@ export class NinoxProjectService implements IProjectService {
     schema: DatabaseSchemaBaseType,
     tables: TableFileType[],
     views: ViewTypeFile[],
-    reports: any[],
+    reports: ReportTypeFile[],
   ): Promise<void> {
     await this.ensureRootDirectoryStructure()
     // Create a subfolder in the root directory/Objects with name Database_${id}
@@ -445,7 +484,7 @@ export class NinoxProjectService implements IProjectService {
 
   private async writeDatabaseFile(database: DatabaseType, schema: DatabaseSchemaBaseType): Promise<void> {
     const databaseFilePath = path.join(
-      this.databaseObjectsPath,
+      this.getDatabaseObjectsPath(),
       `${this.fsUtil.formatObjectFilename('database', database.settings.name)}.yaml`,
     )
     await this.fsUtil.writeFile(
@@ -461,11 +500,12 @@ export class NinoxProjectService implements IProjectService {
     )
   }
 
-  private async writeReportsToFiles(reports: any[], tableFolders: Record<string, string>): Promise<void> {
-    // const reportsPath = path.join(this.getDatabaseObjectsDirectoryPath(databaseId), 'Reports')
-    // await this.fsUtil.mkdir(reportsPath)
-    const reportPromises = reports.map((report) => {
-      const pathPrefix = tableFolders[report.tid ?? report.type]
+  private async writeReportsToFiles(reports: ReportTypeFile[], tableFolders: Record<string, string>): Promise<void> {
+    const reportPromises = reports.map((report_) => {
+      const {report} = report_
+      // TODO: check why report also contains views for some databases e.g hrm
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pathPrefix = tableFolders[report.tid ?? (report as any).type]
       if (!pathPrefix) {
         return Promise.resolve()
       }
@@ -484,7 +524,7 @@ export class NinoxProjectService implements IProjectService {
         tableFileData.table.kind ?? 'table',
         tableFileData.table.caption as string,
       )
-      const tableFolderPath = path.join(this.databaseObjectsPath, tableFolderName)
+      const tableFolderPath = path.join(this.getDatabaseObjectsPath(), tableFolderName)
       tableFolders[tableFileData.table._id] = tableFolderPath
 
       // create table folder

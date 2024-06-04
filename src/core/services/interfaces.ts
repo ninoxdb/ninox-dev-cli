@@ -2,6 +2,8 @@ import {
   DatabaseSchemaBaseType,
   DatabaseSchemaType,
   DatabaseType,
+  Report,
+  ReportTypeFile,
   TableFileType,
   ViewType,
   ViewTypeFile,
@@ -25,10 +27,17 @@ export interface IProjectService {
     database: unknown,
     sc: unknown,
     views: View[],
-  ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]; views: ViewTypeFile[]}
+    reports: Report[],
+  ): {
+    database: DatabaseType
+    reports: ReportTypeFile[]
+    schema: DatabaseSchemaBaseType
+    tables: TableFileType[]
+    views: ViewTypeFile[]
+  }
   parseLocalObjectsToNinoxObjects(
     dBConfigsYaml: DBConfigsYaml,
-  ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: any[]]
+  ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: Report[]]
   readDBConfig(): Promise<DBConfigsYaml>
   readDatabaseConfigFromFiles(databaseId: string): Promise<{database: DatabaseType; schema: DatabaseSchemaType}>
   writeDatabaseToFiles(
@@ -36,6 +45,6 @@ export interface IProjectService {
     schema: DatabaseSchemaBaseType,
     tables: TableFileType[],
     views: ViewTypeFile[],
-    reports: any[],
+    reports: ReportTypeFile[],
   ): Promise<void>
 }

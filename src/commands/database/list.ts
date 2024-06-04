@@ -18,7 +18,7 @@ export default class ListCommand extends BaseCommand {
   protected async init(): Promise<void> {
     await super.init()
     this.databaseService = new DatabaseService(
-      new NinoxProjectService(new FSUtil(), ''),
+      new NinoxProjectService(new FSUtil(), '', this.debug),
       new NinoxClient(this.environment as EnvironmentConfig),
       this.environment.workspaceId,
       () => {},
