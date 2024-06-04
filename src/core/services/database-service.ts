@@ -42,12 +42,9 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     )
     this.debug(`Writing Database ${database.settings.name} to files...`)
     await ninoxProjectService.writeDatabaseToFiles(database, schema, tables, views, reports)
-    await ninoxProjectService.createDatabaseFolderInFiles(databaseId)
     this.debug(`Downloading background image for Database ${database.settings.name}...`)
-    await ninoxClient.downloadDatabaseBackgroundImage(
-      databaseId,
-      ninoxProjectService.getDbBackgroundImagePath(databaseId),
-    )
+    await ninoxProjectService.createDatabaseFolderInFiles()
+    await ninoxClient.downloadDatabaseBackgroundImage(databaseId, ninoxProjectService.getDbBackgroundImagePath())
   }
 
   public getDBId(): string {
@@ -77,11 +74,10 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
 
   public async uploadDatabase(database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[]): Promise<void> {
     // TODO: make sure that folder exists before downloading
-    const bgImagePath = this.ninoxProjectService.getDbBackgroundImagePath(database.id)
     const isUploaded = await this.ninoxClient.uploadDatabaseBackgroundImage(
-      database.id,
-      bgImagePath,
-      this.ninoxProjectService.isDbBackgroundImageExist(database.id, bgImagePath),
+      this.databaseId,
+      this.ninoxProjectService.getDbBackgroundImagePath(),
+      this.ninoxProjectService.isDbBackgroundImageExist(),
     )
     // If there was no background earlier, and now there is one, set the database background type to image
     // TODO: Later on, may be it is better to allow the developer to decide whether to set the background type to image or not, regardless of whether there is a background.jpg file
@@ -90,9 +86,9 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
       database.settings.backgroundClass = 'background-file'
     }
 
-    await this.ninoxClient.uploadDatabaseSchemaToNinox(database.id, schema)
-    await this.ninoxClient.updateDatabaseSettings(database.id, database.settings)
-    await Promise.all(views.map((view) => this.ninoxClient.uploadDatabaseView(database.id, view)))
+    await this.ninoxClient.patchDatabaseSchemaInNinox(database.id, schema)
+    await this.ninoxClient.updateDatabaseSettingsInNinox(database.id, database.settings)
+    await Promise.all(views.map((view) => this.ninoxClient.updateDatabaseViewInNinox(database.id, view)))
   }
 
   private async getDatabaseMetadataAndSchema(

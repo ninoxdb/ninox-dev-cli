@@ -17,10 +17,10 @@ export interface INinoxObjectService<T> {
 }
 
 export interface IProjectService {
-  createDatabaseFolderInFiles(databaseId: string): Promise<void>
-  getDbBackgroundImagePath(databaseId: string): string
+  createDatabaseFolderInFiles(): Promise<void>
+  getDbBackgroundImagePath(): string
   initialiseProject(name: string): Promise<void>
-  isDbBackgroundImageExist(databaseId: string, imagePath?: string): boolean
+  isDbBackgroundImageExist(): boolean
   parseDatabaseConfigs(
     database: unknown,
     sc: unknown,

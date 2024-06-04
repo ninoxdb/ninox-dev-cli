@@ -94,7 +94,7 @@ describe('NinoxProjectService', () => {
     // Resetting environment for each test
     sandbox = sinon.createSandbox() as sinon.SinonSandbox & sinon.SinonStubbedInstance<typeof FSUtil>
     fsUtil = new FSUtil()
-    ninoxProjectService = new NinoxProjectService(fsUtil)
+    ninoxProjectService = new NinoxProjectService(fsUtil, databaseId)
 
     // TODO: check which methods are  necessary to stub from the NinoxProjectService, otherwise make them private
     NinoxProjectServiceStubs.readDBConfig = sandbox
@@ -124,9 +124,9 @@ describe('NinoxProjectService', () => {
 
   describe('createDatabaseFolderInFiles', () => {
     it('should call FSUtil.createDatabaseFolderInFiles with correct database ID', async () => {
-      await ninoxProjectService.createDatabaseFolderInFiles(databaseId)
+      await ninoxProjectService.createDatabaseFolderInFiles()
       // sinon.assert.calledWith(FSUtilStubs.createDatabaseFolderInFiles, databaseId)
-      sinon.assert.calledWith(FSUtilStubs.mkdir, ninoxProjectService.getDatabaseFilesDirectoryPath(databaseId))
+      sinon.assert.calledWith(FSUtilStubs.mkdir, ninoxProjectService.getDatabaseFilesPath())
     })
   })
 
@@ -176,7 +176,7 @@ describe('NinoxProjectService', () => {
         .stub(ninoxProjectService, 'parseDatabaseConfigsbaseAndSchemaFromFileContent')
         .returns({database: testDatabase, schema: testSchema})
 
-      const result = await ninoxProjectService.readDatabaseConfigFromFiles(databaseId)
+      const result = await ninoxProjectService.readDatabaseConfigFromFiles()
       expect(result).to.have.property('database')
       expect(result).to.have.property('schema')
     })
@@ -184,7 +184,7 @@ describe('NinoxProjectService', () => {
   // TODO: add mock views
   describe('writeDatabaseToFiles', () => {
     it('should ensure the root directory structure and write to files', async () => {
-      await ninoxProjectService.writeDatabaseToFiles(testDatabase, testSchemaInFile, testTablesInFile, [],[])
+      await ninoxProjectService.writeDatabaseToFiles(testDatabase, testSchemaInFile, testTablesInFile, [], [])
       sinon.assert.calledOnce(NinoxProjectServiceStubs.ensureRootDirectoryStructure)
       sinon.assert.calledOnce(NinoxProjectServiceStubs.createDatabaseFolderInObjects)
       expect(FSUtilStubs.writeFile.callCount).to.equal(testTablesInFile.length + 1)
