@@ -6,52 +6,67 @@ import {INinoxObjectService, IProjectService} from './interfaces.js'
 export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   protected ninoxClient: NinoxClient
   protected ninoxProjectService: IProjectService
-  protected workspaceId: string
+  private databaseId: string
+  private databaseName!: string
   private debug: (message: string) => void
 
   public constructor(
     ninoxProjectService: IProjectService,
     ninoxClient: NinoxClient,
-    workspaceId: string,
+    databaseId: string,
     debugLogger: (message: string) => void,
   ) {
     this.ninoxProjectService = ninoxProjectService
     this.ninoxClient = ninoxClient
-    this.workspaceId = workspaceId
+    this.databaseId = databaseId
     this.debug = debugLogger
   }
 
-  public async download(id: string): Promise<void> {
-    this.debug(`Downloading database schema ${id}...`)
-    const {database: databaseJSON, schema: schemaJSON} = await this.getDatabaseMetadataAndSchema(id)
+  public async download(): Promise<void> {
+    const {databaseId, ninoxClient, ninoxProjectService} = this
+    this.debug(`Downloading database schema ${databaseId}...`)
+    const {database: databaseJSON, schema: schemaJSON} = await this.getDatabaseMetadataAndSchema(databaseId)
+    this.databaseName = databaseJSON.settings.name
     this.debug(`Database ${databaseJSON.settings.name} downloaded. Parsing schema...`)
 
     this.debug('Downloading views...')
-    const viewsJSON = await this.downloadDatabaseViews(id)
+    const viewsJSON = await this.downloadDatabaseViews(databaseId)
 
     // TODO: download reports
-    const {database, schema, tables, views} = this.ninoxProjectService.parseDatabaseConfigs(
+    const {database, schema, tables, views} = ninoxProjectService.parseDatabaseConfigs(
       databaseJSON,
       schemaJSON,
       viewsJSON,
     )
     this.debug(`Writing Database ${database.settings.name} to files...`)
-    await this.ninoxProjectService.writeDatabaseToFiles(database, schema, tables, views)
-    await this.ninoxProjectService.createDatabaseFolderInFiles(id)
+    await ninoxProjectService.writeDatabaseToFiles(database, schema, tables, views)
+    await ninoxProjectService.createDatabaseFolderInFiles(databaseId)
     this.debug(`Downloading background image for Database ${database.settings.name}...`)
-    await this.ninoxClient.downloadDatabaseBackgroundImage(id, this.ninoxProjectService.getDbBackgroundImagePath(id))
+    await ninoxClient.downloadDatabaseBackgroundImage(
+      databaseId,
+      ninoxProjectService.getDbBackgroundImagePath(databaseId),
+    )
+  }
+
+  public getDBId(): string {
+    return this.databaseId
+  }
+
+  public getDBName(): string {
+    return this.databaseName
   }
 
   public async list(): Promise<DatabaseMetadata[]> {
     return this.ninoxClient.listDatabases()
   }
 
-  public async upload(id: string): Promise<void> {
+  public async upload(): Promise<void> {
     // read raw data from local files
-    const {database: databaseLocal, tables, views: viewsLocal} = await this.ninoxProjectService.readDBConfig(id)
+    const {databaseId, ninoxProjectService} = this
+    const {database: databaseLocal, tables, views: viewsLocal} = await ninoxProjectService.readDBConfig(databaseId)
 
     this.debug(`Uploading database ${databaseLocal}..${tables.length}...${viewsLocal.length} views found.`)
-    const [database, schema, views] = this.ninoxProjectService.parseLocalObjectsToNinoxObjects({
+    const [database, schema, views] = ninoxProjectService.parseLocalObjectsToNinoxObjects({
       database: databaseLocal,
       tables,
       views: viewsLocal,

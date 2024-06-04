@@ -9,9 +9,11 @@ import {
 import {DBConfigsYaml, View} from '../common/types.js'
 
 export interface INinoxObjectService<T> {
-  download(id: string): Promise<void>
+  download(): Promise<void>
+  getDBId(): string
+  getDBName(): string
   list(): Promise<T[]>
-  upload(id: string): Promise<void>
+  upload(): Promise<void>
 }
 
 export interface IProjectService {

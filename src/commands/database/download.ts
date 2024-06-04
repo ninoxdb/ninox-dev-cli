@@ -21,19 +21,21 @@ export default class DownloadCommand extends BaseCommand {
 
   protected async init(): Promise<void> {
     await super.init()
+    const {flags} = await this.parse(DownloadCommand)
     const fsUtil = new FSUtil()
     this.databaseService = new DatabaseService(
       new NinoxProjectService(fsUtil),
       new NinoxClient(this.environment as EnvironmentConfig),
-      this.environment.workspaceId,
+      flags.id,
       this.debug,
     )
   }
 
   public async run(): Promise<void> {
-    const {flags} = await this.parse(DownloadCommand)
-    await this.databaseService.download(flags.id)
+    await this.databaseService.download()
     this.debug(`success src/commands/download.ts`)
-    this.log(`Downloaded database ${flags.id} successfully!`)
+    this.log(
+      `Downloaded database ${this.databaseService.getDBName()} (${this.databaseService.getDBId()}) successfully!`,
+    )
   }
 }

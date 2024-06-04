@@ -43,7 +43,7 @@ describe('DatabaseService', () => {
   beforeEach(() => {
     ninoxClientStub = sinon.createStubInstance(NinoxClient)
     ninoxProjectServiceStub = sinon.createStubInstance(NinoxProjectService)
-    databaseService = new DatabaseService(ninoxProjectServiceStub, ninoxClientStub, 'workspaceId', () => {})
+    databaseService = new DatabaseService(ninoxProjectServiceStub, ninoxClientStub, databaseId, () => {})
   })
 
   afterEach(() => {
@@ -68,7 +68,7 @@ describe('DatabaseService', () => {
       ninoxClientStub.uploadDatabaseSchemaToNinox.resolves()
       ninoxClientStub.uploadDatabaseView.resolves()
 
-      await databaseService.upload(databaseId)
+      await databaseService.upload()
 
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.readDBConfig, databaseId)
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.parseLocalObjectsToNinoxObjects, {
@@ -106,7 +106,7 @@ describe('DatabaseService', () => {
       ninoxProjectServiceStub.getDbBackgroundImagePath.returns(mockBgImagePath)
       ninoxClientStub.downloadDatabaseBackgroundImage.resolves()
 
-      await databaseService.download(databaseId)
+      await databaseService.download()
 
       sinon.assert.calledOnceWithExactly(ninoxClientStub.getDatabase, databaseId)
       sinon.assert.calledOnceWithExactly(
