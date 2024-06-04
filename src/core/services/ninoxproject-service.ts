@@ -35,17 +35,24 @@ import {IProjectService} from './interfaces.js'
 
 export class NinoxProjectService implements IProjectService {
   private credentialsFilePath: string
-  private filesPath: string
+  private databaseFilesPath: string
+  private databaseObjectsPath: string
+  private dbBackgroundImagePath: string
+  private filesBasePath: string
   private fsUtil: FSUtil
-  private objectsPath: string
+  private objectsBasePath: string
   public constructor(
     fsUtil: FSUtil,
+    databaseId: string,
     private basePath: string = process.cwd(),
   ) {
     this.fsUtil = fsUtil
     this.credentialsFilePath = path.join(this.basePath, CREDENTIALS_FILE_NAME)
-    this.filesPath = path.join(this.basePath, 'src', 'Files')
-    this.objectsPath = path.join(this.basePath, 'src', 'Objects')
+    this.filesBasePath = path.join(this.basePath, 'src', 'Files')
+    this.objectsBasePath = path.join(this.basePath, 'src', 'Objects')
+    this.databaseObjectsPath = path.join(this.objectsBasePath, `Database_${databaseId}`)
+    this.databaseFilesPath = path.join(this.filesBasePath, `Database_${databaseId}`)
+    this.dbBackgroundImagePath = path.join(this.databaseFilesPath, DB_BACKGROUND_FILE_NAME)
   }
 
   public async createConfigYaml(): Promise<void> {
@@ -57,17 +64,18 @@ export class NinoxProjectService implements IProjectService {
   }
 
   // create folder src/Files/Database_${databaseid}
-  public async createDatabaseFolderInFiles(databaseId: string): Promise<void> {
-    return this.fsUtil.mkdir(this.getDatabaseFilesDirectoryPath(databaseId), {
+  public async createDatabaseFolderInFiles(): Promise<void> {
+    return this.fsUtil.mkdir(this.databaseObjectsPath, {
       recursive: true,
     })
   }
 
   // create folder src/Object/Database_${databaseid}
-  public async createDatabaseFolderInObjects(databaseId: string): Promise<void> {
-    return this.fsUtil.mkdir(this.getDatabaseObjectsDirectoryPath(databaseId), {
+  public async createDatabaseFolderInObjects(): Promise<string> {
+    await this.fsUtil.mkdir(this.databaseObjectsPath, {
       recursive: true,
     })
+    return this.databaseObjectsPath
   }
 
   public async createPackageJson(
@@ -94,8 +102,8 @@ export class NinoxProjectService implements IProjectService {
   }
 
   public async ensureRootDirectoryStructure(): Promise<void> {
-    await this.fsUtil.mkdir(this.objectsPath, {recursive: true})
-    await this.fsUtil.mkdir(this.filesPath, {recursive: true})
+    await this.fsUtil.mkdir(this.objectsBasePath, {recursive: true})
+    await this.fsUtil.mkdir(this.filesBasePath, {recursive: true})
   }
 
   public getCredentialsPath(): string {
@@ -103,41 +111,40 @@ export class NinoxProjectService implements IProjectService {
   }
 
   // TODO: make private
-  public getDatabaseFilesDirectoryPath(databaseId: string): string {
-    return path.join(this.filesPath, `Database_${databaseId}`)
+  public getDatabaseFilesPath(): string {
+    return this.databaseFilesPath
   }
 
-  public getDatabaseObjectsDirectoryPath(databaseId: string): string {
-    return path.join(this.objectsPath, `Database_${databaseId}`)
+  public getDatabaseObjectsPath(): string {
+    return this.databaseObjectsPath
   }
 
-  public getDbBackgroundImagePath(databaseId: string): string {
-    return path.join(this.getDatabaseFilesDirectoryPath(databaseId), DB_BACKGROUND_FILE_NAME)
+  public getDbBackgroundImagePath(): string {
+    return this.dbBackgroundImagePath
   }
 
   public getFilePath(databaseId: string, objectName: string): string {
-    if (!fs.existsSync(this.getDatabaseFilesDirectoryPath(databaseId))) {
-      throw new Error('File path not set')
+    if (!fs.existsSync(this.databaseFilesPath)) {
+      throw new Error('Database folder not found')
     }
 
-    return path.join(this.getDatabaseFilesDirectoryPath(databaseId), `${objectName}.yaml`)
+    return path.join(this.databaseFilesPath, `${objectName}.yaml`)
   }
 
   public getFilesPath(): string {
-    return this.filesPath
+    return this.filesBasePath
   }
 
-  public getObjectPath(databaseId: string, objectName: string): string {
-    const databaseFolderPath = this.getDatabaseObjectsDirectoryPath(databaseId)
-    if (!this.fsUtil.fileExists(databaseFolderPath)) {
-      throw new Error(`Database folder not found: ${databaseFolderPath}`)
+  public getObjectPath(objectName: string): string {
+    if (!this.fsUtil.fileExists(this.databaseObjectsPath)) {
+      throw new Error(`Database folder not found: ${this.databaseObjectsPath}`)
     }
 
-    return path.join(this.getDatabaseObjectsDirectoryPath(databaseId), `${objectName}.yaml`)
+    return path.join(this.databaseObjectsPath, `${objectName}.yaml`)
   }
 
-  public getObjectsPath(): string {
-    return this.objectsPath
+  public getObjectsBasePath(): string {
+    return this.objectsBasePath
   }
 
   public async initialiseProject(name: string): Promise<void> {
@@ -146,9 +153,8 @@ export class NinoxProjectService implements IProjectService {
     await this.ensureRootDirectoryStructure()
   }
 
-  public isDbBackgroundImageExist(databaseId: string, imagePath?: string): boolean {
-    const backgroundFilePath = imagePath ?? this.getDbBackgroundImagePath(databaseId)
-    return fs.existsSync(backgroundFilePath)
+  public isDbBackgroundImageExist(): boolean {
+    return fs.existsSync(this.dbBackgroundImagePath)
   }
 
   public parseDatabaseConfigs(
@@ -267,36 +273,30 @@ export class NinoxProjectService implements IProjectService {
     return [database, schema, views]
   }
 
-  public async readDatabaseConfigFromFiles(
-    databaseId: string,
-  ): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
-    const databaseConfigInYaml = await this.readDBConfig(this.getDatabaseObjectsDirectoryPath(databaseId))
+  public async readDatabaseConfigFromFiles(): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
+    const databaseConfigInYaml = await this.readDBConfig()
     const databaseConfig = this.parseDatabaseConfigsbaseConfigFileContentFromYaml(databaseConfigInYaml)
     const parsedDBConfig = this.parseDatabaseConfigsbaseAndSchemaFromFileContent(databaseConfig)
     return parsedDBConfig
   }
 
-  public async readDBConfig(databaseId: string): Promise<DBConfigsYaml> {
-    const databaseFolderPath = this.getDatabaseObjectsDirectoryPath(databaseId)
-    if (!this.fsUtil.fileExists(databaseFolderPath)) {
-      throw new Error(`Database folder not found: ${databaseFolderPath}`)
+  public async readDBConfig(): Promise<DBConfigsYaml> {
+    const {databaseObjectsPath, fsUtil} = this
+    if (!fsUtil.fileExists(databaseObjectsPath)) {
+      throw new Error(`Database folder not found: ${databaseObjectsPath}`)
     }
 
-    const databaseFolderObjectFiles = await fsAsync.readdir(databaseFolderPath)
-    const database = await this.readDatabaseFile(databaseFolderObjectFiles, databaseFolderPath)
+    const databaseFolderObjectFiles = await fsAsync.readdir(databaseObjectsPath)
+    const database = await this.readDatabaseFile(databaseFolderObjectFiles, databaseObjectsPath)
 
-    const tables = await this.readTableFiles(databaseFolderObjectFiles, databaseFolderPath)
+    const tables = await this.readTableFiles(databaseFolderObjectFiles, databaseObjectsPath)
 
-    const views = await this.readViewsFromFiles(databaseFolderObjectFiles, databaseFolderPath)
+    const views = await this.readViewsFromFiles(databaseFolderObjectFiles, databaseObjectsPath)
     return {
       database,
       tables,
       views,
     } satisfies DBConfigsYaml
-  }
-
-  public async readDBConfigFromFiles(databaseId: string): Promise<DBConfigsYaml> {
-    return this.readDBConfig(this.getDatabaseObjectsDirectoryPath(databaseId))
   }
 
   // Write the database, schema and tables to their respective files
@@ -308,9 +308,9 @@ export class NinoxProjectService implements IProjectService {
   ): Promise<void> {
     await this.ensureRootDirectoryStructure()
     // Create a subfolder in the root directory/Objects with name Database_${id}
-    await this.createDatabaseFolderInObjects(database.id)
+    await this.createDatabaseFolderInObjects()
     await this.fsUtil.writeFile(
-      this.getObjectPath(database.id, this.fsUtil.getObjectFileName('Database', database.settings.name)),
+      this.getObjectPath(this.fsUtil.getObjectFileName('database', database.settings.name)),
       yaml.dump(
         DatabaseFile.parse({
           database: {
@@ -325,7 +325,6 @@ export class NinoxProjectService implements IProjectService {
     for (const tableFileData of tables) {
       const fileWritePromise = this.fsUtil.writeFile(
         this.getObjectPath(
-          database.id,
           this.fsUtil.getObjectFileName(
             tableFileData.table.kind === 'page' ? 'Page' : 'Table',
             tableFileData.table.caption as string,
@@ -427,10 +426,7 @@ export class NinoxProjectService implements IProjectService {
   private async writeViewsToFiles(databaseId: string, viewsByTable: Record<string, ViewTypeFile[]>): Promise<void> {
     const directoryCreationPromises = Object.entries(viewsByTable).map(async ([tableName, views]) => {
       // Create a directory for views named: Table_${tableName}
-      const pathPrefix = path.join(
-        this.getDatabaseObjectsDirectoryPath(databaseId),
-        this.fsUtil.getObjectFileName('Views', tableName),
-      )
+      const pathPrefix = path.join(this.databaseObjectsPath, this.fsUtil.getObjectFileName('Views', tableName))
 
       // Create the directory
       await this.fsUtil.mkdir(pathPrefix)

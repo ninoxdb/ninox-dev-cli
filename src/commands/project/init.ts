@@ -18,7 +18,7 @@ export default class InitCommand extends Command {
   protected async init(): Promise<void> {
     await super.init()
     const fsUtil = new FSUtil()
-    this.ninoxProjectService = new NinoxProjectService(fsUtil)
+    this.ninoxProjectService = new NinoxProjectService(fsUtil, '')
   }
 
   public async run(): Promise<void> {

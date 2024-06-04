@@ -61,7 +61,6 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   }
 
   public async upload(): Promise<void> {
-    // read raw data from local files
     const {databaseId, ninoxProjectService} = this
     const {database: databaseLocal, tables, views: viewsLocal} = await ninoxProjectService.readDBConfig(databaseId)
 
