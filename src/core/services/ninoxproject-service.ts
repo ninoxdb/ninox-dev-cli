@@ -380,22 +380,37 @@ export class NinoxProjectService implements IProjectService {
     // group views by table
     const viewsByTable: Record<string, ViewTypeFile[]> = {}
     for (const view of views) {
-      // skip orphan views
+      // filter orphan views
       if (!tableFolders[view.view.type]) {
         continue
       }
 
-      if (!viewsByTable[view.view._table]) {
-        viewsByTable[view.view._table] = []
+      if (!viewsByTable[view.view.type]) {
+        viewsByTable[view.view.type] = []
       }
 
-      viewsByTable[view.view._table].push(view)
+      viewsByTable[view.view.type].push(view)
     }
 
     await this.writeViewsToFiles(viewsByTable, tableFolders)
 
+    // group reports by table
+    const reportsByTable: Record<string, ReportTypeFile[]> = {}
+    for (const reportFile of reports) {
+      // filter orphan views
+      if (!tableFolders[reportFile.report.tid]) {
+        continue
+      }
+
+      if (!reportsByTable[reportFile.report.tid]) {
+        reportsByTable[reportFile.report.tid] = []
+      }
+
+      reportsByTable[reportFile.report.tid].push(reportFile)
+    }
+
     // reports
-    await this.writeReportsToFiles(reports, tableFolders)
+    await this.writeReportsToFiles(reportsByTable, tableFolders)
   }
 
   private parseDatabaseConfigsbaseConfigFileContentFromYaml(
@@ -500,20 +515,24 @@ export class NinoxProjectService implements IProjectService {
     )
   }
 
-  private async writeReportsToFiles(reports: ReportTypeFile[], tableFolders: Record<string, string>): Promise<void> {
-    const reportPromises = reports.map((report_) => {
-      const {report} = report_
-      // TODO: check why report also contains views for some databases e.g hrm
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pathPrefix = tableFolders[report.tid ?? (report as any).type]
-      if (!pathPrefix) {
-        return Promise.resolve()
-      }
+  private async writeReportsToFiles(
+    reports: Record<string, ReportTypeFile[]>,
+    tableFolders: Record<string, string>,
+  ): Promise<void> {
+    // TODO: check why report also contains view like structures for some databases e.g hrm
+    const directoryPromises = Object.entries(reports).map(async ([, reports]) => {
+      // assume that the table folder exists if defined
+      const fileWritingPromises = reports.map((report) => {
+        const tablePath = tableFolders[report.report.tid]
 
-      const reportFileName = `${this.fsUtil.formatObjectFilename('report', report.caption)}.yaml`
-      return this.fsUtil.writeFile(path.join(pathPrefix, reportFileName), yaml.dump(report))
+        const reportFileName = `${this.fsUtil.formatObjectFilename('report', report.report.caption)}.yaml`
+        return this.fsUtil.writeFile(path.join(tablePath, reportFileName), yaml.dump(report))
+      })
+
+      // Wait for all file writing promises in this directory to resolve
+      return Promise.all(fileWritingPromises)
     })
-    await Promise.all(reportPromises)
+    await Promise.all(directoryPromises)
   }
 
   private async writeTablesToFiles(tables: TableFileType[]): Promise<Record<string, string>> {
@@ -545,7 +564,7 @@ export class NinoxProjectService implements IProjectService {
     viewsByTable: Record<string, ViewTypeFile[]>,
     tableFolders: Record<string, string>,
   ): Promise<void> {
-    const directoryCreationPromises = Object.entries(viewsByTable).map(async ([, views]) => {
+    const directoryPromises = Object.entries(viewsByTable).map(async ([, views]) => {
       // assume that the table folder exists if defined
       const fileWritingPromises = views.map((view) => {
         const tablePath = tableFolders[view.view.type]
@@ -559,6 +578,6 @@ export class NinoxProjectService implements IProjectService {
     })
 
     // Wait for all directory creation and file writing promises to resolve
-    await Promise.all(directoryCreationPromises.flat())
+    await Promise.all(directoryPromises)
   }
 }
