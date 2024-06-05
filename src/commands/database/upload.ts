@@ -23,12 +23,13 @@ export default class UploadCommand extends BaseCommand {
   protected async init(): Promise<void> {
     await super.init()
     const {flags} = await this.parse(UploadCommand)
+    const context = {debug: this.debug}
     const fsUtil = new FSUtil()
     this.databaseService = new DatabaseService(
-      new NinoxProjectService(fsUtil, flags.id, this.debug),
+      new NinoxProjectService(fsUtil, flags.id, context),
       new NinoxClient(this.environment as EnvironmentConfig),
       flags.id,
-      this.debug,
+      context,
     )
   }
 

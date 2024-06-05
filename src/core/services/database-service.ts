@@ -1,5 +1,5 @@
 import {DatabaseMetadata, DatabaseSchemaType, DatabaseType, Report, ViewType} from '../common/schema-validators.js'
-import {View} from '../common/types.js'
+import {ContextOptions, View} from '../common/types.js'
 import {NinoxClient} from '../utils/ninox-client.js'
 import {INinoxObjectService, IProjectService} from './interfaces.js'
 
@@ -14,12 +14,13 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     ninoxProjectService: IProjectService,
     ninoxClient: NinoxClient,
     databaseId: string,
-    debugLogger: (message: string) => void,
+    context: ContextOptions,
   ) {
     this.ninoxProjectService = ninoxProjectService
     this.ninoxClient = ninoxClient
     this.databaseId = databaseId
-    this.debug = debugLogger
+    const {debug} = context
+    this.debug = debug
   }
 
   public async download(): Promise<void> {

@@ -33,7 +33,7 @@ import {
   reportFileSchema,
   reportSchema,
 } from '../common/schema-validators.js'
-import {DBConfigsYaml, TableFolderContent, View} from '../common/types.js'
+import {ContextOptions, DBConfigsYaml, TableFolderContent, View} from '../common/types.js'
 import {FSUtil} from '../utils/fs.js'
 import {IProjectService} from './interfaces.js'
 
@@ -51,7 +51,7 @@ export class NinoxProjectService implements IProjectService {
   public constructor(
     fsUtil: FSUtil,
     databaseId: string,
-    debugLogger: (message: string) => void,
+    context: ContextOptions,
     private basePath: string = process.cwd(),
   ) {
     this.fsUtil = fsUtil
@@ -62,7 +62,8 @@ export class NinoxProjectService implements IProjectService {
     this.databaseFilesPath = path.join(this.filesBasePath, `database_${databaseId}`)
     this.dbBackgroundImagePath = path.join(this.getDatabaseFilesPath(), DB_BACKGROUND_FILE_NAME)
     this.databaseId = databaseId
-    this.debug = debugLogger
+    const {debug} = context
+    this.debug = debug
   }
 
   public async createConfigYaml(): Promise<void> {
@@ -225,7 +226,6 @@ export class NinoxProjectService implements IProjectService {
       })
       .filter(Boolean) as ReportTypeFile[]
 
-    // parse reports
     return {database: parsedDatabase, reports, schema: schemaWithoutTypes, tables, views}
   }
 

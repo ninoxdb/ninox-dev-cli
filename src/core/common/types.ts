@@ -98,3 +98,7 @@ export type TableFolderContent = {
   table: string
   views: string[]
 }
+
+export type ContextOptions = {
+  debug: (message: string) => void
+}

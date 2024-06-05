@@ -234,20 +234,20 @@ const normalReportObjectSchema = z.object({
   borderRadius: z.number().nullable().optional(),
   borderStyle: z.string().nullable().optional(),
   borderWidth: z.number().nullable().optional(),
-  file: z.unknown().optional(),
+  file: z.any().nullable().optional(),
   fontFamily: z.string().nullable().optional(),
   fontSize: z.number().nullable().optional(),
   fontStyle: z.enum(['italic']).nullable().optional(),
   fontWeight: z.enum(['bold']).nullable().optional(),
-  h: z.number().optional(),
-  isAutoHeight: z.boolean().optional(),
-  lineHeight: z.number().optional(),
+  h: z.number().nullable().optional(),
+  isAutoHeight: z.boolean().nullable().optional(),
+  lineHeight: z.number().nullable().optional(),
   paddingB: z.number().optional(),
   paddingL: z.number().optional(),
   paddingR: z.number().optional(),
   paddingT: z.number().optional(),
   position: z.enum(['head', 'foot', 'page']),
-  text: z.string().optional(),
+  text: z.string().nullable().optional(),
   textAlign: z.enum(['left', 'center', 'right', 'justify']).nullable().optional(),
   textColor: z.string().nullable().optional(),
   textDecoration: z.enum(['underline']).nullable().optional(),
@@ -257,37 +257,33 @@ const normalReportObjectSchema = z.object({
   y: z.number().optional(),
 })
 
-const normalReportSchema = minimalReportSchema.merge(
-  z.object({
-    fontFamily: z.string().optional(),
-    fontSize: z.number().optional(),
-    footHeight: z.number().optional(),
-    headHeight: z.number().optional(),
-    marginB: z.number().optional(),
-    marginL: z.number().optional(),
-    marginR: z.number().optional(),
-    marginT: z.number().optional(),
-    objects: z.array(normalReportObjectSchema).optional(),
-    paperHeight: z.number().optional(),
-    paperWidth: z.number().optional(),
-    printAttachments: z.boolean().optional(),
-  }),
-)
+const normalReportSchema = minimalReportSchema.extend({
+  fontFamily: z.string().optional(),
+  fontSize: z.number().optional(),
+  footHeight: z.number().optional(),
+  headHeight: z.number().optional(),
+  marginB: z.number().optional(),
+  marginL: z.number().optional(),
+  marginR: z.number().optional(),
+  marginT: z.number().optional(),
+  objects: z.array(normalReportObjectSchema).optional(),
+  paperHeight: z.number().optional(),
+  paperWidth: z.number().optional(),
+  printAttachments: z.boolean().optional(),
+})
 
-const carboneReportSchema = minimalReportSchema.merge(
-  z.object({
-    customDataExp: z.string(),
-    customDataSource: z.boolean(),
-    recurcionLevel: z.number(),
-    reportType: z.literal('carbone'),
-    // other fields not specified in ninox-core
-    testPrint: z.boolean().optional(),
-    // eslint-disable-next-line perfectionist/sort-objects
-    pdfPassword: z.string().optional(),
-    setPassword: z.boolean().optional(),
-    // seq: z.number().optional(),
-  }),
-)
+const carboneReportSchema = minimalReportSchema.extend({
+  customDataExp: z.string(),
+  customDataSource: z.boolean(),
+  recurcionLevel: z.number(),
+  reportType: z.literal('carbone'),
+  // other fields not specified in ninox-core
+  testPrint: z.boolean().optional(),
+  // eslint-disable-next-line perfectionist/sort-objects
+  pdfPassword: z.string().optional(),
+  setPassword: z.boolean().optional(),
+  // seq: z.number().optional(),
+})
 
 export const reportSchema = z.union([normalReportSchema, carboneReportSchema])
 

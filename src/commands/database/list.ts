@@ -17,11 +17,12 @@ export default class ListCommand extends BaseCommand {
 
   protected async init(): Promise<void> {
     await super.init()
+    const context = {debug: this.debug}
     this.databaseService = new DatabaseService(
-      new NinoxProjectService(new FSUtil(), '', this.debug),
+      new NinoxProjectService(new FSUtil(), '', context),
       new NinoxClient(this.environment as EnvironmentConfig),
       this.environment.workspaceId,
-      () => {},
+      context,
     )
   }
 
