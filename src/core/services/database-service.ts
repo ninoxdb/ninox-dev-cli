@@ -87,14 +87,13 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     views: ViewType[],
     reports: Report[],
   ): Promise<void> {
-    // TODO: make sure that folder exists before downloading
     const isUploaded = await this.ninoxClient.uploadDatabaseBackgroundImage(
       this.databaseId,
       this.ninoxProjectService.getDbBackgroundImagePath(),
       this.ninoxProjectService.isDbBackgroundImageExist(),
     )
+    // TODO: Later on, may be it is better to allow the ninox developer to decide whether to set the background type to image or not, regardless of whether there is a background.jpg file
     // If there was no background earlier, and now there is one, set the database background type to image
-    // TODO: Later on, may be it is better to allow the developer to decide whether to set the background type to image or not, regardless of whether there is a background.jpg file
     if (isUploaded) {
       database.settings.bgType = 'image'
       database.settings.backgroundClass = 'background-file'
@@ -104,7 +103,6 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     await this.ninoxClient.updateDatabaseSettingsInNinox(database.id, database.settings)
     await this.ninoxClient.updateDatabaseViewsInNinox(database.id, views)
     await this.ninoxClient.updateDatabaseReportsInNinox(database.id, reports)
-    // await Promise.all(views.map((view) => this.ninoxClient.updateDatabaseViewInNinox(database.id, view)))
   }
 
   private async getDatabaseMetadataAndSchema(

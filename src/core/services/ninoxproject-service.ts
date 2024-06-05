@@ -1,6 +1,4 @@
 import * as yaml from 'js-yaml'
-import fs from 'node:fs'
-import * as fsAsync from 'node:fs/promises'
 import path from 'node:path'
 
 import {
@@ -13,7 +11,6 @@ import {
 } from '../common/constants.js'
 import {
   Database,
-  DatabaseConfigFileContent,
   DatabaseFile,
   DatabaseFileType,
   DatabaseSchema,
@@ -133,30 +130,6 @@ export class NinoxProjectService implements IProjectService {
     return this.dbBackgroundImagePath
   }
 
-  public getFilePath(databaseId: string, objectName: string): string {
-    if (!fs.existsSync(this.databaseFilesPath)) {
-      throw new Error('Database folder not found')
-    }
-
-    return path.join(this.databaseFilesPath, `${objectName}.yaml`)
-  }
-
-  public getFilesPath(): string {
-    return this.filesBasePath
-  }
-
-  public getObjectPath(objectName: string): string {
-    if (!this.fsUtil.fileExists(this.databaseObjectsPath)) {
-      throw new Error(`Database folder not found: ${this.databaseObjectsPath}`)
-    }
-
-    return path.join(this.databaseObjectsPath, `${objectName}.yaml`)
-  }
-
-  public getObjectsBasePath(): string {
-    return this.objectsBasePath
-  }
-
   public async initialiseProject(name: string): Promise<void> {
     await this.createPackageJson(name)
     await this.createConfigYaml()
@@ -164,7 +137,7 @@ export class NinoxProjectService implements IProjectService {
   }
 
   public isDbBackgroundImageExist(): boolean {
-    return fs.existsSync(this.dbBackgroundImagePath)
+    return this.fsUtil.existsSync(this.dbBackgroundImagePath)
   }
 
   public parseDatabaseConfigs(
@@ -229,36 +202,6 @@ export class NinoxProjectService implements IProjectService {
     return {database: parsedDatabase, reports, schema: schemaWithoutTypes, tables, views}
   }
 
-  public parseDatabaseConfigsbaseAndSchemaFromFileContent(databaseConfig: DatabaseConfigFileContent): {
-    database: DatabaseType
-    schema: DatabaseSchemaType
-  } {
-    const databaseParseResult = DatabaseFile.safeParse(databaseConfig.databaseLocal)
-    if (!databaseParseResult.success) {
-      throw new Error(
-        `Database validation failed for database: ${databaseConfig.databaseLocal?.database?.settings?.name} (${databaseConfig.databaseLocal.database.id})`,
-      )
-    }
-
-    const schema: DatabaseSchemaType = {
-      ...databaseParseResult.data.database.schema,
-      types: {},
-    }
-    for (const tableFileData of databaseConfig.tablesLocal) {
-      const tableResult = TableFile.safeParse(tableFileData)
-      if (!tableResult.success) {
-        throw new Error('Table validation failed for table with id: ' + tableFileData.table._id)
-      }
-
-      schema.types[tableResult.data.table._id] = TableBase.parse(tableResult.data.table)
-    }
-
-    return {
-      database: Database.parse(databaseParseResult.data.database),
-      schema,
-    }
-  }
-
   /**
    *
    * @param dBConfigsYaml database, tables, views in yaml string format
@@ -267,7 +210,6 @@ export class NinoxProjectService implements IProjectService {
   public parseLocalObjectsToNinoxObjects(
     dBConfigsYaml: DBConfigsYaml,
   ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: Report[]] {
-    // const databaseConfig = this.parseDatabaseConfigsbaseConfigFileContentFromYaml(dBConfigsYaml)
     const {database: databaseFileContent, reports: reportsFileContent, tables, views: viewsFileContent} = dBConfigsYaml
     const databaseLocal = yaml.load(databaseFileContent) as DatabaseFileType
     const tablesLocal = tables.map((table) => yaml.load(table) as TableFileType)
@@ -313,13 +255,6 @@ export class NinoxProjectService implements IProjectService {
     return [database, schema, views, reports]
   }
 
-  public async readDatabaseConfigFromFiles(): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
-    const databaseConfigInYaml = await this.readDBConfig()
-    const databaseConfig = this.parseDatabaseConfigsbaseConfigFileContentFromYaml(databaseConfigInYaml)
-    const parsedDBConfig = this.parseDatabaseConfigsbaseAndSchemaFromFileContent(databaseConfig)
-    return parsedDBConfig
-  }
-
   public async readDBConfig(): Promise<DBConfigsYaml> {
     const {fsUtil} = this
     const databaseObjectsPath = this.getDatabaseObjectsPath()
@@ -327,7 +262,7 @@ export class NinoxProjectService implements IProjectService {
       throw new Error(`Database folder not found: ${databaseObjectsPath}`)
     }
 
-    const databaseFolderObjects = await fsAsync.readdir(databaseObjectsPath)
+    const databaseFolderObjects = await fsUtil.readdir(databaseObjectsPath)
     const databaseFile = databaseFolderObjects.find((file) => file.startsWith(`database_`))
     const database = await this.readDatabaseFile(databaseFile as string)
 
@@ -413,16 +348,6 @@ export class NinoxProjectService implements IProjectService {
     await this.writeReportsToFiles(reportsByTable, tableFolders)
   }
 
-  private parseDatabaseConfigsbaseConfigFileContentFromYaml(
-    databaseConfigYaml: DBConfigsYaml,
-  ): DatabaseConfigFileContent {
-    const {database: databaseYaml, tables: tablesYaml} = databaseConfigYaml
-    return {
-      databaseLocal: yaml.load(databaseYaml) as DatabaseFileType,
-      tablesLocal: tablesYaml.map((table) => yaml.load(table) as TableFileType),
-    } satisfies DatabaseConfigFileContent
-  }
-
   private parseDatabaseMetadata(database: unknown): DatabaseType {
     const parsedDatabase = Database.safeParse(database)
     if (!parsedDatabase.success) {
@@ -452,7 +377,7 @@ export class NinoxProjectService implements IProjectService {
 
   private async processTableFolder(folderPath: string): Promise<TableFolderContent> {
     const {fsUtil} = this
-    const files = await fs.promises.readdir(folderPath)
+    const files = await fsUtil.readdir(folderPath)
 
     const tableFileName = files.find((file) => file.startsWith('table_') || file.startsWith('page_'))
     if (!tableFileName) {
@@ -494,7 +419,7 @@ export class NinoxProjectService implements IProjectService {
       throw new Error('Database file not found')
     }
 
-    return fsAsync.readFile(path.join(this.databaseObjectsPath, databaseFile), 'utf8')
+    return this.fsUtil.readFile(path.join(this.databaseObjectsPath, databaseFile))
   }
 
   private async writeDatabaseFile(database: DatabaseType, schema: DatabaseSchemaBaseType): Promise<void> {

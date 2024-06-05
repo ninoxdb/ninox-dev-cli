@@ -34,7 +34,6 @@ describe('NinoxProjectService', () => {
     createPackageJson: sinon.stub(),
     ensureRootDirectoryStructure: sinon.stub(),
     readDBConfig: sinon.stub(),
-    readDatabaseConfigFromFiles: sinon.stub(),
   }
   const testSchemaBase: DatabaseSchemaBaseType = {
     afterOpen: 'alert(---Guten Morgen---)',
@@ -166,18 +165,6 @@ describe('NinoxProjectService', () => {
       expect(result).to.have.property('database')
       expect(result).to.have.property('schema')
       expect(result).to.have.property('tables')
-    })
-  })
-
-  describe('readDatabaseConfigFromFiles', () => {
-    it('should return parsed database configuration', async () => {
-      sandbox
-        .stub(ninoxProjectService, 'parseDatabaseConfigsbaseAndSchemaFromFileContent')
-        .returns({database: testDatabase, schema: testSchema})
-
-      const result = await ninoxProjectService.readDatabaseConfigFromFiles()
-      expect(result).to.have.property('database')
-      expect(result).to.have.property('schema')
     })
   })
 
