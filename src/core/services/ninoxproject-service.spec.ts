@@ -94,7 +94,7 @@ describe('NinoxProjectService', () => {
     // Resetting environment for each test
     sandbox = sinon.createSandbox() as sinon.SinonSandbox & sinon.SinonStubbedInstance<typeof FSUtil>
     fsUtil = new FSUtil()
-    ninoxProjectService = new NinoxProjectService(fsUtil, databaseId, {debug: sinon.stub()})
+    ninoxProjectService = new NinoxProjectService(fsUtil, {debug: sinon.stub()}, databaseId)
 
     // TODO: check which methods are  necessary to stub from the NinoxProjectService, otherwise make them private
     NinoxProjectServiceStubs.readDBConfig = sandbox

@@ -26,10 +26,10 @@ export default class UploadCommand extends BaseCommand {
     const context = {debug: this.debug}
     const fsUtil = new FSUtil()
     this.databaseService = new DatabaseService(
-      new NinoxProjectService(fsUtil, flags.id, context),
+      new NinoxProjectService(fsUtil, context, flags.id),
       new NinoxClient(this.environment as EnvironmentConfig),
-      flags.id,
       context,
+      flags.id,
     )
   }
 

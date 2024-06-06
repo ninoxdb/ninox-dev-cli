@@ -19,9 +19,8 @@ export default class ListCommand extends BaseCommand {
     await super.init()
     const context = {debug: this.debug}
     this.databaseService = new DatabaseService(
-      new NinoxProjectService(new FSUtil(), '', context),
+      new NinoxProjectService(new FSUtil(), context),
       new NinoxClient(this.environment as EnvironmentConfig),
-      this.environment.workspaceId,
       context,
     )
   }

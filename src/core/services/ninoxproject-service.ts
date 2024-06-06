@@ -35,9 +35,10 @@ import {FSUtil} from '../utils/fs.js'
 import {IProjectService} from './interfaces.js'
 
 export class NinoxProjectService implements IProjectService {
+  private basePath: string = process.cwd()
   private credentialsFilePath: string
   private databaseFilesPath: string
-  private databaseId: string
+  private databaseId?: string
   private databaseObjectsPath: string
   private dbBackgroundImagePath: string
   private debug: (message: string) => void
@@ -45,20 +46,15 @@ export class NinoxProjectService implements IProjectService {
   private fsUtil: FSUtil
   private objectsBasePath: string
 
-  public constructor(
-    fsUtil: FSUtil,
-    databaseId: string,
-    context: ContextOptions,
-    private basePath: string = process.cwd(),
-  ) {
+  public constructor(fsUtil: FSUtil, context: ContextOptions, databaseId?: string) {
     this.fsUtil = fsUtil
+    this.databaseId = databaseId
     this.credentialsFilePath = path.join(this.basePath, CREDENTIALS_FILE_NAME)
     this.filesBasePath = path.join(this.basePath, 'src', 'Files')
     this.objectsBasePath = path.join(this.basePath, 'src', 'Objects')
     this.databaseObjectsPath = path.join(this.objectsBasePath, `database_${databaseId}`)
     this.databaseFilesPath = path.join(this.filesBasePath, `database_${databaseId}`)
-    this.dbBackgroundImagePath = path.join(this.getDatabaseFilesPath(), DB_BACKGROUND_FILE_NAME)
-    this.databaseId = databaseId
+    this.dbBackgroundImagePath = path.join(this.databaseFilesPath, DB_BACKGROUND_FILE_NAME)
     const {debug} = context
     this.debug = debug
   }
@@ -119,14 +115,17 @@ export class NinoxProjectService implements IProjectService {
   }
 
   public getDatabaseFilesPath(): string {
+    if (!this.databaseId) throw new Error('Database ID is required for this operation.')
     return this.databaseFilesPath
   }
 
   public getDatabaseObjectsPath(): string {
+    if (!this.databaseId) throw new Error('Database ID is required for this operation.')
     return this.databaseObjectsPath
   }
 
   public getDbBackgroundImagePath(): string {
+    if (!this.databaseId) throw new Error('Database ID is required for this operation.')
     return this.dbBackgroundImagePath
   }
 

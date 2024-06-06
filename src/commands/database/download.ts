@@ -25,10 +25,10 @@ export default class DownloadCommand extends BaseCommand {
     const fsUtil = new FSUtil()
     const context = {debug: this.debug}
     this.databaseService = new DatabaseService(
-      new NinoxProjectService(fsUtil, flags.id, context),
+      new NinoxProjectService(fsUtil, context, flags.id),
       new NinoxClient(this.environment as EnvironmentConfig),
-      flags.id,
       context,
+      flags.id,
     )
   }
 

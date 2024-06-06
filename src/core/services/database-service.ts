@@ -6,15 +6,15 @@ import {INinoxObjectService, IProjectService} from './interfaces.js'
 export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   protected ninoxClient: NinoxClient
   protected ninoxProjectService: IProjectService
-  private databaseId: string
+  private databaseId?: string
   private databaseName!: string
   private debug: (message: string) => void
 
   public constructor(
     ninoxProjectService: IProjectService,
     ninoxClient: NinoxClient,
-    databaseId: string,
     context: ContextOptions,
+    databaseId?: string,
   ) {
     this.ninoxProjectService = ninoxProjectService
     this.ninoxClient = ninoxClient
@@ -24,6 +24,7 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   }
 
   public async download(): Promise<void> {
+    if (!this.databaseId) throw new Error('Database ID is required to download the database')
     const {databaseId, ninoxClient, ninoxProjectService} = this
     this.debug(`Downloading database schema ${databaseId}...`)
     const {database: databaseJSON, schema: schemaJSON} = await this.getDatabaseMetadataAndSchema(databaseId)
@@ -49,6 +50,7 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   }
 
   public getDBId(): string {
+    if (!this.databaseId) throw new Error('Database ID is not set')
     return this.databaseId
   }
 
@@ -87,6 +89,7 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     views: ViewType[],
     reports: Report[],
   ): Promise<void> {
+    if (!this.databaseId) throw new Error('Database ID is required to upload the database')
     const isUploaded = await this.ninoxClient.uploadDatabaseBackgroundImage(
       this.databaseId,
       this.ninoxProjectService.getDbBackgroundImagePath(),
