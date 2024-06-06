@@ -34,6 +34,36 @@ import {ContextOptions, DBConfigsYaml, TableFolderContent, View} from '../common
 import {FSUtil} from '../utils/fs.js'
 import {IProjectService} from './interfaces.js'
 
+function replaceTabsWithSpaces(string_: string): string {
+  const spaces = ' '.repeat(4)
+  return string_.replaceAll('\t', spaces)
+}
+
+// Define a custom type for multi-line strings
+const MultilineStringType = new yaml.Type('tag:yaml.org,2002:ninox-script', {
+  construct(data): string {
+    const spaces = ' '.repeat(4)
+    return data.replaceAll(spaces, '\t')
+  },
+  defaultStyle: '|',
+  kind: 'scalar',
+  predicate(value: unknown): boolean {
+    return typeof value === 'string' && value.includes('\t')
+  },
+  represent(data): string | unknown {
+    // Represent data as a block scalar
+    if (typeof data === 'string') return replaceTabsWithSpaces(data)
+    return data
+  },
+  resolve(data): boolean {
+    // Treat data with newline as multiline string
+    return typeof data === 'string' && data.includes('    ')
+  },
+})
+
+// Create a custom schema that includes the custom type
+const customSchema = yaml.DEFAULT_SCHEMA.extend(MultilineStringType)
+
 export class NinoxProjectService implements IProjectService {
   private basePath: string = process.cwd()
   private credentialsFilePath: string
@@ -210,8 +240,15 @@ export class NinoxProjectService implements IProjectService {
     dBConfigsYaml: DBConfigsYaml,
   ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: Report[]] {
     const {database: databaseFileContent, reports: reportsFileContent, tables, views: viewsFileContent} = dBConfigsYaml
-    const databaseLocal = yaml.load(databaseFileContent) as DatabaseFileType
-    const tablesLocal = tables.map((table) => yaml.load(table) as TableFileType)
+    const databaseLocal = yaml.load(databaseFileContent, {
+      schema: customSchema,
+    }) as DatabaseFileType
+    const tablesLocal = tables.map(
+      (table) =>
+        yaml.load(table, {
+          schema: customSchema,
+        }) as TableFileType,
+    )
     const viewsLocal = viewsFileContent.map((view) => yaml.load(view) as ViewTypeFile)
     const reportsLocal = reportsFileContent.map((report) => yaml.load(report) as ReportTypeFile)
     const {database: databaseJSON} = databaseLocal
@@ -435,6 +472,9 @@ export class NinoxProjectService implements IProjectService {
             schema: {...schema, _database: database.id},
           },
         }),
+        {
+          schema: customSchema,
+        },
       ),
     )
   }
@@ -475,7 +515,12 @@ export class NinoxProjectService implements IProjectService {
       fileWritePromises.push(
         this.fsUtil.mkdir(tableFolderPath).then(() => {
           // write table file
-          this.fsUtil.writeFile(path.join(tableFolderPath, `${tableFolderName}.yaml`), yaml.dump(tableFileData))
+          this.fsUtil.writeFile(
+            path.join(tableFolderPath, `${tableFolderName}.yaml`),
+            yaml.dump(tableFileData, {
+              schema: customSchema,
+            }),
+          )
         }),
       )
     }
