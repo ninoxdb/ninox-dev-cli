@@ -2,6 +2,8 @@ import {
   DatabaseSchemaBaseType,
   DatabaseSchemaType,
   DatabaseType,
+  Report,
+  ReportTypeFile,
   TableFileType,
   ViewType,
   ViewTypeFile,
@@ -17,24 +19,31 @@ export interface INinoxObjectService<T> {
 }
 
 export interface IProjectService {
-  createDatabaseFolderInFiles(databaseId: string): Promise<void>
-  getDbBackgroundImagePath(databaseId: string): string
+  createDatabaseFolderInFiles(): Promise<void>
+  getDbBackgroundImagePath(): string
   initialiseProject(name: string): Promise<void>
-  isDbBackgroundImageExist(databaseId: string, imagePath?: string): boolean
+  isDbBackgroundImageExist(): boolean
   parseDatabaseConfigs(
     database: unknown,
     sc: unknown,
     views: View[],
-  ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]; views: ViewTypeFile[]}
+    reports: Report[],
+  ): {
+    database: DatabaseType
+    reports: ReportTypeFile[]
+    schema: DatabaseSchemaBaseType
+    tables: TableFileType[]
+    views: ViewTypeFile[]
+  }
   parseLocalObjectsToNinoxObjects(
     dBConfigsYaml: DBConfigsYaml,
-  ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[]]
-  readDBConfig(databaseId: string): Promise<DBConfigsYaml>
-  readDatabaseConfigFromFiles(databaseId: string): Promise<{database: DatabaseType; schema: DatabaseSchemaType}>
+  ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: Report[]]
+  readDBConfig(): Promise<DBConfigsYaml>
   writeDatabaseToFiles(
     database: DatabaseType,
     schema: DatabaseSchemaBaseType,
     tables: TableFileType[],
     views: ViewTypeFile[],
+    reports: ReportTypeFile[],
   ): Promise<void>
 }

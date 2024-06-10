@@ -8,6 +8,7 @@ import {
   DatabaseSchemaType,
   DatabaseSettingsType,
   GetDatabaseResponse,
+  Report,
   ViewType,
 } from '../common/schema-validators.js'
 import {NinoxCredentials, View, ViewMetadata} from '../common/types.js'
@@ -68,11 +69,25 @@ export class NinoxClient {
       .catch((error) => handleAxiosError(error, 'Failed to fetch database'))
   }
 
+  public async getDatabaseReport(databaseId: string, reportId: string): Promise<Report> {
+    return this.client
+      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports/${reportId}`)
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to fetch database report'))
+  }
+
   public async getDatabaseView(databaseId: string, viewId: string): Promise<View> {
     return this.client
       .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/views/${viewId}`)
       .then((response) => response.data)
       .catch((error) => handleAxiosError(error, 'Failed to fetch database views'))
+  }
+
+  public async listDatabaseReports(databaseId: string): Promise<Report[]> {
+    return this.client
+      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports`)
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to list database reports'))
   }
 
   public async listDatabases(): Promise<DatabaseMetadata[]> {
@@ -92,7 +107,26 @@ export class NinoxClient {
       .catch((error) => handleAxiosError(error, 'Failed to list database views'))
   }
 
-  public async updateDatabaseSettings(id: string, settings: DatabaseSettingsType): Promise<unknown> {
+  public async patchDatabaseSchemaInNinox(id: string, schema: DatabaseSchemaType): Promise<unknown> {
+    return this.client
+      .patch(`/v1/teams/${this.workspaceId}/databases/${id}/schema?human=T`, schema)
+      .then((response) => response.data)
+      .catch((error) =>
+        handleAxiosError(
+          error,
+          'Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.',
+        ),
+      )
+  }
+
+  public async updateDatabaseReportsInNinox(databaseId: string, reports: Report[]): Promise<unknown> {
+    return this.client
+      .post(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports`, reports)
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to update database reports'))
+  }
+
+  public async updateDatabaseSettingsInNinox(id: string, settings: DatabaseSettingsType): Promise<unknown> {
     const data = JSON.stringify(settings)
     return this.client
       .post(`/${this.workspaceId}/${id}/settings/update`, data, {
@@ -102,6 +136,26 @@ export class NinoxClient {
       })
       .then((response) => response.data)
       .catch((error) => handleAxiosError(error, 'Failed to Update Database settings.'))
+  }
+
+  public async updateDatabaseViewInNinox(databaseId: string, view: ViewType): Promise<unknown> {
+    return this.client
+      .post(`/${this.workspaceId}/${databaseId}/json/views/update`, JSON.stringify(view), {
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      })
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to upload database view'))
+  }
+
+  // I can update all views in a Database with a single request
+  // POST /databases/:dbid/views and views as array of ViewType
+  public async updateDatabaseViewsInNinox(databaseId: string, views: ViewType[]): Promise<unknown> {
+    return this.client
+      .post(`/v1/teams/${this.workspaceId}/databases/${databaseId}/views`, views)
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to update database views'))
   }
 
   public async uploadDatabaseBackgroundImage(
@@ -131,29 +185,6 @@ export class NinoxClient {
       })
       .catch(() => false)
     return true
-  }
-
-  public async uploadDatabaseSchemaToNinox(id: string, schema: DatabaseSchemaType): Promise<unknown> {
-    return this.client
-      .patch(`/v1/teams/${this.workspaceId}/databases/${id}/schema?human=T`, schema)
-      .then((response) => response.data)
-      .catch((error) =>
-        handleAxiosError(
-          error,
-          'Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.',
-        ),
-      )
-  }
-
-  public async uploadDatabaseView(databaseId: string, view: ViewType): Promise<unknown> {
-    return this.client
-      .post(`/${this.workspaceId}/${databaseId}/json/views/update`, JSON.stringify(view), {
-        headers: {
-          'Content-Type': 'text/plain',
-        },
-      })
-      .then((response) => response.data)
-      .catch((error) => handleAxiosError(error, 'Failed to upload database view'))
   }
 }
 
