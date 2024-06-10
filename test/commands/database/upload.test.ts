@@ -30,7 +30,7 @@ describe('database/upload', () => {
       .stub(NinoxProjectService.prototype, 'getCredentialsPath')
       .get(() => '/mocked/path/to/credentials')
     filesPathStub = sinon.stub(NinoxProjectService.prototype, 'getFilesPath').get(() => filesPath)
-    objectsPathStub = sinon.stub(NinoxProjectService.prototype, 'getObjectsBasePath').get(() => objectsPath)
+    objectsPathStub = sinon.stub(NinoxProjectService.prototype, 'getObjectsPath').get(() => objectsPath)
 
     stubReadEnvironmentConfig = sinon
       .stub(UploadCommand.prototype, 'readEnvironmentConfig')
