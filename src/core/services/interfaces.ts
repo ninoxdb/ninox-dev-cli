@@ -22,6 +22,7 @@ export interface IProjectService {
   createDatabaseFolderInFiles(): Promise<void>
   getDbBackgroundImagePath(): string
   initialiseProject(name: string): Promise<void>
+  isDatabaseNameConflictExist(databaseName: string): Promise<boolean>
   isDbBackgroundImageExist(): boolean
   parseDatabaseConfigs(
     database: unknown,
@@ -39,6 +40,7 @@ export interface IProjectService {
     dBConfigsYaml: DBConfigsYaml,
   ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: Report[]]
   readDBConfig(): Promise<DBConfigsYaml>
+  reinitialisePathsWithDBName(databaseName: string): void
   writeDatabaseToFiles(
     database: DatabaseType,
     schema: DatabaseSchemaBaseType,

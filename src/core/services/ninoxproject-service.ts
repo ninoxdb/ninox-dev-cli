@@ -135,6 +135,34 @@ export class NinoxProjectService implements IProjectService {
     await this.ensureRootDirectoryStructure()
   }
 
+  public async isDatabaseNameConflictExist(databaseName: string): Promise<boolean> {
+    try {
+      const newName = this.fsUtil.normalizeFileName(databaseName)
+      // try to read the database folder in Objects for Database File
+      const databaseObjectsPath = path.join(this.objectsBasePath, `database_${newName}`)
+      const databaseFilePath = path.join(databaseObjectsPath, `database_${newName}.yaml`)
+      // try reading the database file
+      const databaseFileContent = await this.fsUtil.readFile(databaseFilePath)
+      const databaseJSON = yaml.load(databaseFileContent) as DatabaseFileType
+      const {
+        database: {
+          id,
+          settings: {name},
+        },
+      } = databaseJSON
+      const existingName = this.fsUtil.normalizeFileName(name)
+      // if new name is same as existing name, yet ids are different, then there is a conflict
+      if (existingName === newName && id !== this.databaseId) {
+        return true
+      }
+
+      return false
+    } catch {
+      // if file does not exist, then there is no conflict
+      return false
+    }
+  }
+
   public isDbBackgroundImageExist(): boolean {
     return this.fsUtil.existsSync(this.dbBackgroundImagePath)
   }
@@ -294,6 +322,32 @@ export class NinoxProjectService implements IProjectService {
     } satisfies DBConfigsYaml
   }
 
+  public async reinitailisePaths(): Promise<void> {
+    // iterate over all the folders in Objects and try reading the database file
+    const databaseFiles: DatabaseFileType[] = []
+    const databaseFolders = await this.fsUtil.readdir(this.objectsBasePath)
+    for (const folder of databaseFolders) {
+      // eslint-disable-next-line no-await-in-loop
+      const filesInFolder = await this.fsUtil.readdir(path.join(this.objectsBasePath, folder))
+      const databaseFile = filesInFolder.find((file) => file.startsWith('database_'))
+      if (!databaseFile) {
+        continue
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      const databaseFileContent = await this.fsUtil.readFile(path.join(this.objectsBasePath, folder, databaseFile))
+      const databaseJSON = yaml.load(databaseFileContent) as DatabaseFileType
+      databaseFiles.push(databaseJSON)
+    }
+  }
+
+  public reinitialisePathsWithDBName(databaseName: string): void {
+    const name = this.fsUtil.normalizeFileName(databaseName)
+    this.databaseFilesPath = path.join(this.filesBasePath, `database_${name}`)
+    this.databaseObjectsPath = path.join(this.objectsBasePath, `database_${name}`)
+    this.dbBackgroundImagePath = path.join(this.databaseFilesPath, DB_BACKGROUND_FILE_NAME)
+  }
+
   // Write the database, schema and tables to their respective files
   // eslint-disable-next-line max-params
   public async writeDatabaseToFiles(
@@ -413,12 +467,12 @@ export class NinoxProjectService implements IProjectService {
     }
   }
 
-  private async readDatabaseFile(databaseFile: string): Promise<string> {
-    if (!databaseFile) {
-      throw new Error('Database file not found')
+  private async readDatabaseFile(databaseFileName: string): Promise<string> {
+    if (!databaseFileName) {
+      throw new Error(`Database file not found: ${databaseFileName}`)
     }
 
-    return this.fsUtil.readFile(path.join(this.databaseObjectsPath, databaseFile))
+    return this.fsUtil.readFile(path.join(this.databaseObjectsPath, databaseFileName))
   }
 
   private async writeDatabaseFile(database: DatabaseType, schema: DatabaseSchemaBaseType): Promise<void> {

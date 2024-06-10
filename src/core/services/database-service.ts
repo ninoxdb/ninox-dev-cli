@@ -30,6 +30,14 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     const {database: databaseJSON, schema: schemaJSON} = await this.getDatabaseMetadataAndSchema(databaseId)
     this.databaseName = databaseJSON.settings.name
     this.debug(`Database ${databaseJSON.settings.name} downloaded. Parsing schema...`)
+    // validate if there is a Different database with the same name in the project
+    ninoxProjectService.reinitialisePathsWithDBName(databaseJSON.settings.name)
+    const isNameConflict = await ninoxProjectService.isDatabaseNameConflictExist(databaseJSON.settings.name)
+    if (isNameConflict) {
+      throw new Error(
+        `A Database with the name ${databaseJSON.settings.name} but a different ID already exists in the project. Please remove the existing database or change the name of the downloaded database.`,
+      )
+    }
 
     this.debug('Downloading views...')
     const viewsJSON = await this.getDatabaseViews(databaseId)
