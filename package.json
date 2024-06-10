@@ -1,6 +1,6 @@
 {
-  "name": "ninox",
-  "description": "Ninox Dev CLI",
+  "name": "@ninox/ninox",
+  "description": "Ninox Database CLI for developer workflows",
   "version": "0.1.0",
   "author": "Muhammad Saqib Arfeen<saqib.arfeen@ninox.com>",
   "bin": {
