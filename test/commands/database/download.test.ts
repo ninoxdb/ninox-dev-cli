@@ -8,16 +8,20 @@ import {loadJsonMock} from '../../common/test-utils.js'
 
 describe('database/download', () => {
   let stubReadEnvironmentConfig: sinon.SinonStub
+  const workspaceId = 'mocked-workspace'
   const databaseId = '4321'
+  let databaseJSONMock: GetDatabaseResponse
   before(() => {
-    const databaseJSONMock = loadJsonMock('download-database-info.json') as GetDatabaseResponse
+    databaseJSONMock = loadJsonMock('download-database-info.json') as GetDatabaseResponse
     nock('https://mocked.example.com')
-      .get(`/v1/teams/mocked-workspace/databases/${databaseId}?human=T`)
+      .get(`/v1/teams/${workspaceId}/databases/${databaseId}?human=T`)
       .reply(200, databaseJSONMock)
-
-    nock('https://mocked.example.com')
-      .get(`/mocked-workspace/${databaseId}/files/background.jpg`)
+      .get(`/${workspaceId}/${databaseId}/files/background.jpg`)
       .reply(200, 'mocked-image')
+      .get(`/v1/teams/${workspaceId}/databases/${databaseId}/views`)
+      .reply(200, [])
+      .get(`/v1/teams/${workspaceId}/databases/${databaseId}/reports`)
+      .reply(200, [])
 
     stubReadEnvironmentConfig = sinon.stub(DownloadCommand.prototype, 'readEnvironmentConfig').callsFake(() => ({
       apiKey: 'mocked-api-key',
@@ -34,7 +38,9 @@ describe('database/download', () => {
     .stdout()
     .command(['database download', '--id', databaseId])
     .it('runs download', (context) => {
-      expect(context.stdout).to.contain(`Downloaded database ${databaseId} successfully!`)
+      expect(context.stdout).to.contain(
+        `Downloaded database ${databaseJSONMock.settings.name} (${databaseId}) successfully!`,
+      )
     })
   test
     .stderr()

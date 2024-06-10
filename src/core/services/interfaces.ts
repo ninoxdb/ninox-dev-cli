@@ -1,20 +1,49 @@
-import {DatabaseSchemaBaseType, DatabaseSchemaType, DatabaseType, TableFileType} from '../common/schema-validators.js'
+import {
+  DatabaseSchemaBaseType,
+  DatabaseSchemaType,
+  DatabaseType,
+  Report,
+  ReportTypeFile,
+  TableFileType,
+  ViewType,
+  ViewTypeFile,
+} from '../common/schema-validators.js'
+import {DBConfigsYaml, View} from '../common/types.js'
 
 export interface INinoxObjectService<T> {
-  download(id: string): Promise<void>
+  download(): Promise<void>
+  getDBId(): string
+  getDBName(): string
   list(): Promise<T[]>
-  upload(id: string): Promise<void>
+  upload(): Promise<void>
 }
 
 export interface IProjectService {
-  createDatabaseFolderInFiles(databaseId: string): Promise<void>
-  getDbBackgroundImagePath(databaseId: string): string
+  createDatabaseFolderInFiles(): Promise<void>
+  getDbBackgroundImagePath(): string
   initialiseProject(name: string): Promise<void>
-  isDbBackgroundImageExist(databaseId: string, imagePath?: string): boolean
+  isDbBackgroundImageExist(): boolean
   parseDatabaseConfigs(
     database: unknown,
     sc: unknown,
-  ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]}
-  readDatabaseConfigFromFiles(databaseId: string): Promise<{database: DatabaseType; schema: DatabaseSchemaType}>
-  writeDatabaseToFiles(database: DatabaseType, schema: DatabaseSchemaBaseType, tables: TableFileType[]): Promise<void>
+    views: View[],
+    reports: Report[],
+  ): {
+    database: DatabaseType
+    reports: ReportTypeFile[]
+    schema: DatabaseSchemaBaseType
+    tables: TableFileType[]
+    views: ViewTypeFile[]
+  }
+  parseLocalObjectsToNinoxObjects(
+    dBConfigsYaml: DBConfigsYaml,
+  ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: Report[]]
+  readDBConfig(): Promise<DBConfigsYaml>
+  writeDatabaseToFiles(
+    database: DatabaseType,
+    schema: DatabaseSchemaBaseType,
+    tables: TableFileType[],
+    views: ViewTypeFile[],
+    reports: ReportTypeFile[],
+  ): Promise<void>
 }

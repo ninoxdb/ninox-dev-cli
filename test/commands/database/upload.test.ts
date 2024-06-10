@@ -1,5 +1,6 @@
 import {expect, test} from '@oclif/test'
 import nock from 'nock'
+import path from 'node:path'
 import sinon from 'sinon'
 
 import UploadCommand from '../../../src/commands/database/upload.js'
@@ -26,11 +27,20 @@ describe('database/upload', () => {
       .reply(200)
       .patch(`/v1/teams/${mockNinoxEnvironment.workspaceId}/databases/${databaseId}/schema?human=T`)
       .reply(200)
+      .post(`/v1/teams/${mockNinoxEnvironment.workspaceId}/databases/${databaseId}/views`)
+      .reply(200)
+      .post(`/v1/teams/${mockNinoxEnvironment.workspaceId}/databases/${databaseId}/reports`)
+      .reply(200)
+
     credentialsPathStub = sinon
       .stub(NinoxProjectService.prototype, 'getCredentialsPath')
       .get(() => '/mocked/path/to/credentials')
-    filesPathStub = sinon.stub(NinoxProjectService.prototype, 'getFilesPath').get(() => filesPath)
-    objectsPathStub = sinon.stub(NinoxProjectService.prototype, 'getObjectsPath').get(() => objectsPath)
+    filesPathStub = sinon
+      .stub(NinoxProjectService.prototype, 'getDatabaseFilesPath')
+      .returns(path.join(filesPath, `database_${databaseId}`))
+    objectsPathStub = sinon
+      .stub(NinoxProjectService.prototype, 'getDatabaseObjectsPath')
+      .returns(path.join(objectsPath, `database_${databaseId}`))
 
     stubReadEnvironmentConfig = sinon
       .stub(UploadCommand.prototype, 'readEnvironmentConfig')
