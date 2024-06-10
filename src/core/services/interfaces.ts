@@ -1,19 +1,9 @@
-import {
-  DatabaseSchemaBaseType,
-  DatabaseSchemaType,
-  DatabaseType,
-  TableFileType,
-  ViewType,
-  ViewTypeFile,
-} from '../common/schema-validators.js'
-import {DBConfigsYaml, View} from '../common/types.js'
+import {DatabaseSchemaBaseType, DatabaseSchemaType, DatabaseType, TableFileType} from '../common/schema-validators.js'
 
 export interface INinoxObjectService<T> {
-  download(): Promise<void>
-  getDBId(): string
-  getDBName(): string
+  download(id: string): Promise<void>
   list(): Promise<T[]>
-  upload(): Promise<void>
+  upload(id: string): Promise<void>
 }
 
 export interface IProjectService {
@@ -24,17 +14,7 @@ export interface IProjectService {
   parseDatabaseConfigs(
     database: unknown,
     sc: unknown,
-    views: View[],
-  ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]; views: ViewTypeFile[]}
-  parseLocalObjectsToNinoxObjects(
-    dBConfigsYaml: DBConfigsYaml,
-  ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[]]
-  readDBConfig(databaseId: string): Promise<DBConfigsYaml>
+  ): {database: DatabaseType; schema: DatabaseSchemaBaseType; tables: TableFileType[]}
   readDatabaseConfigFromFiles(databaseId: string): Promise<{database: DatabaseType; schema: DatabaseSchemaType}>
-  writeDatabaseToFiles(
-    database: DatabaseType,
-    schema: DatabaseSchemaBaseType,
-    tables: TableFileType[],
-    views: ViewTypeFile[],
-  ): Promise<void>
+  writeDatabaseToFiles(database: DatabaseType, schema: DatabaseSchemaBaseType, tables: TableFileType[]): Promise<void>
 }
