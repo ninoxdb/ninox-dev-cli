@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import sinon from 'sinon'
 
-import {DatabaseSchemaType, GetDatabaseResponse, TableFileType} from '../common/schema-validators.js'
+import {DatabaseSchemaType, GetDatabaseResponse, TableFileType, ViewType} from '../common/schema-validators.js'
 import {NinoxClient} from '../utils/ninox-client.js'
 import {DatabaseService} from './database-service.js'
 import {NinoxProjectService} from './ninoxproject-service.js'
@@ -43,7 +43,7 @@ describe('DatabaseService', () => {
   beforeEach(() => {
     ninoxClientStub = sinon.createStubInstance(NinoxClient)
     ninoxProjectServiceStub = sinon.createStubInstance(NinoxProjectService)
-    databaseService = new DatabaseService(ninoxProjectServiceStub, ninoxClientStub, 'workspaceId', () => {})
+    databaseService = new DatabaseService(ninoxProjectServiceStub, ninoxClientStub, databaseId, () => {})
   })
 
   afterEach(() => {
@@ -53,19 +53,29 @@ describe('DatabaseService', () => {
   describe('upload', () => {
     it('should call the necessary methods to upload data', async () => {
       const mockBgImagePath = 'path/to/bg/image'
-      ninoxProjectServiceStub.readDatabaseConfigFromFiles.resolves({
-        database: {id: databaseId, settings: settingsMock},
-        schema: schemaMock,
+      ninoxProjectServiceStub.readDBConfig.resolves({
+        database: '',
+        tables: [],
+        views: [],
       })
       ninoxProjectServiceStub.getDbBackgroundImagePath.returns(mockBgImagePath)
       ninoxProjectServiceStub.isDbBackgroundImageExist.returns(true)
+
+      ninoxProjectServiceStub.parseLocalObjectsToNinoxObjects.returns([databaseInfoMock, schemaMock, []])
+
       ninoxClientStub.uploadDatabaseBackgroundImage.resolves()
       ninoxClientStub.updateDatabaseSettings.resolves()
       ninoxClientStub.uploadDatabaseSchemaToNinox.resolves()
+      ninoxClientStub.uploadDatabaseView.resolves()
 
-      await databaseService.upload(databaseId)
+      await databaseService.upload()
 
-      sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.readDatabaseConfigFromFiles, databaseId)
+      sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.readDBConfig, databaseId)
+      sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.parseLocalObjectsToNinoxObjects, {
+        database: '',
+        tables: [],
+        views: [],
+      })
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.getDbBackgroundImagePath, databaseId)
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.isDbBackgroundImageExist, databaseId, mockBgImagePath)
       sinon.assert.calledOnceWithExactly(
@@ -83,29 +93,34 @@ describe('DatabaseService', () => {
       const mockBgImagePath = 'path/to/bg/image'
 
       ninoxClientStub.getDatabase.resolves(databaseJSONMock)
+      ninoxClientStub.listDatabaseViews.resolves([])
+      // TODO: mock views
       ninoxProjectServiceStub.parseDatabaseConfigs.returns({
         database: databaseInfoMock,
         schema: schemaMock,
         tables: tablesMock,
+        views: [],
       })
       ninoxProjectServiceStub.writeDatabaseToFiles.resolves()
       ninoxProjectServiceStub.createDatabaseFolderInFiles.resolves()
       ninoxProjectServiceStub.getDbBackgroundImagePath.returns(mockBgImagePath)
       ninoxClientStub.downloadDatabaseBackgroundImage.resolves()
 
-      await databaseService.download(databaseId)
+      await databaseService.download()
 
       sinon.assert.calledOnceWithExactly(ninoxClientStub.getDatabase, databaseId)
       sinon.assert.calledOnceWithExactly(
         ninoxProjectServiceStub.parseDatabaseConfigs,
         {id: databaseId, settings: databaseJSONMock.settings},
         databaseJSONMock.schema,
+        [],
       )
       sinon.assert.calledOnceWithExactly(
         ninoxProjectServiceStub.writeDatabaseToFiles,
         databaseInfoMock,
         schemaMock,
         tablesMock,
+        [],
       )
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.createDatabaseFolderInFiles, databaseId)
       sinon.assert.calledOnceWithExactly(ninoxProjectServiceStub.getDbBackgroundImagePath, databaseId)
@@ -127,14 +142,15 @@ describe('DatabaseService', () => {
       const database = databaseJSONMock
       const {schema, settings} = database
       const databaseForUpload = {id: databaseId, ...database, settings: {...settings}}
+      const views: ViewType[] = []
 
       ninoxClientStub.uploadDatabaseBackgroundImage.resolves(true) // mock that image is uploaded
       ninoxClientStub.updateDatabaseSettings.resolves()
       ninoxClientStub.uploadDatabaseSchemaToNinox.resolves()
 
-      await databaseService.uploadDatabase(databaseForUpload, schema, 'imagePath', true)
+      await databaseService.uploadDatabase(databaseForUpload, schema, views)
 
-      expect(ninoxClientStub.uploadDatabaseBackgroundImage.calledOnceWith(databaseId, 'imagePath', true)).to.be.true
+      expect(ninoxClientStub.uploadDatabaseBackgroundImage.calledOnceWith(databaseId)).to.be.true
       expect(databaseForUpload.settings.bgType).to.equal('image')
       expect(databaseForUpload.settings.backgroundClass).to.equal('background-file')
       expect(ninoxClientStub.updateDatabaseSettings.calledOnceWith(databaseId, databaseForUpload.settings)).to.be.true
