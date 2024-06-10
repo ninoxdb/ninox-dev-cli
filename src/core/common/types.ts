@@ -12,7 +12,6 @@ export interface Credentials {
 }
 export interface DBConfigsYaml {
   database: string
-  reports: string[]
   tables: string[]
   views: string[]
 }
@@ -91,14 +90,4 @@ export type ViewType = {
 
 export type ViewTypeFile = {
   view: {_database: string; _table: string} & ViewType
-}
-
-export type TableFolderContent = {
-  reports: string[]
-  table: string
-  views: string[]
-}
-
-export type ContextOptions = {
-  debug: (message: string) => void
 }
