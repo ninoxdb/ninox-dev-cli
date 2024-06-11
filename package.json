@@ -1,7 +1,7 @@
 {
   "name": "@ninox/ninox",
   "description": "Ninox Database CLI for developer workflows",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Muhammad Saqib Arfeen<saqib.arfeen@ninox.com>",
   "bin": {
     "ninox": "./bin/run.js"
