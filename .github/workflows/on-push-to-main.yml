@@ -38,30 +38,31 @@ jobs:
       - name: Generate oclif README
         if: ${{ steps.version-check.outputs.skipped == 'false' }}
         id: oclif-readme
+        # git checkout -b update-readme-${{ github.run_id }}
+        # git commit -am "chore: update README.md"
+        # git push -u origin update-readme-${{ github.run_id }}
         run: |
-          npm install
+          npm ci
           npm exec oclif readme
-          if [ -n "$(git status --porcelain)" ]; then
-            git checkout -b update-readme-${{ github.run_id }}
-            git commit -am "chore: update README.md"
-            git push -u origin update-readme-${{ github.run_id }}
-            echo "::set-output name=commit::true"
+          if git diff --exit-code README.md; then
+            echo "No changes detected in README.md"
           else
-              echo "::set-output name=commit::false"
+            echo "Changes detected in README.md"
+            echo "commit=true" >> $GITHUB_ENV
           fi
       - name: Create Pull Request
-        if: ${{ steps.oclif-readme.outputs.commit == 'true' }}
-        uses: peter-evans/create-pull-request@v5
+        if: env.commit == 'true'
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update README.md"
           base: main
           branch: update-readme-${{ github.run_id }}
-          title: 'Update README'
+          title: 'docs: [ND-0] Update README'
           body: 'This PR updates the README file.'
           labels: 'automerge'
       - name: Create Github Release
-        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5
+        uses: ncipollo/release-action@v1
         if: ${{ steps.version-check.outputs.skipped == 'false' }}
         with:
           name: ${{ steps.version-check.outputs.tag }}
