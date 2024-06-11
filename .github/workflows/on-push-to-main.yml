@@ -10,6 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
       - name: Check if version already exists
         id: version-check
         run: |
@@ -43,13 +45,17 @@ jobs:
             git checkout -b update-readme-${{ github.run_id }}
             git commit -am "chore: update README.md"
             git push -u origin update-readme-${{ github.run_id }}
+            echo "::set-output name=commit::true"
+          else
+              echo "::set-output name=commit::false"
           fi
       - name: Create Pull Request
-        if: ${{ steps.oclif-readme.outputs.commit != '' }}
+        if: ${{ steps.oclif-readme.outputs.commit == 'true' }}
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update README.md"
+          base: main
           branch: update-readme-${{ github.run_id }}
           title: 'Update README'
           body: 'This PR updates the README file.'
@@ -63,3 +69,4 @@ jobs:
           commit: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
           skipIfReleaseExists: true
+          draft: true
