@@ -1,4 +1,4 @@
-name: PR lint
+name: Check PR title
 
 on:
   pull_request:
