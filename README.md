@@ -15,11 +15,11 @@ Ninox Dev CLI
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g ninox
+$ npm install -g @ninox/ninox
 $ ninox COMMAND
 running command...
 $ ninox (--version)
-ninox/0.1.0 darwin-arm64 node-v20.14.0
+@ninox/ninox/0.1.0 darwin-arm64 node-v20.14.0
 $ ninox --help [COMMAND]
 USAGE
   $ ninox COMMAND
