@@ -40,10 +40,20 @@ jobs:
           npm install
           npm exec oclif readme
           if [ -n "$(git status --porcelain)" ]; then
-            git add .
+            git checkout -b update-readme-${{ github.run_id }}
             git commit -am "chore: update README.md"
-            git push -u origin ${{ github.ref_name }}
+            git push -u origin update-readme-${{ github.run_id }}
           fi
+      - name: Create Pull Request
+        if: ${{ steps.oclif-readme.outputs.commit != '' }}
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update README.md"
+          branch: update-readme-${{ github.run_id }}
+          title: 'Update README'
+          body: 'This PR updates the README file.'
+          labels: 'automerge'
       - name: Create Github Release
         uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5
         if: ${{ steps.version-check.outputs.skipped == 'false' }}
