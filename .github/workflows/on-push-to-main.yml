@@ -30,37 +30,6 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Setup git
-        if: ${{ steps.version-check.outputs.skipped == 'false' }}
-        run: |
-          git config --global user.email ${{ secrets.GH_EMAIL }}
-          git config --global user.name ${{ secrets.GH_USERNAME }}
-      - name: Generate oclif README
-        if: ${{ steps.version-check.outputs.skipped == 'false' }}
-        id: oclif-readme
-        # git checkout -b update-readme-${{ github.run_id }}
-        # git commit -am "chore: update README.md"
-        # git push -u origin update-readme-${{ github.run_id }}
-        run: |
-          npm ci
-          npm exec oclif readme
-          if git diff --exit-code README.md; then
-            echo "No changes detected in README.md"
-          else
-            echo "Changes detected in README.md"
-            echo "commit=true" >> $GITHUB_ENV
-          fi
-      - name: Create Pull Request
-        if: env.commit == 'true'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update README.md"
-          base: main
-          branch: update-readme-${{ github.run_id }}
-          title: 'docs: [ND-0] Update README'
-          body: 'This PR updates the README file.'
-          labels: 'automerge'
       - name: Create Github Release
         uses: ncipollo/release-action@v1
         if: ${{ steps.version-check.outputs.skipped == 'false' }}
