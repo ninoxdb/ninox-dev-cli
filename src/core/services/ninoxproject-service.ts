@@ -241,12 +241,12 @@ export class NinoxProjectService implements IProjectService {
   ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: Report[]] {
     const {database: databaseFileContent, reports: reportsFileContent, tables, views: viewsFileContent} = dBConfigsYaml
     const databaseLocal = yaml.load(databaseFileContent, {
-      schema: customSchema,
+      // schema: customSchema,
     }) as DatabaseFileType
     const tablesLocal = tables.map(
       (table) =>
         yaml.load(table, {
-          schema: customSchema,
+          // schema: customSchema,
         }) as TableFileType,
     )
     const viewsLocal = viewsFileContent.map((view) => yaml.load(view) as ViewTypeFile)
@@ -473,7 +473,7 @@ export class NinoxProjectService implements IProjectService {
           },
         }),
         {
-          schema: customSchema,
+          // schema: customSchema,
         },
       ),
     )
@@ -518,7 +518,7 @@ export class NinoxProjectService implements IProjectService {
           this.fsUtil.writeFile(
             path.join(tableFolderPath, `${tableFolderName}.yaml`),
             yaml.dump(tableFileData, {
-              schema: customSchema,
+              // schema: customSchema,
             }),
           )
         }),
