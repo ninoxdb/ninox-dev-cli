@@ -25,6 +25,7 @@ export class NinoxClient {
       headers: {
         Authorization: `Bearer ${creds.apiKey}`,
       },
+      timeout: 30_000,
     })
   }
 
