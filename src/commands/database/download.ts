@@ -1,4 +1,5 @@
 import {Flags} from '@oclif/core'
+import ora from 'ora'
 
 import {BaseCommand} from '../../core/base.js'
 import {EnvironmentConfig} from '../../core/common/types.js'
@@ -22,6 +23,7 @@ export default class DownloadCommand extends BaseCommand {
   protected async init(): Promise<void> {
     await super.init()
     const {flags} = await this.parse(DownloadCommand)
+    if (process.env.NODE_ENV !== 'test') this.spinner = ora(`Downloading Database ${flags.id}\n`).start()
     const fsUtil = new FSUtil()
     const context = {debug: this.debug}
     this.databaseService = new DatabaseService(
@@ -34,6 +36,7 @@ export default class DownloadCommand extends BaseCommand {
 
   public async run(): Promise<void> {
     await this.databaseService.download()
+    this.spinner?.stop()
     this.debug(`success src/commands/download.ts`)
     this.log(
       `Downloaded database ${this.databaseService.getDBName()} (${this.databaseService.getDBId()}) successfully!`,

@@ -1,3 +1,5 @@
+import ora from 'ora'
+
 import {BaseCommand} from '../../core/base.js'
 import {DatabaseMetadata} from '../../core/common/schema-validators.js'
 import {EnvironmentConfig} from '../../core/common/types.js'
@@ -17,6 +19,8 @@ export default class ListCommand extends BaseCommand {
 
   protected async init(): Promise<void> {
     await super.init()
+    if (process.env.NODE_ENV !== 'test')
+      this.spinner = ora(`Listing all Databases in the workspace ${this.environment.workspaceId}\n`).start()
     const context = {debug: this.debug}
     this.databaseService = new DatabaseService(
       new NinoxProjectService(new FSUtil(), context),
@@ -32,6 +36,7 @@ export default class ListCommand extends BaseCommand {
       this.log(database.name, database.id)
     }
 
+    this.spinner?.stop()
     this.debug(`success src/commands/list.ts`)
   }
 }
