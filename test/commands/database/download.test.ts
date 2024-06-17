@@ -18,9 +18,9 @@ describe('database/download', () => {
       .reply(200, databaseJSONMock)
       .get(`/${workspaceId}/${databaseId}/files/background.jpg`)
       .reply(200, 'mocked-image')
-      .get(`/v1/teams/${workspaceId}/databases/${databaseId}/views`)
+      .get(`/v1/teams/${workspaceId}/databases/${databaseId}/views?fullView=T`)
       .reply(200, [])
-      .get(`/v1/teams/${workspaceId}/databases/${databaseId}/reports`)
+      .get(`/v1/teams/${workspaceId}/databases/${databaseId}/reports?fullReport=T`)
       .reply(200, [])
 
     stubReadEnvironmentConfig = sinon.stub(DownloadCommand.prototype, 'readEnvironmentConfig').callsFake(() => ({

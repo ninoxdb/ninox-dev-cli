@@ -11,7 +11,7 @@ import {
   Report,
   ViewType,
 } from '../common/schema-validators.js'
-import {NinoxCredentials, View, ViewMetadata} from '../common/types.js'
+import {NinoxCredentials, View} from '../common/types.js'
 
 export class NinoxClient {
   private client: AxiosInstance
@@ -69,25 +69,18 @@ export class NinoxClient {
       .catch((error) => handleAxiosError(error, 'Failed to fetch database'))
   }
 
-  public async getDatabaseReport(databaseId: string, reportId: string): Promise<Report> {
+  public async getDatabaseReports(databaseId: string): Promise<Report[]> {
     return this.client
-      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports/${reportId}`)
-      .then((response) => response.data)
-      .catch((error) => handleAxiosError(error, 'Failed to fetch database report'))
-  }
-
-  public async getDatabaseView(databaseId: string, viewId: string): Promise<View> {
-    return this.client
-      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/views/${viewId}`)
-      .then((response) => response.data)
-      .catch((error) => handleAxiosError(error, 'Failed to fetch database views'))
-  }
-
-  public async listDatabaseReports(databaseId: string): Promise<Report[]> {
-    return this.client
-      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports`)
+      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports?fullReport=T`)
       .then((response) => response.data)
       .catch((error) => handleAxiosError(error, 'Failed to list database reports'))
+  }
+
+  public async getDatabaseViews(databaseId: string): Promise<View[]> {
+    return this.client
+      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/views?fullView=T`)
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to list database views'))
   }
 
   public async listDatabases(): Promise<DatabaseMetadata[]> {
@@ -98,13 +91,6 @@ export class NinoxClient {
         handleAxiosError(error, 'Failed to list databases')
         return []
       })
-  }
-
-  public async listDatabaseViews(databaseId: string): Promise<ViewMetadata[]> {
-    return this.client
-      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/views`)
-      .then((response) => response.data)
-      .catch((error) => handleAxiosError(error, 'Failed to list database views'))
   }
 
   public async patchDatabaseSchemaInNinox(id: string, schema: DatabaseSchemaType): Promise<unknown> {

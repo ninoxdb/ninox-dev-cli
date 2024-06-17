@@ -95,8 +95,8 @@ describe('DatabaseService', () => {
       const mockBgImagePath = 'path/to/bg/image'
 
       ninoxClientStub.getDatabase.resolves(databaseJSONMock)
-      ninoxClientStub.listDatabaseViews.resolves([])
-      ninoxClientStub.listDatabaseReports.resolves([])
+      ninoxClientStub.getDatabaseViews.resolves([])
+      ninoxClientStub.getDatabaseReports.resolves([])
       // TODO: mock views
       ninoxProjectServiceStub.parseDatabaseConfigs.returns({
         database: databaseInfoMock,
