@@ -81,7 +81,7 @@ export const TableBase = z.object({
   icon: z.string().optional(),
   kind: z.enum(['table', 'page']),
   nextFieldId: z.number(),
-  order: z.union([z.number(), z.null()]),
+  order: z.union([z.number(), z.null()]).optional(),
   readRoles: z.array(z.string()).optional(),
   uis: z.record(z.any()),
   uuid: z.string(),
@@ -119,7 +119,7 @@ export const DatabaseSchemaForUpload = z.object({
       }),
     )
     .optional(),
-  seq: z.number(),
+  seq: z.number().optional(),
   version: z.number(),
 })
 
@@ -207,8 +207,8 @@ export const ViewTypeSchema = z.object({
   id: z.string(),
   kanbanDisableCreate: z.boolean().optional(),
   mode: z.string().optional(),
-  order: z.number(),
-  seq: z.number(),
+  order: z.number().optional(),
+  seq: z.number().optional(),
   type: z.string(),
 })
 
