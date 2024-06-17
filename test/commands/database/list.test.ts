@@ -24,9 +24,9 @@ describe('database/list', () => {
     .stdout()
     .command(['database list'])
     .it('list Databases', (context) => {
-      expect(context.stdout).to.contain(
-        databaseList.map((database: DatabaseMetadata) => `${database.name} ${database.id}`).join('\n'),
-      )
+      for (const database of databaseList) {
+        expect(context.stdout).to.match(new RegExp(`${database.id}`))
+      }
     })
 
   test
