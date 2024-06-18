@@ -160,11 +160,27 @@ export class NinoxProjectService implements IProjectService {
     const {types} = parsedSchema
 
     const tables = Object.entries(types).map(([key, value]) => {
-      const parsedTable = TableBase.safeParse(value)
-      if (!parsedTable.success) throw new Error(`Validation errors: Table validation failed ${types[key]?.caption}`)
+      const parsedTableResult = TableBase.safeParse(value)
+      if (!parsedTableResult.success)
+        throw new Error(`Validation errors: Table validation failed ${types[key]?.caption}`)
+      const {data: parsedTable} = parsedTableResult
+      for (const [fieldId, fieldConfig] of Object.entries(parsedTable.fields)) {
+        const {caption} = fieldConfig
+        delete parsedTable.fields[fieldId]
+        delete fieldConfig.caption
+        parsedTable.fields[caption] = {...fieldConfig, _id: fieldId}
+      }
+
+      for (const [fieldId, fieldConfig] of Object.entries(parsedTable.uis)) {
+        const {caption} = fieldConfig
+        delete parsedTable.uis[fieldId]
+        delete fieldConfig.caption
+        parsedTable.uis[caption] = {...fieldConfig, _id: fieldId}
+      }
+
       return TableFile.parse({
         table: {
-          ...parsedTable.data,
+          ...parsedTable,
           _database: parsedDatabase.id,
           _id: key,
         },
@@ -227,6 +243,21 @@ export class NinoxProjectService implements IProjectService {
     // attach the tables to the schema
     for (const table of tablesJSON) {
       schemaJSON.types[table._id] = table
+      for (const [fieldName, fieldConfig] of Object.entries(table.fields)) {
+        const {_id} = fieldConfig
+        if (!_id) throw new Error(`Field _id is required ${table.caption + '.' + fieldName}`)
+        delete table.fields[fieldName]
+        table.fields[_id] = fieldConfig
+        fieldConfig.caption = fieldName
+      }
+
+      for (const [fieldName, fieldConfig] of Object.entries(table.uis)) {
+        const {_id} = fieldConfig
+        if (!_id) throw new Error(`Field _id is required ${table.caption + '.' + fieldName}`)
+        delete table.uis[fieldName]
+        table.uis[_id] = fieldConfig
+        fieldConfig.caption = fieldName
+      }
     }
 
     const database = Database.parse(databaseJSON)

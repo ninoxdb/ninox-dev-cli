@@ -4,9 +4,8 @@ table:
   caption: Table112~!   @#$%^&*`@#$%^&*()$%^&*(
   captions: {}
   fields:
-    A:
+    Text:
       base: string
-      caption: Text
       captions: {}
       required: false
       order: 0
@@ -18,9 +17,9 @@ table:
       stringAutocorrect: true
       stringMultiline: false
       height: 1
-    C:
+      _id: A
+    Birthday:
       base: string
-      caption: Birthday
       captions: {}
       required: false
       order: 2
@@ -33,9 +32,9 @@ table:
       stringAutocorrect: true
       stringMultiline: false
       height: 1
-    D:
+      _id: C
+    Father Name:
       base: string
-      caption: Father Name
       captions: {}
       required: false
       order: 3
@@ -47,9 +46,9 @@ table:
       stringAutocorrect: true
       stringMultiline: false
       height: 1
-    B:
+      _id: D
+    First Name:
       base: string
-      caption: First Name
       captions: {}
       required: false
       order: 1
@@ -61,6 +60,7 @@ table:
       stringAutocorrect: true
       stringMultiline: false
       height: 1
+      _id: B
   globalSearch: true
   hidden: false
   kind: table
