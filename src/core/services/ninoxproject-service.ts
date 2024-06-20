@@ -480,7 +480,6 @@ export class NinoxProjectService implements IProjectService {
     reports: Record<string, ReportTypeFile[]>,
     tableFolders: Record<string, string>,
   ): Promise<void> {
-    // TODO: check why report also contains view like structures for some databases e.g hrm
     const directoryPromises = Object.entries(reports).map(async ([, reports]) => {
       // assume that the table folder exists if defined
       const fileWritingPromises = reports.map((report) => {
