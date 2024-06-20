@@ -34,6 +34,7 @@ import {ContextOptions, DBConfigsYaml, TableFolderContent, View} from '../common
 import {FSUtil} from '../utils/fs.js'
 import {IProjectService} from './interfaces.js'
 
+const JSYAML_DEFAULT_OPTIONS = {lineWidth: -1}
 export class NinoxProjectService implements IProjectService {
   private basePath: string = process.cwd()
   private credentialsFilePath: string
@@ -435,6 +436,7 @@ export class NinoxProjectService implements IProjectService {
             schema: {...schema, _database: database.id},
           },
         }),
+        JSYAML_DEFAULT_OPTIONS,
       ),
     )
   }
@@ -450,7 +452,7 @@ export class NinoxProjectService implements IProjectService {
         const tablePath = tableFolders[report.report.tid]
 
         const reportFileName = `${this.fsUtil.formatObjectFilename('report', report.report.caption)}.yaml`
-        return this.fsUtil.writeFile(path.join(tablePath, reportFileName), yaml.dump(report))
+        return this.fsUtil.writeFile(path.join(tablePath, reportFileName), yaml.dump(report, JSYAML_DEFAULT_OPTIONS))
       })
 
       // Wait for all file writing promises in this directory to resolve
@@ -475,7 +477,10 @@ export class NinoxProjectService implements IProjectService {
       fileWritePromises.push(
         this.fsUtil.mkdir(tableFolderPath).then(() => {
           // write table file
-          this.fsUtil.writeFile(path.join(tableFolderPath, `${tableFolderName}.yaml`), yaml.dump(tableFileData))
+          this.fsUtil.writeFile(
+            path.join(tableFolderPath, `${tableFolderName}.yaml`),
+            yaml.dump(tableFileData, JSYAML_DEFAULT_OPTIONS),
+          )
         }),
       )
     }
@@ -494,7 +499,7 @@ export class NinoxProjectService implements IProjectService {
         const tablePath = tableFolders[view.view.type]
 
         const viewFileName = `${this.fsUtil.formatObjectFilename('view', view.view.caption)}.yaml`
-        return this.fsUtil.writeFile(path.join(tablePath, viewFileName), yaml.dump(view))
+        return this.fsUtil.writeFile(path.join(tablePath, viewFileName), yaml.dump(view, JSYAML_DEFAULT_OPTIONS))
       })
 
       // Wait for all file writing promises in this directory to resolve
