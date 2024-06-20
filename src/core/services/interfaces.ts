@@ -21,6 +21,7 @@ export interface INinoxObjectService<T> {
 export interface IProjectService {
   createDatabaseFolderInFiles(): Promise<void>
   getDbBackgroundImagePath(): string
+  getReportFilesFolderPath(reportId: string): string
   initialiseProject(name: string): Promise<void>
   isDbBackgroundImageExist(): boolean
   parseDatabaseConfigs(

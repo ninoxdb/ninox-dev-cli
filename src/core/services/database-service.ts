@@ -47,6 +47,15 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     this.debug(`Downloading background image for Database ${database.settings.name}...`)
     await ninoxProjectService.createDatabaseFolderInFiles()
     await ninoxClient.downloadDatabaseBackgroundImage(databaseId, ninoxProjectService.getDbBackgroundImagePath())
+    // download report files
+    for (const {report} of reports) {
+      // eslint-disable-next-line no-await-in-loop
+      await ninoxClient.downloadReportFiles(
+        databaseId,
+        report.id,
+        ninoxProjectService.getReportFilesFolderPath(report.id),
+      )
+    }
   }
 
   public getDBId(): string {

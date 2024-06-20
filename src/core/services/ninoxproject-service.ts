@@ -130,6 +130,10 @@ export class NinoxProjectService implements IProjectService {
     return this.dbBackgroundImagePath
   }
 
+  public getReportFilesFolderPath(reportId: string): string {
+    return path.join(this.getDatabaseFilesPath(), `report_${reportId}`)
+  }
+
   public async initialiseProject(name: string): Promise<void> {
     await this.createPackageJson(name)
     await this.createConfigYaml()

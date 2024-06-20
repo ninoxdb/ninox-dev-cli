@@ -52,7 +52,7 @@ export class NinoxClient {
         })
       })
     } catch (error) {
-      // ignore 404 as the background image is optional
+      // silently ignore 404 as the background image is optional
       if (error instanceof AxiosError && error?.response?.status === axios.HttpStatusCode.NotFound) {
         error?.request?.abort()
         return
@@ -60,6 +60,46 @@ export class NinoxClient {
 
       throw error
     }
+  }
+
+  public async downloadReportFiles(databaseId: string, reportId: string, folderPath: string): Promise<unknown> {
+    const reportFilesUrl = `/v1/teams/${this.workspaceId}/databases/${databaseId}/reports/${reportId}/files`
+
+    return this.client
+      .get(reportFilesUrl)
+      .then((response) => {
+        const files = response.data
+
+        const downloadPromises = files.map(async (filename: string) => {
+          const fileUrl = `/v1/teams/${this.workspaceId}/databases/${databaseId}/reports/${reportId}/files/${filename}`
+          await fs.promises.mkdir(folderPath, {recursive: true})
+          const writer = fs.createWriteStream(`${folderPath}/${filename}`)
+
+          return this.client({
+            method: 'GET',
+            responseType: 'stream',
+            url: fileUrl,
+          }).then((fileResponse) => {
+            fileResponse.data.pipe(writer)
+
+            return new Promise((resolve, reject) => {
+              writer.on('finish', resolve)
+              writer.on('error', reject)
+            })
+          })
+        })
+
+        return Promise.all(downloadPromises)
+      })
+      .catch((error) => {
+        // ignore 404 as the background image is optional
+        if (error instanceof AxiosError && error?.response?.status === axios.HttpStatusCode.NotFound) {
+          error?.request?.abort()
+          return
+        }
+
+        handleAxiosError(error, 'Failed to download report files')
+      })
   }
 
   public async getDatabase(id: string): Promise<GetDatabaseResponse> {
