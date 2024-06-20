@@ -64,7 +64,7 @@ export class NinoxClient {
 
   public async getDatabase(id: string): Promise<GetDatabaseResponse> {
     return this.client
-      .get(`/v1/teams/${this.workspaceId}/databases/${id}?human=T`)
+      .get(`/v1/teams/${this.workspaceId}/databases/${id}?human-script=T`)
       .then((response) => response.data)
       .catch((error) => handleAxiosError(error, 'Failed to fetch database'))
   }
@@ -95,7 +95,7 @@ export class NinoxClient {
 
   public async patchDatabaseSchemaInNinox(id: string, schema: DatabaseSchemaType): Promise<unknown> {
     return this.client
-      .patch(`/v1/teams/${this.workspaceId}/databases/${id}/schema?human=T`, schema)
+      .patch(`/v1/teams/${this.workspaceId}/databases/${id}/schema?human-script=T`, schema)
       .then((response) => response.data)
       .catch((error) =>
         handleAxiosError(
