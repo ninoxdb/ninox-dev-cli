@@ -1,5 +1,5 @@
-import * as yaml from 'js-yaml'
 import path from 'node:path'
+import * as yaml from 'yaml'
 
 import {
   CREDENTIALS_FILE_NAME,
@@ -34,7 +34,7 @@ import {ContextOptions, DBConfigsYaml, TableFolderContent, View} from '../common
 import {FSUtil} from '../utils/fs.js'
 import {IProjectService} from './interfaces.js'
 
-const JSYAML_DEFAULT_OPTIONS = {lineWidth: -1}
+const YAML_DEFAULT_OPTIONS = {lineWidth: -1}
 export class NinoxProjectService implements IProjectService {
   private basePath: string = process.cwd()
   private credentialsFilePath: string
@@ -65,7 +65,7 @@ export class NinoxProjectService implements IProjectService {
       return
     }
 
-    await this.fsUtil.writeFile(this.credentialsFilePath, yaml.dump(ConfigYamlTemplate))
+    await this.fsUtil.writeFile(this.credentialsFilePath, yaml.stringify(ConfigYamlTemplate))
   }
 
   // create folder src/Files/Database_${databaseid}
@@ -231,10 +231,10 @@ export class NinoxProjectService implements IProjectService {
     dBConfigsYaml: DBConfigsYaml,
   ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: Report[]] {
     const {database: databaseFileContent, reports: reportsFileContent, tables, views: viewsFileContent} = dBConfigsYaml
-    const databaseLocal = yaml.load(databaseFileContent) as DatabaseFileType
-    const tablesLocal = tables.map((table) => yaml.load(table) as TableFileType)
-    const viewsLocal = viewsFileContent.map((view) => yaml.load(view) as ViewTypeFile)
-    const reportsLocal = reportsFileContent.map((report) => yaml.load(report) as ReportTypeFile)
+    const databaseLocal = yaml.parse(databaseFileContent) as DatabaseFileType
+    const tablesLocal = tables.map((table) => yaml.parse(table) as TableFileType)
+    const viewsLocal = viewsFileContent.map((view) => yaml.parse(view) as ViewTypeFile)
+    const reportsLocal = reportsFileContent.map((report) => yaml.parse(report) as ReportTypeFile)
     const {database: databaseJSON} = databaseLocal
     const {schema: schemaLocalJSON} = databaseJSON
 
@@ -464,14 +464,14 @@ export class NinoxProjectService implements IProjectService {
     )
     await this.fsUtil.writeFile(
       databaseFilePath,
-      yaml.dump(
+      yaml.stringify(
         DatabaseFile.parse({
           database: {
             ...database,
             schema: {...schema, _database: database.id},
           },
         }),
-        JSYAML_DEFAULT_OPTIONS,
+        YAML_DEFAULT_OPTIONS,
       ),
     )
   }
@@ -486,7 +486,7 @@ export class NinoxProjectService implements IProjectService {
         const tablePath = tableFolders[report.report.tid]
 
         const reportFileName = `${this.fsUtil.formatObjectFilename('report', report.report.caption)}.yaml`
-        return this.fsUtil.writeFile(path.join(tablePath, reportFileName), yaml.dump(report, JSYAML_DEFAULT_OPTIONS))
+        return this.fsUtil.writeFile(path.join(tablePath, reportFileName), yaml.stringify(report, YAML_DEFAULT_OPTIONS))
       })
 
       // Wait for all file writing promises in this directory to resolve
@@ -513,7 +513,7 @@ export class NinoxProjectService implements IProjectService {
           // write table file
           this.fsUtil.writeFile(
             path.join(tableFolderPath, `${tableFolderName}.yaml`),
-            yaml.dump(tableFileData, JSYAML_DEFAULT_OPTIONS),
+            yaml.stringify(tableFileData, YAML_DEFAULT_OPTIONS),
           )
         }),
       )
@@ -533,7 +533,7 @@ export class NinoxProjectService implements IProjectService {
         const tablePath = tableFolders[view.view.type]
 
         const viewFileName = `${this.fsUtil.formatObjectFilename('view', view.view.caption)}.yaml`
-        return this.fsUtil.writeFile(path.join(tablePath, viewFileName), yaml.dump(view, JSYAML_DEFAULT_OPTIONS))
+        return this.fsUtil.writeFile(path.join(tablePath, viewFileName), yaml.stringify(view, YAML_DEFAULT_OPTIONS))
       })
 
       // Wait for all file writing promises in this directory to resolve

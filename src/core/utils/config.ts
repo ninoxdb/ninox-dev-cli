@@ -1,6 +1,6 @@
-import * as yaml from 'js-yaml'
 import fs from 'node:fs'
 import path from 'node:path'
+import * as yaml from 'yaml'
 
 import {CREDENTIALS_FILE_NAME} from '../common/constants.js'
 import {Config, EnvironmentConfig} from '../common/types.js'
@@ -13,7 +13,7 @@ export function readConfig(): Config {
     throw new Error(`Configuration file not found: ${configFile}`)
   }
 
-  return yaml.load(fs.readFileSync(configFile, 'utf8')) as Config
+  return yaml.parse(fs.readFileSync(configFile, 'utf8')) as Config
 }
 
 export function getEnvironment(environment: string): EnvironmentConfig {
