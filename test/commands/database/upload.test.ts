@@ -25,7 +25,7 @@ describe('database/upload', () => {
       })
       .post(`/${mockNinoxEnvironment.workspaceId}/${databaseId}/settings/update`)
       .reply(200)
-      .patch(`/v1/teams/${mockNinoxEnvironment.workspaceId}/databases/${databaseId}/schema?humanScript=T`)
+      .patch(`/v1/teams/${mockNinoxEnvironment.workspaceId}/databases/${databaseId}/schema?formattedScripts=T`)
       .reply(200)
       .post(`/v1/teams/${mockNinoxEnvironment.workspaceId}/databases/${databaseId}/views`)
       .reply(200)
