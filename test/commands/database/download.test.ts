@@ -14,7 +14,7 @@ describe('database/download', () => {
   before(() => {
     databaseJSONMock = loadJsonMock('download-database-info.json') as GetDatabaseResponse
     nock('https://mocked.example.com')
-      .get(`/v1/teams/${workspaceId}/databases/${databaseId}?formattedScripts=T`)
+      .get(`/v1/teams/${workspaceId}/databases/${databaseId}?formatScripts=T`)
       .reply(200, databaseJSONMock)
       .get(`/${workspaceId}/${databaseId}/files/background.jpg`)
       .reply(200, 'mocked-image')
