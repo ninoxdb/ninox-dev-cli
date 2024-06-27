@@ -8,6 +8,7 @@ import {INinoxObjectService} from '../../core/services/interfaces.js'
 import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
 import {FSUtil} from '../../core/utils/fs.js'
 import {NinoxClient} from '../../core/utils/ninox-client.js'
+import {isTest} from '../../core/utils/util.js'
 
 export default class UploadCommand extends BaseCommand {
   public static override description =
@@ -24,7 +25,7 @@ export default class UploadCommand extends BaseCommand {
   protected async init(): Promise<void> {
     await super.init()
     const {flags} = await this.parse(UploadCommand)
-    if (process.env.NODE_ENV !== 'test') this.spinner = ora(`Uploading Database ${flags.id}\n`).start()
+    if (!isTest()) this.spinner = ora(`Uploading Database ${flags.id}\n`).start()
     const context = {debug: this.debug}
     const fsUtil = new FSUtil()
     this.databaseService = new DatabaseService(

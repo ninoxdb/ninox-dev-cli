@@ -34,3 +34,5 @@ export function getEnvironment(environment: string): EnvironmentConfig {
 
   return config.environments[environment]
 }
+
+export const isTest = (): boolean => process.env.NODE_ENV === 'test'

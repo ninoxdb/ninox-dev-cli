@@ -2,7 +2,7 @@ import {Args, Command} from '@oclif/core'
 import {Ora} from 'ora'
 
 import {EnvironmentConfig} from './common/types.js'
-import {getEnvironment} from './utils/config.js'
+import {getEnvironment} from './utils/util.js'
 
 export abstract class BaseCommand extends Command {
   public static override args = {

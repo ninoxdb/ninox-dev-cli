@@ -8,6 +8,7 @@ import {INinoxObjectService} from '../../core/services/interfaces.js'
 import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
 import {FSUtil} from '../../core/utils/fs.js'
 import {NinoxClient} from '../../core/utils/ninox-client.js'
+import {isTest} from '../../core/utils/util.js'
 
 export default class DownloadCommand extends BaseCommand {
   public static override description =
@@ -23,7 +24,7 @@ export default class DownloadCommand extends BaseCommand {
   protected async init(): Promise<void> {
     await super.init()
     const {flags} = await this.parse(DownloadCommand)
-    if (process.env.NODE_ENV !== 'test') this.spinner = ora(`Downloading Database ${flags.id}\n`).start()
+    if (!isTest()) this.spinner = ora(`Downloading Database ${flags.id}\n`).start()
     const fsUtil = new FSUtil()
     const context = {debug: this.debug}
     this.databaseService = new DatabaseService(

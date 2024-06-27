@@ -9,6 +9,7 @@ import {INinoxObjectService} from '../../core/services/interfaces.js'
 import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
 import {FSUtil} from '../../core/utils/fs.js'
 import {NinoxClient} from '../../core/utils/ninox-client.js'
+import {isTest} from '../../core/utils/util.js'
 export default class ListCommand extends BaseCommand {
   public static override description =
     'List all the database names and ids in the Ninox cloud server. The ENV argument comes before the command name.'
@@ -19,7 +20,7 @@ export default class ListCommand extends BaseCommand {
 
   protected async init(): Promise<void> {
     await super.init()
-    if (process.env.NODE_ENV !== 'test')
+    if (!isTest())
       this.spinner = ora(`Listing all Databases in the workspace ${this.environment.workspaceId}\n`).start()
     const context = {debug: this.debug}
     this.databaseService = new DatabaseService(
