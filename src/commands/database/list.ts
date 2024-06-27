@@ -1,5 +1,4 @@
 import ora from 'ora'
-import table from 'tty-table'
 
 import {BaseCommand} from '../../core/base.js'
 import {DatabaseMetadata} from '../../core/common/schema-validators.js'
@@ -9,7 +8,7 @@ import {INinoxObjectService} from '../../core/services/interfaces.js'
 import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
 import {FSUtil} from '../../core/utils/fs.js'
 import {NinoxClient} from '../../core/utils/ninox-client.js'
-import {isTest} from '../../core/utils/util.js'
+import {isTest, renderDatabaseListAsTable} from '../../core/utils/util.js'
 export default class ListCommand extends BaseCommand {
   public static override description =
     'List all the database names and ids in the Ninox cloud server. The ENV argument comes before the command name.'
@@ -33,19 +32,7 @@ export default class ListCommand extends BaseCommand {
   public async run(): Promise<void> {
     await this.parse(ListCommand)
     const dbs = await this.databaseService.list()
-    const ANSI = table(
-      [
-        {alias: '#', value: 'idx'},
-        {alias: 'Database name', align: 'left', headerAlign: 'left', value: 'name', width: 20},
-        {alias: 'Database ID', value: 'id'},
-      ],
-      dbs.map((database, index) => ({...database, idx: index + 1})),
-      [],
-      {
-        borderColor: 'green',
-        borderStyle: 'solid',
-      },
-    ).render()
+    const ANSI = renderDatabaseListAsTable(dbs)
     this.log(`${ANSI}\n`)
 
     this.spinner?.stop()
