@@ -1,5 +1,5 @@
-import * as yaml from 'js-yaml'
 import path from 'node:path'
+import * as yaml from 'yaml'
 
 import {
   CREDENTIALS_FILE_NAME,
@@ -34,6 +34,7 @@ import {ContextOptions, DBConfigsYaml, TableFolderContent, View} from '../common
 import {FSUtil} from '../utils/fs.js'
 import {IProjectService} from './interfaces.js'
 
+const YAML_DEFAULT_OPTIONS = {lineWidth: -1}
 export class NinoxProjectService implements IProjectService {
   private basePath: string = process.cwd()
   private credentialsFilePath: string
@@ -64,7 +65,7 @@ export class NinoxProjectService implements IProjectService {
       return
     }
 
-    await this.fsUtil.writeFile(this.credentialsFilePath, yaml.dump(ConfigYamlTemplate))
+    await this.fsUtil.writeFile(this.credentialsFilePath, yaml.stringify(ConfigYamlTemplate))
   }
 
   // create folder src/Files/Database_${databaseid}
@@ -129,6 +130,10 @@ export class NinoxProjectService implements IProjectService {
     return this.dbBackgroundImagePath
   }
 
+  public getReportFilesFolderPath(reportId: string): string {
+    return path.join(this.getDatabaseFilesPath(), `report_${reportId}`)
+  }
+
   public async initialiseProject(name: string): Promise<void> {
     await this.createPackageJson(name)
     await this.createConfigYaml()
@@ -159,11 +164,27 @@ export class NinoxProjectService implements IProjectService {
     const {types} = parsedSchema
 
     const tables = Object.entries(types).map(([key, value]) => {
-      const parsedTable = TableBase.safeParse(value)
-      if (!parsedTable.success) throw new Error(`Validation errors: Table validation failed ${types[key]?.caption}`)
+      const parsedTableResult = TableBase.safeParse(value)
+      if (!parsedTableResult.success)
+        throw new Error(`Validation errors: Table validation failed ${types[key]?.caption}`)
+      const {data: parsedTable} = parsedTableResult
+      for (const [fieldId, fieldConfig] of Object.entries(parsedTable.fields)) {
+        const {caption} = fieldConfig
+        delete parsedTable.fields[fieldId]
+        delete fieldConfig.caption
+        parsedTable.fields[caption] = {...fieldConfig, _id: fieldId}
+      }
+
+      for (const [fieldId, fieldConfig] of Object.entries(parsedTable.uis)) {
+        const {caption} = fieldConfig
+        delete parsedTable.uis[fieldId]
+        delete fieldConfig.caption
+        parsedTable.uis[caption] = {...fieldConfig, _id: fieldId}
+      }
+
       return TableFile.parse({
         table: {
-          ...parsedTable.data,
+          ...parsedTable,
           _database: parsedDatabase.id,
           _id: key,
         },
@@ -210,10 +231,10 @@ export class NinoxProjectService implements IProjectService {
     dBConfigsYaml: DBConfigsYaml,
   ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: Report[]] {
     const {database: databaseFileContent, reports: reportsFileContent, tables, views: viewsFileContent} = dBConfigsYaml
-    const databaseLocal = yaml.load(databaseFileContent) as DatabaseFileType
-    const tablesLocal = tables.map((table) => yaml.load(table) as TableFileType)
-    const viewsLocal = viewsFileContent.map((view) => yaml.load(view) as ViewTypeFile)
-    const reportsLocal = reportsFileContent.map((report) => yaml.load(report) as ReportTypeFile)
+    const databaseLocal = yaml.parse(databaseFileContent) as DatabaseFileType
+    const tablesLocal = tables.map((table) => yaml.parse(table) as TableFileType)
+    const viewsLocal = viewsFileContent.map((view) => yaml.parse(view) as ViewTypeFile)
+    const reportsLocal = reportsFileContent.map((report) => yaml.parse(report) as ReportTypeFile)
     const {database: databaseJSON} = databaseLocal
     const {schema: schemaLocalJSON} = databaseJSON
 
@@ -226,6 +247,21 @@ export class NinoxProjectService implements IProjectService {
     // attach the tables to the schema
     for (const table of tablesJSON) {
       schemaJSON.types[table._id] = table
+      for (const [fieldName, fieldConfig] of Object.entries(table.fields)) {
+        const {_id} = fieldConfig
+        if (!_id) throw new Error(`Field _id is required ${table.caption + '.' + fieldName}`)
+        delete table.fields[fieldName]
+        table.fields[_id] = fieldConfig
+        fieldConfig.caption = fieldName
+      }
+
+      for (const [fieldName, fieldConfig] of Object.entries(table.uis)) {
+        const {_id} = fieldConfig
+        if (!_id) throw new Error(`Field _id is required ${table.caption + '.' + fieldName}`)
+        delete table.uis[fieldName]
+        table.uis[_id] = fieldConfig
+        fieldConfig.caption = fieldName
+      }
     }
 
     const database = Database.parse(databaseJSON)
@@ -428,13 +464,14 @@ export class NinoxProjectService implements IProjectService {
     )
     await this.fsUtil.writeFile(
       databaseFilePath,
-      yaml.dump(
+      yaml.stringify(
         DatabaseFile.parse({
           database: {
             ...database,
             schema: {...schema, _database: database.id},
           },
         }),
+        YAML_DEFAULT_OPTIONS,
       ),
     )
   }
@@ -443,14 +480,13 @@ export class NinoxProjectService implements IProjectService {
     reports: Record<string, ReportTypeFile[]>,
     tableFolders: Record<string, string>,
   ): Promise<void> {
-    // TODO: check why report also contains view like structures for some databases e.g hrm
     const directoryPromises = Object.entries(reports).map(async ([, reports]) => {
       // assume that the table folder exists if defined
       const fileWritingPromises = reports.map((report) => {
         const tablePath = tableFolders[report.report.tid]
 
         const reportFileName = `${this.fsUtil.formatObjectFilename('report', report.report.caption)}.yaml`
-        return this.fsUtil.writeFile(path.join(tablePath, reportFileName), yaml.dump(report))
+        return this.fsUtil.writeFile(path.join(tablePath, reportFileName), yaml.stringify(report, YAML_DEFAULT_OPTIONS))
       })
 
       // Wait for all file writing promises in this directory to resolve
@@ -475,7 +511,10 @@ export class NinoxProjectService implements IProjectService {
       fileWritePromises.push(
         this.fsUtil.mkdir(tableFolderPath).then(() => {
           // write table file
-          this.fsUtil.writeFile(path.join(tableFolderPath, `${tableFolderName}.yaml`), yaml.dump(tableFileData))
+          this.fsUtil.writeFile(
+            path.join(tableFolderPath, `${tableFolderName}.yaml`),
+            yaml.stringify(tableFileData, YAML_DEFAULT_OPTIONS),
+          )
         }),
       )
     }
@@ -494,7 +533,7 @@ export class NinoxProjectService implements IProjectService {
         const tablePath = tableFolders[view.view.type]
 
         const viewFileName = `${this.fsUtil.formatObjectFilename('view', view.view.caption)}.yaml`
-        return this.fsUtil.writeFile(path.join(tablePath, viewFileName), yaml.dump(view))
+        return this.fsUtil.writeFile(path.join(tablePath, viewFileName), yaml.stringify(view, YAML_DEFAULT_OPTIONS))
       })
 
       // Wait for all file writing promises in this directory to resolve

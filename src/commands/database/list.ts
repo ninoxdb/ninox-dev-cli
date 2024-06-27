@@ -1,3 +1,5 @@
+import ora from 'ora'
+
 import {BaseCommand} from '../../core/base.js'
 import {DatabaseMetadata} from '../../core/common/schema-validators.js'
 import {EnvironmentConfig} from '../../core/common/types.js'
@@ -6,7 +8,7 @@ import {INinoxObjectService} from '../../core/services/interfaces.js'
 import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
 import {FSUtil} from '../../core/utils/fs.js'
 import {NinoxClient} from '../../core/utils/ninox-client.js'
-
+import {isTest, renderDatabaseListAsTable} from '../../core/utils/util.js'
 export default class ListCommand extends BaseCommand {
   public static override description =
     'List all the database names and ids in the Ninox cloud server. The ENV argument comes before the command name.'
@@ -17,6 +19,8 @@ export default class ListCommand extends BaseCommand {
 
   protected async init(): Promise<void> {
     await super.init()
+    if (!isTest())
+      this.spinner = ora(`Listing all Databases in the workspace ${this.environment.workspaceId}\n`).start()
     const context = {debug: this.debug}
     this.databaseService = new DatabaseService(
       new NinoxProjectService(new FSUtil(), context),
@@ -28,10 +32,10 @@ export default class ListCommand extends BaseCommand {
   public async run(): Promise<void> {
     await this.parse(ListCommand)
     const dbs = await this.databaseService.list()
-    for (const database of dbs) {
-      this.log(database.name, database.id)
-    }
+    const ANSI = renderDatabaseListAsTable(dbs)
+    this.log(`${ANSI}\n`)
 
+    this.spinner?.stop()
     this.debug(`success src/commands/list.ts`)
   }
 }

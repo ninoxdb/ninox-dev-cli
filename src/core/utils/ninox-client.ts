@@ -11,7 +11,7 @@ import {
   Report,
   ViewType,
 } from '../common/schema-validators.js'
-import {NinoxCredentials, View, ViewMetadata} from '../common/types.js'
+import {NinoxCredentials, View} from '../common/types.js'
 
 export class NinoxClient {
   private client: AxiosInstance
@@ -52,7 +52,7 @@ export class NinoxClient {
         })
       })
     } catch (error) {
-      // ignore 404 as the background image is optional
+      // silently ignore 404 as the background image is optional
       if (error instanceof AxiosError && error?.response?.status === axios.HttpStatusCode.NotFound) {
         error?.request?.abort()
         return
@@ -62,32 +62,66 @@ export class NinoxClient {
     }
   }
 
+  // TODO: Upload Report files is not yet supported due to the lack of use cases
+  public async downloadReportFiles(databaseId: string, reportId: string, folderPath: string): Promise<unknown> {
+    const reportFilesUrl = `/v1/teams/${this.workspaceId}/databases/${databaseId}/reports/${reportId}/files`
+
+    return this.client
+      .get(reportFilesUrl)
+      .then((response) => {
+        const files = response.data
+
+        const downloadPromises = files.map(async (filename: string) => {
+          const fileUrl = `/v1/teams/${this.workspaceId}/databases/${databaseId}/reports/${reportId}/files/${filename}`
+          await fs.promises.mkdir(folderPath, {recursive: true})
+          const writer = fs.createWriteStream(`${folderPath}/${filename}`)
+
+          return this.client({
+            method: 'GET',
+            responseType: 'stream',
+            url: fileUrl,
+          }).then((fileResponse) => {
+            fileResponse.data.pipe(writer)
+
+            return new Promise((resolve, reject) => {
+              writer.on('finish', resolve)
+              writer.on('error', reject)
+            })
+          })
+        })
+
+        return Promise.all(downloadPromises)
+      })
+      .catch((error) => {
+        // ignore 404 as the background image is optional
+        if (error instanceof AxiosError && error?.response?.status === axios.HttpStatusCode.NotFound) {
+          error?.request?.abort()
+          return
+        }
+
+        handleAxiosError(error, 'Failed to download report files')
+      })
+  }
+
   public async getDatabase(id: string): Promise<GetDatabaseResponse> {
     return this.client
-      .get(`/v1/teams/${this.workspaceId}/databases/${id}?human=T`)
+      .get(`/v1/teams/${this.workspaceId}/databases/${id}?formatScripts=T`)
       .then((response) => response.data)
       .catch((error) => handleAxiosError(error, 'Failed to fetch database'))
   }
 
-  public async getDatabaseReport(databaseId: string, reportId: string): Promise<Report> {
+  public async getDatabaseReports(databaseId: string): Promise<Report[]> {
     return this.client
-      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports/${reportId}`)
-      .then((response) => response.data)
-      .catch((error) => handleAxiosError(error, 'Failed to fetch database report'))
-  }
-
-  public async getDatabaseView(databaseId: string, viewId: string): Promise<View> {
-    return this.client
-      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/views/${viewId}`)
-      .then((response) => response.data)
-      .catch((error) => handleAxiosError(error, 'Failed to fetch database views'))
-  }
-
-  public async listDatabaseReports(databaseId: string): Promise<Report[]> {
-    return this.client
-      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports`)
+      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/reports?fullReport=T`)
       .then((response) => response.data)
       .catch((error) => handleAxiosError(error, 'Failed to list database reports'))
+  }
+
+  public async getDatabaseViews(databaseId: string): Promise<View[]> {
+    return this.client
+      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/views?fullView=T`)
+      .then((response) => response.data)
+      .catch((error) => handleAxiosError(error, 'Failed to list database views'))
   }
 
   public async listDatabases(): Promise<DatabaseMetadata[]> {
@@ -100,16 +134,9 @@ export class NinoxClient {
       })
   }
 
-  public async listDatabaseViews(databaseId: string): Promise<ViewMetadata[]> {
-    return this.client
-      .get(`/v1/teams/${this.workspaceId}/databases/${databaseId}/views`)
-      .then((response) => response.data)
-      .catch((error) => handleAxiosError(error, 'Failed to list database views'))
-  }
-
   public async patchDatabaseSchemaInNinox(id: string, schema: DatabaseSchemaType): Promise<unknown> {
     return this.client
-      .patch(`/v1/teams/${this.workspaceId}/databases/${id}/schema?human=T`, schema)
+      .patch(`/v1/teams/${this.workspaceId}/databases/${id}/schema?formatScripts=T`, schema)
       .then((response) => response.data)
       .catch((error) =>
         handleAxiosError(

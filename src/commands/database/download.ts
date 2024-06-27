@@ -1,4 +1,5 @@
 import {Flags} from '@oclif/core'
+import ora from 'ora'
 
 import {BaseCommand} from '../../core/base.js'
 import {EnvironmentConfig} from '../../core/common/types.js'
@@ -7,6 +8,7 @@ import {INinoxObjectService} from '../../core/services/interfaces.js'
 import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
 import {FSUtil} from '../../core/utils/fs.js'
 import {NinoxClient} from '../../core/utils/ninox-client.js'
+import {isTest} from '../../core/utils/util.js'
 
 export default class DownloadCommand extends BaseCommand {
   public static override description =
@@ -22,6 +24,7 @@ export default class DownloadCommand extends BaseCommand {
   protected async init(): Promise<void> {
     await super.init()
     const {flags} = await this.parse(DownloadCommand)
+    if (!isTest()) this.spinner = ora(`Downloading Database ${flags.id}\n`).start()
     const fsUtil = new FSUtil()
     const context = {debug: this.debug}
     this.databaseService = new DatabaseService(
@@ -34,6 +37,7 @@ export default class DownloadCommand extends BaseCommand {
 
   public async run(): Promise<void> {
     await this.databaseService.download()
+    this.spinner?.stop()
     this.debug(`success src/commands/download.ts`)
     this.log(
       `Downloaded database ${this.databaseService.getDBName()} (${this.databaseService.getDBId()}) successfully!`,

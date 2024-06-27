@@ -1,7 +1,7 @@
 {
   "name": "@ninox/ninox",
   "description": "Ninox Database CLI for developer workflows",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Muhammad Saqib Arfeen<saqib.arfeen@ninox.com>",
   "bin": {
     "ninox": "./bin/run.js"
@@ -15,7 +15,9 @@
     "axios": "^1.6.8",
     "debug": "^4.3.4",
     "form-data": "^4.0.0",
-    "js-yaml": "^4.1.0",
+    "ora": "^8.0.1",
+    "tty-table": "^4.2.3",
+    "yaml": "^2.4.5",
     "zod": "^3.23.6"
   },
   "devDependencies": {

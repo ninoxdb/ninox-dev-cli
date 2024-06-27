@@ -1,4 +1,5 @@
 import {Flags} from '@oclif/core'
+import ora from 'ora'
 
 import {BaseCommand} from '../../core/base.js'
 import {EnvironmentConfig} from '../../core/common/types.js'
@@ -7,6 +8,7 @@ import {INinoxObjectService} from '../../core/services/interfaces.js'
 import {NinoxProjectService} from '../../core/services/ninoxproject-service.js'
 import {FSUtil} from '../../core/utils/fs.js'
 import {NinoxClient} from '../../core/utils/ninox-client.js'
+import {isTest} from '../../core/utils/util.js'
 
 export default class UploadCommand extends BaseCommand {
   public static override description =
@@ -23,6 +25,7 @@ export default class UploadCommand extends BaseCommand {
   protected async init(): Promise<void> {
     await super.init()
     const {flags} = await this.parse(UploadCommand)
+    if (!isTest()) this.spinner = ora(`Uploading Database ${flags.id}\n`).start()
     const context = {debug: this.debug}
     const fsUtil = new FSUtil()
     this.databaseService = new DatabaseService(
@@ -35,6 +38,7 @@ export default class UploadCommand extends BaseCommand {
 
   public async run(): Promise<void> {
     await this.databaseService.upload()
+    this.spinner?.stop()
     this.debug(`success src/commands/upload.ts`)
     this.log(`Uploaded database ${this.databaseService.getDBId()} successfully!`)
   }
