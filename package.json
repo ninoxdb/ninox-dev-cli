@@ -2,6 +2,9 @@
   "name": "@ninox/ninox",
   "description": "Ninox Database CLI for developer workflows",
   "version": "0.1.2",
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "Muhammad Saqib Arfeen<saqib.arfeen@ninox.com>",
   "bin": {
     "ninox": "./bin/run.js"
