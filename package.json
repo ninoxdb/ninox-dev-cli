@@ -53,7 +53,6 @@
     "/dist",
     "/oclif.manifest.json"
   ],
-  "homepage": "https://github.com/ninoxdb/ninox-dev-cli",
   "keywords": [
     "oclif"
   ],
@@ -66,10 +65,6 @@
     "commands": "./dist/commands",
     "topicSeparator": " ",
     "topics": {}
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ninoxdb/ninox-dev-cli.git"
   },
   "scripts": {
     "build": "shx rm -rf dist && tsc -b",
