@@ -2,6 +2,9 @@
   "name": "@ninox/ninox",
   "description": "Ninox Database CLI for developer workflows",
   "version": "0.1.2",
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "Muhammad Saqib Arfeen<saqib.arfeen@ninox.com>",
   "bin": {
     "ninox": "./bin/run.js"
@@ -50,7 +53,6 @@
     "/dist",
     "/oclif.manifest.json"
   ],
-  "homepage": "https://github.com/ninoxdb/ninox-dev-cli",
   "keywords": [
     "oclif"
   ],
@@ -63,10 +65,6 @@
     "commands": "./dist/commands",
     "topicSeparator": " ",
     "topics": {}
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ninoxdb/ninox-dev-cli.git"
   },
   "scripts": {
     "build": "shx rm -rf dist && tsc -b",
