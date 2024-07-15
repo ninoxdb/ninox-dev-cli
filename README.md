@@ -171,13 +171,14 @@ $ npm install -g @ninox/ninox
 ```
 
 # Best practices
-1. Single Database Operations: Both download and upload commands work on one database at a time. You need to specify the Database ID for each operation.
-2. Existing Databases Only: The current version of the Ninox CLI only supports updating existing databases. You cannot use this tool to create a new database from scratch.
-3. Supported Modifications: While you can't create new databases, you can make the following changes to existing databases:
+1. Schema versioning is a mechanism to prevent accidental overwriting of the database configuration. Everytime an update is made to the Database schema (manually in the Ninox app or with the ninox database upload command), the version number of the database schema is incremented. If a database is being uploaded with a version number that is older than the current version on the server, the upload command will fail. This is to prevent accidental overwriting of the database configuration e.g from two people updating the same Database. A simple work around is to backup your current work and then get(download) the latest version of the database configuration before publishing(upload) your changes.
+2. Single Database Operations: Both download and upload commands work on one database at a time. You need to specify the Database ID for each operation.
+3. Existing Databases Only: The current version of the Ninox CLI only supports updating existing databases. You cannot use this tool to create a new database from scratch.
+4. Supported Modifications: While you can't create new databases, you can make the following changes to existing databases:
     a. Create new tables
     b. Add new pages
     c. Define new fields
     d. Write new Ninox scripts
-4. Local Storage: After downloading, all database artifacts are stored as YAML files in your current working directory. Ensure you're in the correct directory when running the upload command.
-5. Version Control: It's recommended to keep these YAML files under version control to track changes and collaborate with team members.
-6. Review Before Upload: Always review your local changes before uploading to ensure you're not overwriting important configurations unintentionally and to always back up the configuration yaml files in a source control, before making significant changes.
+5. Local Storage: After downloading, all database artifacts are stored as YAML files in your current working directory. Ensure you're in the correct directory when running the upload command.
+6. Version Control: It's recommended to keep these YAML files under version control to track changes and collaborate with team members.
+7. Review Before Upload: Always review your local changes before uploading to ensure you're not overwriting important configurations unintentionally and to always back up the configuration yaml files in a source control, before making significant changes.
