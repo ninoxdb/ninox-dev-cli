@@ -71,7 +71,7 @@ $ npm install -g @ninox/ninox
 $ ninox COMMAND
 running command...
 $ ninox (--version)
-@ninox/ninox/0.1.3 darwin-arm64 node-v20.15.0
+@ninox/ninox/0.1.4 darwin-arm64 node-v20.15.0
 $ ninox --help [COMMAND]
 USAGE
   $ ninox COMMAND
@@ -104,8 +104,6 @@ EXAMPLES
   $ ninox DEV database download -i 1234
 ```
 
-_See code: [src/commands/database/download.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.3/src/commands/database/download.ts)_
-
 ## `ninox database list`
 
 List all the database names and ids in the Ninox cloud server. The ENV argument comes before the command name.
@@ -120,8 +118,6 @@ DESCRIPTION
 EXAMPLES
   $ ninox DEV database list
 ```
-
-_See code: [src/commands/database/list.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.3/src/commands/database/list.ts)_
 
 ## `ninox database upload`
 
@@ -141,8 +137,6 @@ EXAMPLES
   $ ninox DEV database upload -i 1234
 ```
 
-_See code: [src/commands/database/upload.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.3/src/commands/database/upload.ts)_
-
 ## `ninox project init NAME`
 
 Initialize a new Ninox project in the current directory
@@ -160,8 +154,6 @@ DESCRIPTION
 EXAMPLES
   $ ninox project init
 ```
-
-_See code: [src/commands/project/init.ts](https://github.com/ninoxdb/ninox-dev-cli/blob/v0.1.3/src/commands/project/init.ts)_
 <!-- commandsstop -->
 
 # Installation
