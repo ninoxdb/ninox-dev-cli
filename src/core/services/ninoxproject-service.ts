@@ -331,6 +331,25 @@ export class NinoxProjectService implements IProjectService {
   }
 
   // Write the database, schema and tables to their respective files
+  public async writeDatabaseFile(database: DatabaseType, schema: DatabaseSchemaBaseType): Promise<void> {
+    const databaseFilePath = path.join(
+      this.getDatabaseObjectsPath(),
+      `${this.fsUtil.formatObjectFilename('database', database.settings.name)}.yaml`,
+    )
+    await this.fsUtil.writeFile(
+      databaseFilePath,
+      yaml.stringify(
+        DatabaseFile.parse({
+          database: {
+            ...database,
+            schema: {...schema, _database: database.id},
+          },
+        }),
+        YAML_DEFAULT_OPTIONS,
+      ),
+    )
+  }
+
   // eslint-disable-next-line max-params
   public async writeDatabaseToFiles(
     database: DatabaseType,
@@ -455,25 +474,6 @@ export class NinoxProjectService implements IProjectService {
     }
 
     return this.fsUtil.readFile(path.join(this.databaseObjectsPath, databaseFile))
-  }
-
-  private async writeDatabaseFile(database: DatabaseType, schema: DatabaseSchemaBaseType): Promise<void> {
-    const databaseFilePath = path.join(
-      this.getDatabaseObjectsPath(),
-      `${this.fsUtil.formatObjectFilename('database', database.settings.name)}.yaml`,
-    )
-    await this.fsUtil.writeFile(
-      databaseFilePath,
-      yaml.stringify(
-        DatabaseFile.parse({
-          database: {
-            ...database,
-            schema: {...schema, _database: database.id},
-          },
-        }),
-        YAML_DEFAULT_OPTIONS,
-      ),
-    )
   }
 
   private async writeReportsToFiles(

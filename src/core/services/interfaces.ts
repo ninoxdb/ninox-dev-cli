@@ -40,6 +40,7 @@ export interface IProjectService {
     dBConfigsYaml: DBConfigsYaml,
   ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: Report[]]
   readDBConfig(): Promise<DBConfigsYaml>
+  writeDatabaseFile(database: DatabaseType, schema: DatabaseSchemaBaseType): Promise<void>
   writeDatabaseToFiles(
     database: DatabaseType,
     schema: DatabaseSchemaBaseType,

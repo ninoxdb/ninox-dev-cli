@@ -102,3 +102,7 @@ export type TableFolderContent = {
 export type ContextOptions = {
   debug: (message: string) => void
 }
+
+export type SchemaPatchResponse = {
+  version: number
+}
