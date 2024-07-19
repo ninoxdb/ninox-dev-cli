@@ -1,5 +1,5 @@
 import {DatabaseMetadata, DatabaseSchemaType, DatabaseType, Report, ViewType} from '../common/schema-validators.js'
-import {ContextOptions} from '../common/types.js'
+import {ContextOptions, SchemaPatchResponse} from '../common/types.js'
 import {NinoxClient} from '../utils/ninox-client.js'
 import {INinoxObjectService, IProjectService} from './interfaces.js'
 
@@ -89,7 +89,10 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
       tables,
       views: viewsLocal,
     })
-    await this.uploadDatabase(database, schema, views, reports)
+    const newVersion = await this.uploadDatabase(database, schema, views, reports)
+    if (Number(newVersion)) {
+      await ninoxProjectService.writeDatabaseFile(database, {...schema, version: newVersion})
+    }
   }
 
   public async uploadDatabase(
@@ -97,7 +100,7 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     schema: DatabaseSchemaType,
     views: ViewType[],
     reports: Report[],
-  ): Promise<void> {
+  ): Promise<number> {
     if (!this.databaseId) throw new Error('Database ID is required to upload the database')
     const isUploaded = await this.ninoxClient.uploadDatabaseBackgroundImage(
       this.databaseId,
@@ -111,10 +114,11 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
       database.settings.backgroundClass = 'background-file'
     }
 
-    await this.ninoxClient.patchDatabaseSchemaInNinox(database.id, schema)
+    const response = (await this.ninoxClient.patchDatabaseSchemaInNinox(database.id, schema)) as SchemaPatchResponse
     await this.ninoxClient.updateDatabaseSettingsInNinox(database.id, database.settings)
     await this.ninoxClient.updateDatabaseViewsInNinox(database.id, views)
     await this.ninoxClient.updateDatabaseReportsInNinox(database.id, reports)
+    return response?.version
   }
 
   private async getDatabaseMetadataAndSchema(
