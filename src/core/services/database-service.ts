@@ -90,7 +90,7 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
       views: viewsLocal,
     })
     const newVersion = await this.uploadDatabase(database, schema, views, reports)
-    if (Number.isFinite(newVersion)) {
+    if (Number(newVersion)) {
       await ninoxProjectService.writeDatabaseFile(database, {...schema, version: newVersion})
     }
   }
