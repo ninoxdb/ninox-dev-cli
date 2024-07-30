@@ -7,18 +7,26 @@ Ninox SDK CLI Tool
 [![Downloads/week](https://img.shields.io/npm/dw/nx-cli.svg)](https://npmjs.org/package/nx-cli)
 
 <!-- toc -->
+* [Installation](#installation)
 * [Getting Started](#getting-started)
 * [Usage](#usage)
 * [Commands](#commands)
-* [Installation](#installation)
 * [Best practices](#best-practices)
 <!-- tocstop -->
 
 Ninox-cli is a powerful command-line interface designed for Ninox builders to enhance their development workflows. It allows you to connect to your Ninox cloud instance to manage Ninox database configurations; to perform operations such as downloading and uploading a database configuration, for better management of the development process.
 
+# Installation
+To install the latest version of the Ninox CLI tool, run the following command (requires NodeJS LTS version 18 or higher):
+```sh-session
+$ npm install -g @ninox/ninox
+```
+
 # Getting Started
 <!-- getting-started -->
-It is configured with the Ninox cloud's credentials. To get started, run the following command, to initialize a new Ninox-cli project in the current directory:
+The Ninox CLI is configured with your Ninox cloud's credentials. To get started, with Terminal on (*)nix or Command Prompt on Windows:
+1. Create a new directory and change your cmd/terminal to this directory, where the Ninox CLI project files will be stored (following step).
+2. Run the following command, to initialize a new Ninox-cli project in the current directory:
 ```sh-session
 $ ninox project init <project-name>
 ```
@@ -35,6 +43,7 @@ environments:
     workspaceId: your-prod-workspace-id
 ```
 Replace the placeholder values with your actual Ninox instance details.
+3. After entering your Ninox Cloud's credentials into the config.yaml file and giving a suitable name to the environment, you can now start using the Ninox CLI tool to list, download or upload all the databases of the workspace specified in the environment.
 
 ## Authentication
 Authentication is handled through the config.yaml file. The CLI tool uses the API key specified in the configuration file for the environment name, specified in the command (e.g  ninox local database download -i 1234 )
@@ -71,7 +80,7 @@ $ npm install -g @ninox/ninox
 $ ninox COMMAND
 running command...
 $ ninox (--version)
-@ninox/ninox/0.1.4 darwin-arm64 node-v20.15.0
+@ninox/ninox/0.1.5 darwin-arm64 node-v20.15.0
 $ ninox --help [COMMAND]
 USAGE
   $ ninox COMMAND
@@ -156,14 +165,8 @@ EXAMPLES
 ```
 <!-- commandsstop -->
 
-# Installation
-To install the latest version of the Ninox CLI tool, run the following command:
-```sh-session
-$ npm install -g @ninox/ninox
-```
-
 # Best practices
-1. Schema versioning is a mechanism to prevent accidental overwriting of the database configuration. Everytime an update is made to the Database schema (manually in the Ninox app or with the ninox database upload command), the version number of the database schema is incremented. If a database is being uploaded with a version number that is older than the current version on the server, the upload command will fail. This is to prevent accidental overwriting of the database configuration e.g from two people updating the same Database. A simple work around is to backup your current work and then get(download) the latest version of the database configuration before publishing(upload) your changes.
+1. Schema versioning is a mechanism to prevent accidental overwriting of the database configuration. When an update is made to the Database schema (manually in the Ninox app or with the ninox database upload command), the version number of the database schema is incremented by one. If a database is being uploaded with a version number that is not equal to the current version on the server, the upload command will fail. This is to prevent accidental overwriting of the database configuration e.g when multiple people working with Ninox CLI on the same Database, to prevent one from overwriting others' work . A simple work around is to backup your current work and then get(download) the latest version of the database configuration before publishing(upload) your changes.
 2. Single Database Operations: Both download and upload commands work on one database at a time. You need to specify the Database ID for each operation.
 3. Existing Databases Only: The current version of the Ninox CLI only supports updating existing databases. You cannot use this tool to create a new database from scratch.
 4. Supported Modifications: While you can't create new databases, you can make the following changes to existing databases:
