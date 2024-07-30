@@ -138,12 +138,7 @@ export class NinoxClient {
     return this.client
       .patch(`/v1/teams/${this.workspaceId}/databases/${id}/schema?formatScripts=T`, schema)
       .then((response) => response.data)
-      .catch((error) =>
-        handleAxiosError(
-          error,
-          'Failed to Update Schema. Please consider updating your local version of the schema by importing the latest version from the target account.',
-        ),
-      )
+      .catch((error) => handleAxiosError(error, 'Failed to update database Schema'))
   }
 
   public async updateDatabaseReportsInNinox(databaseId: string, reports: Report[]): Promise<unknown> {
