@@ -9,6 +9,8 @@ Ninox SDK CLI Tool
 <!-- toc -->
 * [Installation](#installation)
 * [Getting Started](#getting-started)
+* [Capabilities](#capabilities)
+* [Limitations](#limitations)
 * [Usage](#usage)
 * [Commands](#commands)
 * [Best practices](#best-practices)
@@ -73,6 +75,22 @@ $ ninox DEV database upload -i 1234
 This command will upload the locally stored configuration files for the database with ID 5678 to the Database with id 1234 in the DEV environment.
 
 
+
+# Capabilities
+
+- Update and edit scripts for Table and Field events
+- Write and modify scripts for business process automation
+- Work offline with database configurations
+
+# Limitations
+
+- Cannot create new databases
+- Cannot add new tables or fields
+- Cannot modify existing field structures
+- Not designed for making schema changes (tables/fields)
+
+Important: All schema changes (tables/fields) must be made exclusively through the Ninox application, not the Ninox CLI.
+
 # Usage
 <!-- usage -->
 ```sh-session
@@ -100,7 +118,7 @@ Download the settings and configuration (i.e Tables, Fields, Views and Reports) 
 
 ```
 USAGE
-  $ ninox database download ENV -i <value>
+  $ ninox ENV database download -i <value>
 
 FLAGS
   -i, --id=<value>  (required) Database ID to Download
@@ -119,7 +137,7 @@ List all the database names and ids in the Ninox cloud server. The ENV argument 
 
 ```
 USAGE
-  $ ninox database list ENV
+  $ ninox ENV database list
 
 DESCRIPTION
   List all the database names and ids in the Ninox cloud server. The ENV argument comes before the command name.
@@ -134,7 +152,7 @@ Deploy the local database configuration to the Ninox cloud server. The ENV argum
 
 ```
 USAGE
-  $ ninox database upload ENV -i <value>
+  $ ninox ENV database upload -i <value>
 
 FLAGS
   -i, --id=<value>  (required) Database ID to Download
@@ -166,14 +184,19 @@ EXAMPLES
 <!-- commandsstop -->
 
 # Best practices
-1. Schema versioning is a mechanism to prevent accidental overwriting of the database configuration. When an update is made to the Database schema (manually in the Ninox app or with the ninox database upload command), the version number of the database schema is incremented by one. If a database is being uploaded with a version number that is not equal to the current version on the server, the upload command will fail. This is to prevent accidental overwriting of the database configuration e.g when multiple people working with Ninox CLI on the same Database, to prevent one from overwriting others' work . A simple work around is to backup your current work and then get(download) the latest version of the database configuration before publishing(upload) your changes.
-2. Single Database Operations: Both download and upload commands work on one database at a time. You need to specify the Database ID for each operation.
-3. Existing Databases Only: The current version of the Ninox CLI only supports updating existing databases. You cannot use this tool to create a new database from scratch.
-4. Supported Modifications: While you can't create new databases, you can make the following changes to existing databases:
-    a. Create new tables
-    b. Add new pages
-    c. Define new fields
-    d. Write new Ninox scripts
-5. Local Storage: After downloading, all database artifacts are stored as YAML files in your current working directory. Ensure you're in the correct directory when running the upload command.
-6. Version Control: It's recommended to keep these YAML files under version control to track changes and collaborate with team members.
-7. Review Before Upload: Always review your local changes before uploading to ensure you're not overwriting important configurations unintentionally and to always back up the configuration yaml files in a source control, before making significant changes.
+1. Schema Versioning: This mechanism prevents accidental overwriting of database configurations. The schema version increments with each update made in the Ninox app or via the CLI upload command. Uploads will fail if the local version doesn't match the server version. To resolve conflicts:
+    1. Back up your current work
+    2. Download the latest database configuration
+    3. Apply your changes to the updated configuration
+    4. Upload the revised configuration
+
+2. Single Database Operations: Each download or upload command operates on one database at a time. Always specify the Database ID for operations.
+3. Existing Databases Only: The Ninox CLI supports updating existing databases only. You cannot create new databases from scratch.
+4. Supported Modifications:
+    1. Update existing scripts
+    2. Create new scripts for automation
+    3. Modify pages and layouts
+5. Local Storage: Downloaded database artifacts are stored as YAML files in your current working directory. Ensure you're in the correct directory when running commands.
+6. Version Control: Keep YAML files under version control to track changes and facilitate team collaboration.
+7. Review Before Upload: Always review local changes before uploading to avoid unintentional overwrites. Regularly back up configuration YAML files in source control, especially before making significant changes.
+8. Collaborative Work: When multiple team members use the Ninox CLI on the same database, coordinate efforts to prevent conflicts. Use the schema versioning system to manage concurrent work.
