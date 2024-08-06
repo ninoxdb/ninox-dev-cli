@@ -87,9 +87,8 @@ This command will upload the locally stored configuration files for the database
 - Cannot create new databases
 - Cannot add new tables or fields
 - Cannot modify existing field structures
-- Not designed for making schema changes (tables/fields)
+- Not designed for making schema changes (Important: all schema i.e tables/fields changes must be made exclusively through the Ninox application)
 
-Important: All schema changes (tables/fields) must be made exclusively through the Ninox application, not the Ninox CLI.
 
 # Usage
 <!-- usage -->
