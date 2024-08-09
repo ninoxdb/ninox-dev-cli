@@ -7,7 +7,7 @@
 The Ninox CLI tool enhances development workflows for advanced Ninox users by enabling source code version management. You can use the Ninox CLI tool on any command-line interface to connect your Ninox cloud instance to your local development setup and a version control system (for example, GitHub). This allows you to manage your database configurations, including downloading configurations for local development and uploading them back to the cloud.
 
 <!-- toc -->
-Table of contents
+* [Ninox command-line interface (CLI) tool](#ninox-command-line-interface-cli-tool)
 * [Installation](#installation)
 * [Get started](#get-started)
 * [Manage database configurations](#manage-database-configurations)
@@ -108,7 +108,7 @@ $ npm install -g @ninox/ninox
 $ ninox COMMAND
 running command...
 $ ninox (--version)
-@ninox/ninox/0.1.5 darwin-arm64 node-v20.15.0
+@ninox/ninox/0.1.6 darwin-arm64 node-v20.15.0
 $ ninox --help [COMMAND]
 USAGE
   $ ninox COMMAND
