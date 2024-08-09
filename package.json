@@ -1,7 +1,7 @@
 {
   "name": "@ninox/ninox",
   "description": "Ninox Database CLI for developer workflows",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "publishConfig": {
     "access": "public"
   },
@@ -71,7 +71,7 @@
     "lint": "eslint . --ext .ts",
     "postpack": "shx rm -f oclif.manifest.json",
     "posttest": "npm run lint",
-    "readme": "oclif readme",
+    "readme": "oclif readme && node .reorder-cli-param-env.js",
     "prepack": "oclif manifest && oclif readme",
     "test:integration": "mocha --forbid-only \"test/commands/**/*.test.ts\"",
     "test": "mocha --forbid-only \"src/**/*.spec.ts\"",
