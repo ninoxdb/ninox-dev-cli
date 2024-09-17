@@ -102,17 +102,12 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     reports: Report[],
   ): Promise<number> {
     if (!this.databaseId) throw new Error('Database ID is required to upload the database')
-    const isUploaded = await this.ninoxClient.uploadDatabaseBackgroundImage(
+
+    await this.ninoxClient.uploadDatabaseBackgroundImage(
       this.databaseId,
       this.ninoxProjectService.getDbBackgroundImagePath(),
       this.ninoxProjectService.isDbBackgroundImageExist(),
     )
-    // TODO: Later on, may be it is better to allow the ninox developer to decide whether to set the background type to image or not, regardless of whether there is a background.jpg file
-    // If there was no background earlier, and now there is one, set the database background type to image
-    if (isUploaded) {
-      database.settings.bgType = 'image'
-      database.settings.backgroundClass = 'background-file'
-    }
 
     const response = (await this.ninoxClient.patchDatabaseSchemaInNinox(database.id, schema)) as SchemaPatchResponse
     await this.ninoxClient.updateDatabaseSettingsInNinox(database.id, database.settings)
