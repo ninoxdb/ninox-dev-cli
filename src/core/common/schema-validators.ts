@@ -41,7 +41,6 @@ export const DatabaseSchemaBase = z.object({
     )
     .optional(),
   nextTypeId: z.number(),
-  seq: z.number(),
   version: z.number(),
 })
 
@@ -119,7 +118,6 @@ export const DatabaseSchemaForUpload = z.object({
       }),
     )
     .optional(),
-  seq: z.number().optional(),
   version: z.number(),
 })
 
@@ -208,7 +206,6 @@ export const ViewTypeSchema = z.object({
   kanbanDisableCreate: z.boolean().optional(),
   mode: z.string().optional(),
   order: z.number().optional(),
-  seq: z.number().optional(),
   type: z.string(),
 })
 
@@ -223,7 +220,6 @@ const minimalReportSchema = z.object({
   caption: z.string(),
   id: z.string(),
   nids: z.array(z.string()).optional(),
-  seq: z.number().optional(),
   tid: z.string(),
 })
 
@@ -282,7 +278,6 @@ const carboneReportSchema = minimalReportSchema.extend({
   // eslint-disable-next-line perfectionist/sort-objects
   pdfPassword: z.string().optional(),
   setPassword: z.boolean().optional(),
-  // seq: z.number().optional(),
 })
 
 export const reportSchema = z.union([normalReportSchema, carboneReportSchema])

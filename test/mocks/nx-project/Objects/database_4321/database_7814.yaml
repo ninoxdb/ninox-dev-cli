@@ -19,6 +19,5 @@ database:
     hideSearch: false
     knownDatabases: []
     nextTypeId: 2
-    seq: 92
     version: 33
     _database: "4321"
