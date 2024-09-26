@@ -22,7 +22,6 @@ describe('DatabaseService', () => {
     hideSearch: false,
     knownDatabases: [],
     nextTypeId: 1,
-    seq: 1,
     types: {},
     version: 1,
   }

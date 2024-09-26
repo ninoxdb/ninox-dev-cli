@@ -51,7 +51,6 @@ export const testSchemaBase: DatabaseSchemaBaseType = {
   hideSearch: false,
   knownDatabases: [],
   nextTypeId: 2,
-  seq: 92,
   version: 33,
 }
 
