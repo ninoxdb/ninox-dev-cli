@@ -409,11 +409,11 @@ export class NinoxProjectService implements IProjectService {
     await this.writeReportsToFiles(reportsByTable, tableFolders)
   }
 
-  private parseDatabaseMetadata(database: DatabaseType): DatabaseType {
+  private parseDatabaseMetadata(database: unknown): DatabaseType {
     const parsedDatabase = Database.safeParse(database)
     if (!parsedDatabase.success) {
       throw new Error(
-        `Validation errors: Database validation failed ${database?.settings?.name} ` +
+        `Validation errors: Database validation failed ${(database as DatabaseType)?.settings?.name} ` +
           JSON.stringify(parsedDatabase.error),
       )
     }
