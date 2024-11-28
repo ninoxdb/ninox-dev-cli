@@ -6,12 +6,12 @@ export const DatabaseSettings = z.object({
   color: z.string(),
   icon: z.string(),
   name: z.string(),
-  rolesExport: z.array(z.string()).optional(),
-  rolesHistory: z.array(z.string()).optional(),
-  rolesImport: z.array(z.string()).optional(),
-  rolesMassDataUpdate: z.array(z.string()).optional(),
-  rolesOpen: z.array(z.string()).optional(),
-  rolesPrint: z.array(z.string()).optional(),
+  rolesExport: z.array(z.string()).nullable().optional(),
+  rolesHistory: z.array(z.string()).nullable().optional(),
+  rolesImport: z.array(z.string()).nullable().optional(),
+  rolesMassDataUpdate: z.array(z.string()).nullable().optional(),
+  rolesOpen: z.array(z.string()).nullable().optional(),
+  rolesPrint: z.array(z.string()).nullable().optional(),
 })
 
 export const Database = z.object({
@@ -185,10 +185,10 @@ export type GetDatabaseResponse = {
 }
 
 const ConfigColumnSchema = z.object({
-  caption: z.string().optional(),
+  caption: z.string().nullable().optional(),
   expression: z.string(),
-  filter: z.string().optional(),
-  width: z.number().optional(),
+  filter: z.string().nullable().optional(),
+  width: z.number().nullable().optional(),
 })
 
 const ConfigSchema = z.object({
