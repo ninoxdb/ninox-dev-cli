@@ -175,4 +175,85 @@ describe('NinoxProjectService', () => {
       expect(FSUtilStubs.writeFile.callCount).to.equal(testTablesInFile.length + 1)
     })
   })
+
+  describe('writeViewsToFiles', () => {
+    it('should handle views with duplicate captions by creating unique filenames', async () => {
+      // Setup test data
+      const viewsByTable = {
+        N: [
+          {
+            view: {
+              _database: 'rgqpdljgtqza',
+              _table: 'Angebote',
+              caption: 'Tabelle',
+              config: {
+                descending: true,
+                sort: 0,
+                type: 'N',
+              },
+              id: 'mn6V9gsBj1EQ2HKT',
+              mode: 'table',
+              order: 40,
+              type: 'N',
+            },
+          },
+          {
+            view: {
+              _database: 'rgqpdljgtqza',
+              _table: 'Angebote',
+              caption: 'Tabelle',
+              config: {
+                descending: false,
+                sort: 6,
+                type: 'N',
+              },
+              id: 'u9yHP9YsbtFvtQAZ',
+              mode: 'table',
+              order: 30,
+              type: 'N',
+            },
+          },
+        ],
+      }
+
+      const tableFolders = {
+        N: '/path/to/table/folder',
+      }
+
+      // Create stubs using sinon
+      const mockFsUtil = {
+        formatObjectFilename: sinon.stub().callsFake((prefix, name) => `${prefix}_${name}`),
+        mkdir: sinon.stub().resolves(),
+        writeFile: sinon.stub().resolves(),
+      }
+
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+      const service = new NinoxProjectService(mockFsUtil as unknown as FSUtil, {debug() {}}, 'testDbId')
+
+      // Call the private method
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (service as any).writeViewsToFiles(viewsByTable, tableFolders)
+
+      // Verify that writeFile was called twice
+      expect(mockFsUtil.writeFile.callCount).to.equal(2)
+
+      // Get all calls to writeFile
+      const writeFileCalls = mockFsUtil.writeFile.getCalls()
+
+      // First view should use the simple filename
+      expect(writeFileCalls[0].args[0]).to.include('view_Tabelle.yaml')
+
+      // Second view should include the ID in the filename
+      expect(writeFileCalls[1].args[0]).to.include('view_Tabelle_u9yHP9YsbtFvtQAZ.yaml')
+
+      // Verify the content of the files is correct
+      expect(writeFileCalls[0].args[1]).to.include('descending: true')
+      expect(writeFileCalls[1].args[1]).to.include('descending: false')
+    })
+
+    // Clean up after each test
+    afterEach(() => {
+      sinon.restore()
+    })
+  })
 })

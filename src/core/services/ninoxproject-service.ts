@@ -538,19 +538,26 @@ export class NinoxProjectService implements IProjectService {
     tableFolders: Record<string, string>,
   ): Promise<void> {
     const directoryPromises = Object.entries(viewsByTable).map(async ([, views]) => {
-      // assume that the table folder exists if defined
+      // Track used filenames for each table to handle duplicates
+      const usedFilenames = new Set<string>()
+
       const fileWritingPromises = views.map((view) => {
         const tablePath = tableFolders[view.view.type]
+        let viewFileName = `${this.fsUtil.formatObjectFilename('view', view.view.caption)}.yaml`
 
-        const viewFileName = `${this.fsUtil.formatObjectFilename('view', view.view.caption)}.yaml`
+        // If filename already exists, append the view's ID to make it unique
+        if (usedFilenames.has(viewFileName)) {
+          viewFileName = `${this.fsUtil.formatObjectFilename('view', `${view.view.caption}_${view.view.id}`)}.yaml`
+        }
+
+        usedFilenames.add(viewFileName)
+
         return this.fsUtil.writeFile(path.join(tablePath, viewFileName), yaml.stringify(view, YAML_DEFAULT_OPTIONS))
       })
 
-      // Wait for all file writing promises in this directory to resolve
       return Promise.all(fileWritingPromises)
     })
 
-    // Wait for all directory creation and file writing promises to resolve
     await Promise.all(directoryPromises)
   }
 }
