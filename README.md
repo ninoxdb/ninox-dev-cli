@@ -108,7 +108,7 @@ $ npm install -g @ninox/ninox
 $ ninox COMMAND
 running command...
 $ ninox (--version)
-@ninox/ninox/0.1.7 darwin-arm64 node-v20.17.0
+@ninox/ninox/0.1.8 darwin-arm64 node-v22.11.0
 $ ninox --help [COMMAND]
 USAGE
   $ ninox COMMAND
