@@ -214,7 +214,7 @@ function handleAxiosError(error: unknown, message: string): void {
   if (error instanceof AxiosError) {
     const {message: errorMessage, response} = error
     const data = response?.data?.message ?? response?.data
-    const message_ = `${message}\n${data ?? errorMessage}`
+    const message_ = `${message}\n${data ?? errorMessage ?? JSON.stringify(error)}`
     throw new Error(message_)
   }
 

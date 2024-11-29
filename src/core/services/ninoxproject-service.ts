@@ -166,7 +166,10 @@ export class NinoxProjectService implements IProjectService {
     const tables = Object.entries(types).map(([key, value]) => {
       const parsedTableResult = TableBase.safeParse(value)
       if (!parsedTableResult.success)
-        throw new Error(`Validation errors: Table validation failed ${types[key]?.caption}`)
+        throw new Error(
+          `Validation errors: Table validation failed ${types[key]?.caption} ` +
+            JSON.stringify(parsedTableResult.error),
+        )
       const {data: parsedTable} = parsedTableResult
       for (const [fieldId, fieldConfig] of Object.entries(parsedTable.fields)) {
         const {caption} = fieldConfig
@@ -198,7 +201,7 @@ export class NinoxProjectService implements IProjectService {
           view: {...view, _database: parsedDatabase.id, _table: types[view.type]?.caption ?? view.type},
         })
         if (!parsedView.success) {
-          throw new Error('Validation errors: View validation failed')
+          throw new Error('Validation errors: View validation failed ' + JSON.stringify(parsedView.error))
         }
 
         return parsedView.data
@@ -211,7 +214,9 @@ export class NinoxProjectService implements IProjectService {
       .map((report) => {
         const parsedReport = reportFileSchema.safeParse({report: {...report, _database: parsedDatabase.id}})
         if (!parsedReport.success) {
-          this.debug(`Validation errors: Report validation failed ${report.caption}`)
+          this.debug(
+            `Validation errors: Report validation failed ${report.caption} ${JSON.stringify(parsedReport.error)}`,
+          )
           return
         }
 
@@ -271,7 +276,7 @@ export class NinoxProjectService implements IProjectService {
       const {view} = viewLocal
       const parsedView = ViewTypeSchema.safeParse(view)
       if (!parsedView.success) {
-        throw new Error('Validation errors: View validation failed')
+        throw new Error(`Validation errors: View validation failed ${view.caption} ` + JSON.stringify(parsedView.error))
       }
 
       return parsedView.data
@@ -281,7 +286,9 @@ export class NinoxProjectService implements IProjectService {
       const {report} = reportLocal
       const parsedReport = reportSchema.safeParse(report)
       if (!parsedReport.success) {
-        throw new Error('Validation errors: Report validation failed')
+        throw new Error(
+          `Validation errors: Report validation failed ${report.caption} ` + JSON.stringify(parsedReport.error),
+        )
       }
 
       return parsedReport.data
@@ -405,7 +412,10 @@ export class NinoxProjectService implements IProjectService {
   private parseDatabaseMetadata(database: unknown): DatabaseType {
     const parsedDatabase = Database.safeParse(database)
     if (!parsedDatabase.success) {
-      throw new Error('Validation errors: Database validation failed')
+      throw new Error(
+        `Validation errors: Database validation failed ${(database as DatabaseType)?.settings?.name} ` +
+          JSON.stringify(parsedDatabase.error),
+      )
     }
 
     return parsedDatabase.data
@@ -414,7 +424,7 @@ export class NinoxProjectService implements IProjectService {
   private parseDatabaseSchema(schema: unknown): DatabaseSchemaType {
     const parsedSchema = DatabaseSchema.safeParse(schema)
     if (!parsedSchema.success) {
-      throw new Error('Validation errors: Schema validation failed')
+      throw new Error('Validation errors: Schema validation failed ' + JSON.stringify(parsedSchema.error))
     }
 
     return parsedSchema.data
@@ -423,7 +433,7 @@ export class NinoxProjectService implements IProjectService {
   private parseDatabaseSchemaWithoutTypes(schema: unknown): DatabaseSchemaBaseType {
     const parsedSchema = DatabaseSchemaBase.safeParse(schema)
     if (!parsedSchema.success) {
-      throw new Error('Validation errors: Schema validation failed')
+      throw new Error('Validation errors: Schema validation failed ' + JSON.stringify(parsedSchema.error))
     }
 
     return parsedSchema.data
