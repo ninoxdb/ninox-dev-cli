@@ -29,13 +29,13 @@ export interface IProjectService {
     sc: unknown,
     views: View[],
     reports: Report[],
-  ): {
+  ): Promise<{
     database: DatabaseType
     reports: ReportTypeFile[]
     schema: DatabaseSchemaBaseType
     tables: TableFileType[]
     views: ViewTypeFile[]
-  }
+  }>
   parseLocalObjectsToNinoxObjects(
     dBConfigsYaml: DBConfigsYaml,
   ): [database: DatabaseType, schema: DatabaseSchemaType, views: ViewType[], reports: Report[]]

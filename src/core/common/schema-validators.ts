@@ -41,8 +41,18 @@ export const DatabaseSchemaBase = z.object({
     )
     .nullable()
     .optional(),
+  // TODO: check and remove the ability to update this field nextTYpeId nextFieldId etc
   nextTypeId: z.number(),
-  version: z.number(),
+  version: z.union([z.number(), z.string()]),
+  // eslint-disable-next-line perfectionist/sort-objects
+  hash: z.string().nullable().optional(),
+  schema: z.string().nullable().optional(),
+})
+
+export const DatabaseSchemaPasswordProtected = z.object({
+  hash: z.string(),
+  schema: z.string(),
+  version: z.string(),
 })
 
 export const DatabaseSchema = DatabaseSchemaBase.extend({
@@ -322,3 +332,4 @@ export type Report = CarboneReport | NormalReport
 export type ReportTypeFile = z.infer<typeof reportFileSchema>
 export type ViewType = z.infer<typeof ViewTypeSchema>
 export type ViewTypeFile = z.infer<typeof ViewSchemaFile>
+export type DatabaseSchemaPasswordProtectedType = z.infer<typeof DatabaseSchemaPasswordProtected>

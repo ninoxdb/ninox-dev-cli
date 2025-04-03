@@ -36,7 +36,7 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
 
     const reportsJSON = await ninoxClient.getDatabaseReports(databaseId)
 
-    const {database, reports, schema, tables, views} = ninoxProjectService.parseDatabaseConfigs(
+    const {database, reports, schema, tables, views} = await ninoxProjectService.parseDatabaseConfigs(
       databaseJSON,
       schemaJSON,
       viewsJSON,

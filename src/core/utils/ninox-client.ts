@@ -157,7 +157,12 @@ export class NinoxClient {
         },
       })
       .then((response) => response.data)
-      .catch((error) => handleAxiosError(error, 'Failed to Update Database settings.'))
+      .catch((error) =>
+        handleAxiosError(
+          error,
+          'Failed to Update Database settings.' + JSON.stringify(error) + JSON.stringify(settings),
+        ),
+      )
   }
 
   public async updateDatabaseViewInNinox(databaseId: string, view: ViewType): Promise<unknown> {
