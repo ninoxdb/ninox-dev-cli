@@ -1,7 +1,5 @@
-import {ux} from '@oclif/core'
 import path from 'node:path'
 import * as yaml from 'yaml'
-import ora, { Ora,Spinner } from 'ora'
 
 import {
   CREDENTIALS_FILE_NAME,
@@ -18,7 +16,6 @@ import {
   DatabaseSchema,
   DatabaseSchemaBase,
   DatabaseSchemaBaseType,
-  DatabaseSchemaPasswordProtectedType,
   DatabaseSchemaType,
   DatabaseType,
   Report,
@@ -49,9 +46,8 @@ export class NinoxProjectService implements IProjectService {
   private filesBasePath: string
   private fsUtil: FSUtil
   private objectsBasePath: string
-  private spinner?: Ora
 
-  public constructor(fsUtil: FSUtil, context: ContextOptions, databaseId?: string, spinner?: Ora) {
+  public constructor(fsUtil: FSUtil, context: ContextOptions, databaseId?: string) {
     this.fsUtil = fsUtil
     this.databaseId = databaseId
     this.credentialsFilePath = path.join(this.basePath, CREDENTIALS_FILE_NAME)
@@ -62,7 +58,6 @@ export class NinoxProjectService implements IProjectService {
     this.dbBackgroundImagePath = path.join(this.databaseFilesPath, DB_BACKGROUND_FILE_NAME)
     const {debug} = context
     this.debug = debug
-    this.spinner = spinner
   }
 
   public async createConfigYaml(): Promise<void> {
@@ -149,21 +144,21 @@ export class NinoxProjectService implements IProjectService {
     return this.fsUtil.existsSync(this.dbBackgroundImagePath)
   }
 
-  public async parseDatabaseConfigs(
+  public parseDatabaseConfigs(
     database_: unknown,
     schema_: unknown,
     views_: View[],
     reports_: Report[],
-  ): Promise<{
+  ): {
     database: DatabaseType
     reports: ReportTypeFile[]
     schema: DatabaseSchemaBaseType
     tables: TableFileType[]
     views: ViewTypeFile[]
-  }> {
+  } {
     const parsedDatabase = this.parseDatabaseMetadata(database_)
 
-    const parsedSchema = await this.parseDatabaseSchema(schema_)
+    const parsedSchema = this.parseDatabaseSchema(schema_)
 
     const schemaWithoutTypes = this.parseDatabaseSchemaWithoutTypes(parsedSchema)
     const {types} = parsedSchema
@@ -426,35 +421,13 @@ export class NinoxProjectService implements IProjectService {
     return parsedDatabase.data
   }
 
-  private async parseDatabaseSchema(schema: unknown): Promise<DatabaseSchemaType> {
-    const protectedSchema = schema as DatabaseSchemaPasswordProtectedType
-    if (protectedSchema.version === 'PROTECTED.1' && protectedSchema.hash && protectedSchema.schema) {
-      this.spinner?.stop()
-      const password = await ux.prompt('The database is password-protected. Please enter the password:', {
-        type: 'mask', // Masks the input for security
-      })
-      console.log(password)
-    //   ux.prompt('The database is password-protected. Please enter the password:', {
-    //     type: 'mask', // Masks the input for security
-    //   }).then((password) => {
-    //     console.log(password);
-    // })
-  }
+  private parseDatabaseSchema(schema: unknown): DatabaseSchemaType {
+    const parsedSchema = DatabaseSchema.safeParse(schema)
+    if (!parsedSchema.success) {
+      throw new Error('Validation errors: Schema validation failed ' + JSON.stringify(parsedSchema.error))
+    }
 
-  this.spinner?.start()
-    // ask for a password
-    // Prompt user for password
-
-    // const parsedSchema = DatabaseSchema.safeParse(schema)
-    // if (!parsedSchema.success) {
-    //   throw new Error('Validation errors: Schema validation failed ' + JSON.stringify(parsedSchema.error))
-    // }
-
-    // return parsedSchema.data
-    // }
-    //)
-    // }
-    return {} as DatabaseSchemaType
+    return parsedSchema.data
   }
 
   private parseDatabaseSchemaWithoutTypes(schema: unknown): DatabaseSchemaBaseType {

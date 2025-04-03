@@ -1,4 +1,14 @@
-import {DatabaseMetadata, DatabaseSchemaType, DatabaseType, Report, ViewType} from '../common/schema-validators.js'
+import {ux} from '@oclif/core'
+import {Ora} from 'ora'
+
+import {
+  DatabaseMetadata,
+  DatabaseSchemaPasswordProtectedType,
+  DatabaseSchemaType,
+  DatabaseType,
+  Report,
+  ViewType,
+} from '../common/schema-validators.js'
 import {ContextOptions, SchemaPatchResponse} from '../common/types.js'
 import {NinoxClient} from '../utils/ninox-client.js'
 import {INinoxObjectService, IProjectService} from './interfaces.js'
@@ -9,27 +19,46 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   private databaseId?: string
   private databaseName!: string
   private debug: (message: string) => void
+  private spinner?: Ora
 
   public constructor(
     ninoxProjectService: IProjectService,
     ninoxClient: NinoxClient,
     context: ContextOptions,
     databaseId?: string,
+    spinner?: Ora,
   ) {
     this.ninoxProjectService = ninoxProjectService
     this.ninoxClient = ninoxClient
     this.databaseId = databaseId
+    this.spinner = spinner
     const {debug} = context
     this.debug = debug
   }
 
   public async download(): Promise<void> {
-    const {databaseId, ninoxClient, ninoxProjectService} = this
+    const {databaseId, ninoxClient, ninoxProjectService, spinner} = this
     if (!databaseId) throw new Error('Database ID is required to download the database')
     this.debug(`Downloading database schema ${databaseId}...`)
-    const {database: databaseJSON, schema: schemaJSON} = await this.getDatabaseMetadataAndSchema(databaseId)
+    const {database: databaseJSON, schema: _schemaJSON} = await this.getDatabaseMetadataAndSchema(databaseId)
     this.databaseName = databaseJSON.settings.name
     this.debug(`Database ${databaseJSON.settings.name} downloaded. Parsing schema...`)
+
+    let schemaJSON = _schemaJSON
+    // check if schema is protected
+    const protectedSchema = schemaJSON as DatabaseSchemaPasswordProtectedType
+    if (protectedSchema.version.startsWith('PROTECTED') && typeof protectedSchema.schema === 'string') {
+      spinner?.stop()
+      const password = await ux.prompt('The database is password-protected. Please enter the password', {
+        required: true,
+        type: 'mask',
+      })
+      // query the schema with the password
+      this.debug('Decrypting schema...')
+      const {schema: decryptedSchema} = await ninoxClient.getDatabase(databaseId, password)
+      schemaJSON = decryptedSchema
+      spinner?.start()
+    }
 
     this.debug('Downloading views...')
     const viewsJSON = await ninoxClient.getDatabaseViews(databaseId)
