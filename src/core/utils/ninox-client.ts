@@ -139,9 +139,14 @@ export class NinoxClient {
       })
   }
 
-  public async patchDatabaseSchemaInNinox(id: string, schema: DatabaseSchemaType): Promise<unknown> {
+  public async patchDatabaseSchemaInNinox(id: string, schema: DatabaseSchemaType, password?: string): Promise<unknown> {
+    const headers: Record<string, string> = {}
+    if (typeof password === 'string') {
+      headers['nx-password'] = password
+    }
+
     return this.client
-      .patch(`/v1/teams/${this.workspaceId}/databases/${id}/schema?formatScripts=T`, schema)
+      .patch(`/v1/teams/${this.workspaceId}/databases/${id}/schema?formatScripts=T`, schema, {headers})
       .then((response) => response.data)
       .catch((error) => handleAxiosError(error, 'Failed to update database Schema'))
   }
