@@ -1,4 +1,14 @@
-import {DatabaseMetadata, DatabaseSchemaType, DatabaseType, Report, ViewType} from '../common/schema-validators.js'
+import {ux} from '@oclif/core'
+import {Ora} from 'ora'
+
+import {
+  DatabaseMetadata,
+  DatabaseSchemaPasswordProtectedType,
+  DatabaseSchemaType,
+  DatabaseType,
+  Report,
+  ViewType,
+} from '../common/schema-validators.js'
 import {ContextOptions, SchemaPatchResponse} from '../common/types.js'
 import {NinoxClient} from '../utils/ninox-client.js'
 import {INinoxObjectService, IProjectService} from './interfaces.js'
@@ -9,34 +19,48 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   private databaseId?: string
   private databaseName!: string
   private debug: (message: string) => void
+  private spinner?: Ora
 
   public constructor(
     ninoxProjectService: IProjectService,
     ninoxClient: NinoxClient,
     context: ContextOptions,
     databaseId?: string,
+    spinner?: Ora,
   ) {
     this.ninoxProjectService = ninoxProjectService
     this.ninoxClient = ninoxClient
     this.databaseId = databaseId
+    this.spinner = spinner
     const {debug} = context
     this.debug = debug
   }
 
   public async download(): Promise<void> {
-    const {databaseId, ninoxClient, ninoxProjectService} = this
+    const {databaseId, ninoxClient, ninoxProjectService, spinner} = this
     if (!databaseId) throw new Error('Database ID is required to download the database')
     this.debug(`Downloading database schema ${databaseId}...`)
-    const {database: databaseJSON, schema: schemaJSON} = await this.getDatabaseMetadataAndSchema(databaseId)
+    const {database: databaseJSON, schema: _schemaJSON} = await this.getDatabaseMetadataAndSchema(databaseId)
     this.databaseName = databaseJSON.settings.name
     this.debug(`Database ${databaseJSON.settings.name} downloaded. Parsing schema...`)
+
+    let schemaJSON = _schemaJSON
+    // check if schema is protected
+    if (this.isSchemaProtected(schemaJSON)) {
+      spinner?.stop()
+      const password = await this.askForPassword()
+      this.debug('Decrypting schema...')
+      const {schema: decryptedSchema} = await ninoxClient.getDatabase(databaseId, password)
+      schemaJSON = decryptedSchema
+      spinner?.start()
+    }
 
     this.debug('Downloading views...')
     const viewsJSON = await ninoxClient.getDatabaseViews(databaseId)
 
     const reportsJSON = await ninoxClient.getDatabaseReports(databaseId)
 
-    const {database, reports, schema, tables, views} = ninoxProjectService.parseDatabaseConfigs(
+    const {database, reports, schema, tables, views} = await ninoxProjectService.parseDatabaseConfigs(
       databaseJSON,
       schemaJSON,
       viewsJSON,
@@ -79,6 +103,7 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
       tables,
       views: viewsLocal,
     } = await ninoxProjectService.readDBConfig()
+    let password
 
     this.debug(
       `Uploading database tables: ${tables.length} views: ${viewsLocal.length} reports: ${reportsLocal.length} found.`,
@@ -89,7 +114,13 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
       tables,
       views: viewsLocal,
     })
-    const newVersion = await this.uploadDatabase(database, schema, views, reports)
+    this.debug(`Uploading database ${database.settings.name}...`)
+    const {schema: schemaJSON} = await this.getDatabaseMetadataAndSchema(database.id)
+    if (this.isSchemaProtected(schemaJSON)) {
+      password = await this.askForPassword()
+    }
+
+    const newVersion = await this.uploadDatabase(database, schema, views, reports, password)
     if (Number(newVersion)) {
       await ninoxProjectService.writeDatabaseFile(database, {...schema, version: newVersion})
     }
@@ -100,6 +131,7 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     schema: DatabaseSchemaType,
     views: ViewType[],
     reports: Report[],
+    password?: string,
   ): Promise<number> {
     if (!this.databaseId) throw new Error('Database ID is required to upload the database')
     const isUploaded = await this.ninoxClient.uploadDatabaseBackgroundImage(
@@ -114,18 +146,37 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
       database.settings.backgroundClass = 'background-file'
     }
 
-    const response = (await this.ninoxClient.patchDatabaseSchemaInNinox(database.id, schema)) as SchemaPatchResponse
+    const response = (await this.ninoxClient.patchDatabaseSchemaInNinox(
+      database.id,
+      schema,
+      password,
+    )) as SchemaPatchResponse
     await this.ninoxClient.updateDatabaseSettingsInNinox(database.id, database.settings)
     await this.ninoxClient.updateDatabaseViewsInNinox(database.id, views)
     await this.ninoxClient.updateDatabaseReportsInNinox(database.id, reports)
     return response?.version
   }
 
+  private async askForPassword(): Promise<string | undefined> {
+    const password = await ux.prompt('Please enter the database password', {
+      required: true,
+      type: 'hide',
+    })
+    return password
+  }
+
   private async getDatabaseMetadataAndSchema(
     id: string,
   ): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
     const databaseData = await this.ninoxClient.getDatabase(id)
+    if (!databaseData) throw new Error(`Database ${id} not found`)
     const {schema, ...databaseSettings} = databaseData
     return {database: {id, ...databaseSettings}, schema} as {database: DatabaseType; schema: DatabaseSchemaType}
+  }
+
+  private isSchemaProtected(
+    schema: DatabaseSchemaPasswordProtectedType | DatabaseSchemaType,
+  ): schema is DatabaseSchemaPasswordProtectedType {
+    return typeof schema.version === 'string' && schema.version.startsWith('PROTECTED')
   }
 }

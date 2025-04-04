@@ -5,8 +5,9 @@ import sinon from 'sinon'
 
 import UploadCommand from '../../../src/commands/database/upload.js'
 import {DB_BACKGROUND_FILE_NAME} from '../../../src/core/common/constants.js'
+import {GetDatabaseResponse} from '../../../src/core/common/schema-validators.js'
 import {NinoxProjectService} from '../../../src/core/services/ninoxproject-service.js'
-import {filesPath, mockNinoxEnvironment, objectsPath} from '../../common/test-utils.js'
+import {filesPath, loadJsonMock, mockNinoxEnvironment, objectsPath} from '../../common/test-utils.js'
 
 describe('database/upload', () => {
   let stubReadEnvironmentConfig: sinon.SinonStub
@@ -14,7 +15,10 @@ describe('database/upload', () => {
   let credentialsPathStub: sinon.SinonStub
   let filesPathStub: sinon.SinonStub
   let objectsPathStub: sinon.SinonStub
+  let databaseJSONMock: GetDatabaseResponse
+
   before(() => {
+    databaseJSONMock = loadJsonMock('download-database-info.json') as GetDatabaseResponse
     nock('https://mocked.example.com')
       .post(`/${mockNinoxEnvironment.workspaceId}/${databaseId}/files/${DB_BACKGROUND_FILE_NAME}`)
       .matchHeader('authorization', 'Bearer mocked-api-key')
@@ -31,6 +35,8 @@ describe('database/upload', () => {
       .reply(200)
       .post(`/v1/teams/${mockNinoxEnvironment.workspaceId}/databases/${databaseId}/reports`)
       .reply(200)
+      .get(`/v1/teams/${mockNinoxEnvironment.workspaceId}/databases/${databaseId}?formatScripts=T`)
+      .reply(200, databaseJSONMock)
 
     credentialsPathStub = sinon
       .stub(NinoxProjectService.prototype, 'getCredentialsPath')

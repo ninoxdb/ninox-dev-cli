@@ -103,9 +103,14 @@ export class NinoxClient {
       })
   }
 
-  public async getDatabase(id: string): Promise<GetDatabaseResponse> {
+  public async getDatabase(id: string, password?: string): Promise<GetDatabaseResponse> {
+    const headers: Record<string, string> = {}
+    if (typeof password === 'string') {
+      headers['nx-password'] = password
+    }
+
     return this.client
-      .get(`/v1/teams/${this.workspaceId}/databases/${id}?formatScripts=T`)
+      .get(`/v1/teams/${this.workspaceId}/databases/${id}?formatScripts=T`, {headers})
       .then((response) => response.data)
       .catch((error) => handleAxiosError(error, 'Failed to fetch database'))
   }
@@ -134,9 +139,14 @@ export class NinoxClient {
       })
   }
 
-  public async patchDatabaseSchemaInNinox(id: string, schema: DatabaseSchemaType): Promise<unknown> {
+  public async patchDatabaseSchemaInNinox(id: string, schema: DatabaseSchemaType, password?: string): Promise<unknown> {
+    const headers: Record<string, string> = {}
+    if (typeof password === 'string') {
+      headers['nx-password'] = password
+    }
+
     return this.client
-      .patch(`/v1/teams/${this.workspaceId}/databases/${id}/schema?formatScripts=T`, schema)
+      .patch(`/v1/teams/${this.workspaceId}/databases/${id}/schema?formatScripts=T`, schema, {headers})
       .then((response) => response.data)
       .catch((error) => handleAxiosError(error, 'Failed to update database Schema'))
   }
@@ -157,7 +167,12 @@ export class NinoxClient {
         },
       })
       .then((response) => response.data)
-      .catch((error) => handleAxiosError(error, 'Failed to Update Database settings.'))
+      .catch((error) =>
+        handleAxiosError(
+          error,
+          'Failed to Update Database settings.' + JSON.stringify(error) + JSON.stringify(settings),
+        ),
+      )
   }
 
   public async updateDatabaseViewInNinox(databaseId: string, view: ViewType): Promise<unknown> {

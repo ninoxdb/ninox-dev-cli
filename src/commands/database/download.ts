@@ -32,6 +32,7 @@ export default class DownloadCommand extends BaseCommand {
       new NinoxClient(this.environment as EnvironmentConfig),
       context,
       flags.id,
+      this.spinner,
     )
   }
 
