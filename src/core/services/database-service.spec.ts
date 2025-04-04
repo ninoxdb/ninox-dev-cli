@@ -52,6 +52,7 @@ describe('DatabaseService', () => {
   describe('upload', () => {
     it('should call the necessary methods to upload data', async () => {
       const mockBgImagePath = 'path/to/bg/image'
+      ninoxClientStub.getDatabase.resolves(databaseJSONMock)
       ninoxProjectServiceStub.readDBConfig.resolves({
         database: '',
         reports: [],

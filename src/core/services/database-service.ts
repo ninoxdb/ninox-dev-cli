@@ -169,6 +169,7 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     id: string,
   ): Promise<{database: DatabaseType; schema: DatabaseSchemaType}> {
     const databaseData = await this.ninoxClient.getDatabase(id)
+    if (!databaseData) throw new Error(`Database ${id} not found`)
     const {schema, ...databaseSettings} = databaseData
     return {database: {id, ...databaseSettings}, schema} as {database: DatabaseType; schema: DatabaseSchemaType}
   }
@@ -176,6 +177,6 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
   private isSchemaProtected(
     schema: DatabaseSchemaPasswordProtectedType | DatabaseSchemaType,
   ): schema is DatabaseSchemaPasswordProtectedType {
-    return (schema.version as string)?.startsWith('PROTECTED') && typeof schema.schema === 'string'
+    return typeof schema.version === 'string' && schema.version.startsWith('PROTECTED')
   }
 }
