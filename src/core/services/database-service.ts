@@ -1,4 +1,5 @@
 import {ux} from '@oclif/core'
+import CryptoJS from 'crypto-js'
 import {Ora} from 'ora'
 
 import {
@@ -48,9 +49,14 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     // check if schema is protected
     if (this.isSchemaProtected(schemaJSON)) {
       spinner?.stop()
-      const password = await this.askForPassword()
-      this.debug('Decrypting schema...')
-      const {schema: decryptedSchema} = await ninoxClient.getDatabase(databaseId, password)
+      // const password = await this.askForPassword()
+      // this.debug('Decrypting schema...')
+      // const {schema: decryptedSchema} = await ninoxClient.getDatabase(databaseId, password)
+      const {hash, schema} = schemaJSON
+      // eslint-disable-next-line new-cap
+      const schemaString = this.AESDecrypt(schema, hash)
+      const decryptedSchema = JSON.parse(schemaString)
+      this.debug('Schema decrypted successfully.')
       schemaJSON = decryptedSchema
       spinner?.start()
     }
@@ -155,6 +161,10 @@ export class DatabaseService implements INinoxObjectService<DatabaseMetadata> {
     await this.ninoxClient.updateDatabaseViewsInNinox(database.id, views)
     await this.ninoxClient.updateDatabaseReportsInNinox(database.id, reports)
     return response?.version
+  }
+
+  private AESDecrypt(string_: string, key: string): string {
+    return CryptoJS.AES.decrypt(string_, key).toString(CryptoJS.enc.Utf8)
   }
 
   private async askForPassword(): Promise<string | undefined> {
